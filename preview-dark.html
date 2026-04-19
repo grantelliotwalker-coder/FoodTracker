@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Terminal Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1a1a1a;
+    --border: #2a2a2a;
+    --green: #39d353;
+    --amber: #f0a500;
+    --red: #ff4444;
+    --muted: #555;
+    --text: #ccc;
+    --text-bright: #eee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; min-height: 100vh; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--green);
+    padding-bottom: 12px; margin-bottom: 28px;
+  }
+  .header .logo { font-size: 18px; font-weight: 700; color: var(--green); letter-spacing: 0.05em; }
+  .header .logo span { color: var(--text); font-weight: 300; }
+  .header .meta { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); vertical-align: middle; animation: blink 1s step-end infinite; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* NAV CARDS */
+  .nav-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  @media (max-width: 700px) { .nav-cards { grid-template-columns: 1fr; } }
+  .nav-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 20px; cursor: pointer; transition: all 0.15s;
+    text-align: left; font-family: inherit; color: inherit;
+    position: relative;
+  }
+  .nav-card::before { content: '> '; color: var(--green); font-weight: 700; }
+  .nav-card:hover { border-color: var(--green); background: var(--bg3); }
+  .nav-card:hover .nav-title { color: var(--green); }
+  .nav-num { font-size: 10px; color: var(--muted); margin-bottom: 10px; }
+  .nav-title { font-size: 16px; font-weight: 700; color: var(--text-bright); margin-bottom: 6px; letter-spacing: 0.03em; }
+  .nav-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* STATS ROW */
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 28px; }
+  @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--bg2); padding: 16px 14px; }
+  .stat .lbl { font-size: 9px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .stat .val { font-size: 22px; font-weight: 700; color: var(--green); letter-spacing: -0.02em; }
+  .stat .val .unit { font-size: 10px; color: var(--muted); font-weight: 300; margin-left: 2px; }
+
+  /* DIALS */
+  .dials { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  @media (max-width: 700px) { .dials { grid-template-columns: repeat(2, 1fr); } }
+  .dial { background: var(--bg2); border: 1px solid var(--border); padding: 16px; }
+  .dial .label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .dial .value { font-size: 28px; font-weight: 700; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1; }
+  .dial .value .unit { font-size: 11px; color: var(--muted); font-weight: 300; margin-left: 3px; }
+  .dial .tgt { font-size: 10px; color: var(--muted); margin-top: 6px; }
+  .bar { height: 2px; background: var(--border); margin-top: 12px; }
+  .bar .fill { height: 100%; background: var(--green); transition: width 0.4s; }
+  .bar .fill.amber { background: var(--amber); }
+  .bar .fill.red { background: var(--red); }
+
+  /* LOG TABLE */
+  .section-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+  .log { border: 1px solid var(--border); background: var(--bg2); }
+  .log-head, .log-row {
+    display: grid;
+    grid-template-columns: 2.5fr 0.5fr 0.7fr 0.7fr 0.7fr 0.7fr;
+    padding: 10px 14px; gap: 8px; font-size: 11px;
+  }
+  .log-head { color: var(--muted); border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .log-head > *:not(:first-child) { text-align: right; }
+  .log-row { border-bottom: 1px solid var(--border); color: var(--text); align-items: center; }
+  .log-row:last-child { border-bottom: none; }
+  .log-row > *:not(:first-child) { text-align: right; color: var(--muted); }
+  .log-row .name { color: var(--text-bright); }
+  .log-row .name::before { content: '$ '; color: var(--green); }
+  .log-total {
+    display: grid;
+    grid-template-columns: 2.5fr 0.5fr 0.7fr 0.7fr 0.7fr 0.7fr;
+    padding: 10px 14px; gap: 8px; font-size: 11px;
+    background: var(--bg3); color: var(--green); font-weight: 700;
+    border-top: 1px solid var(--green);
+  }
+  .log-total > *:not(:first-child) { text-align: right; }
+
+  .btn {
+    background: transparent; border: 1px solid var(--green); color: var(--green);
+    padding: 8px 16px; font-family: inherit; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--green); color: var(--bg); }
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+
+  .prompt { color: var(--muted); font-size: 11px; margin-bottom: 24px; }
+  .prompt span { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="header">
+    <div class="logo">FOOD<span>/</span>TRACKER<div class="cursor"></div></logo>
+    <div class="meta">SYS &nbsp;·&nbsp; SUNDAY APR 20 2026 &nbsp;·&nbsp; DAY 110</div>
+  </header>
+
+  <div class="prompt"><span>~/ledger $</span> load today --verbose</div>
+
+  <div class="nav-cards">
+    <button class="nav-card">
+      <div class="nav-num">[ 01 ]</div>
+      <div class="nav-title">DAILY TRACKER</div>
+      <div class="nav-desc">Log intake, monitor macros, real-time energy balance.</div>
+    </button>
+    <button class="nav-card">
+      <div class="nav-num">[ 02 ]</div>
+      <div class="nav-title">FOOD LIBRARY</div>
+      <div class="nav-desc">Browse, search and manage your full food catalogue.</div>
+    </button>
+    <button class="nav-card">
+      <div class="nav-num">[ 03 ]</div>
+      <div class="nav-title">WEIGHT LOG</div>
+      <div class="nav-desc">Record weight, set goal, project fat loss trajectory.</div>
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="lbl">Calories</div><div class="val">1,842<span class="unit">kcal</span></div></div>
+    <div class="stat"><div class="lbl">Items</div><div class="val">6</div></div>
+    <div class="stat"><div class="lbl">Spent</div><div class="val">$14<span class="unit">.20</span></div></div>
+    <div class="stat"><div class="lbl">Library</div><div class="val">39</div></div>
+    <div class="stat"><div class="lbl">Weight</div><div class="val">84.2<span class="unit">kg</span></div></div>
+  </div>
+
+  <div class="dials">
+    <div class="dial">
+      <div class="label">Energy</div>
+      <div class="value">1842<span class="unit">cal</span></div>
+      <div class="tgt">of 2726</div>
+      <div class="bar"><div class="fill amber" style="width:67%"></div></div>
+    </div>
+    <div class="dial">
+      <div class="label">Protein</div>
+      <div class="value">142<span class="unit">g</span></div>
+      <div class="tgt">of 75</div>
+      <div class="bar"><div class="fill red" style="width:100%"></div></div>
+    </div>
+    <div class="dial">
+      <div class="label">Fat</div>
+      <div class="value">98<span class="unit">g</span></div>
+      <div class="tgt">of 165</div>
+      <div class="bar"><div class="fill" style="width:59%"></div></div>
+    </div>
+    <div class="dial">
+      <div class="label">Carbs</div>
+      <div class="value">22<span class="unit">g</span></div>
+      <div class="tgt">of 40</div>
+      <div class="bar"><div class="fill" style="width:55%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-label">// today's log</div>
+  <div class="log">
+    <div class="log-head"><div>Food</div><div>Qty</div><div>Cal</div><div>Pro</div><div>Fat</div><div>Carb</div></div>
+    <div class="log-row"><div class="name">Chicken Breast 100g</div><div>2</div><div>330</div><div>62</div><div>7.2</div><div>0</div></div>
+    <div class="log-row"><div class="name">Avocado whole</div><div>1</div><div>330</div><div>3.2</div><div>34.2</div><div>0.8</div></div>
+    <div class="log-row"><div class="name">Boiled Egg</div><div>3</div><div>231</div><div>18.9</div><div>15.9</div><div>1.8</div></div>
+    <div class="log-row"><div class="name">Protein Shake</div><div>1</div><div>124</div><div>23.4</div><div>1.8</div><div>3.2</div></div>
+    <div class="log-total"><div>TOTAL</div><div>—</div><div>1015</div><div>107</div><div>59</div><div>5.8</div></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn">+ Add Food</button>
+    <button class="btn">Clear Day</button>
+  </div>
+
+</div>
+</body>
+</html>
