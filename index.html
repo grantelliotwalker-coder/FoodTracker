@@ -1158,9 +1158,12 @@ if (Math.abs(n) < 10) return n.toFixed(1);
 return Math.round(n).toString();
 }
 function escapeHtml(s) {
-return String(s).replace(/[&<>”’]/g, c => ({
-‘&’: ‘&’, ‘<’: ‘<’, ‘>’: ‘>’, ‘”’: ‘"’, “’”: ‘'’
-}[c]));
+return String(s)
+.replace(/&/g, ‘&amp;’)
+.replace(/</g, ‘&lt;’)
+.replace(/>/g, ‘&gt;’)
+.replace(/”/g, ‘&quot;’)
+.replace(/’/g, ‘&#039;’);
 }
 function persist() {
 saveJSON(STORAGE_KEYS.LIBRARY, library);
