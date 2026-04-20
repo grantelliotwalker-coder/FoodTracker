@@ -531,10 +531,8 @@ function buildLibrary() {
     .map(f => edited[f.name] ? { ...f, ...edited[f.name] } : f);
   return [...base, ...additions];
 }
-let library = buildLibrary();
-let log = loadJSON(STORAGE_KEYS.LOG, {});
-let targets = loadJSON(STORAGE_KEYS.TARGETS, DEFAULT_TARGETS);
-let weights = loadJSON(STORAGE_KEYS.WEIGHTS, { today: null, yesterday: null, goal: null });
+// Initialized in init() after loadJSON is defined
+let library, log, targets, weights;
 let editingFoodIdx = null;
 let currentView = 'home';
 
@@ -939,7 +937,26 @@ function escapeHtml(s) {
   }[c]));
 }
 function persist() {
-  saveJSON(STORAGE_KEYS.LIBRARY, library);
+  const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
+  const currentNames = new Set(library.map(f => f.name));
+
+  // Local additions = foods the user added that aren't in the default
+  const localAdditions = library.filter(f => !baseNames.has(f.name));
+  saveJSON('ft_local_library', localAdditions);
+
+  // Deletions = default foods no longer present
+  const deleted = [...baseNames].filter(n => !currentNames.has(n));
+  saveJSON('ft_deleted_foods', deleted);
+
+  // Edits = default foods whose data was changed
+  const edited = {};
+  for (const f of library) {
+    if (!baseNames.has(f.name)) continue;
+    const orig = DEFAULT_LIBRARY.find(d => d.name === f.name);
+    if (orig && JSON.stringify(orig) !== JSON.stringify(f)) edited[f.name] = f;
+  }
+  saveJSON('ft_edited_foods', edited);
+
   saveJSON(STORAGE_KEYS.LOG, log);
   saveJSON(STORAGE_KEYS.TARGETS, targets);
   saveJSON(STORAGE_KEYS.WEIGHTS, weights);
@@ -954,6 +971,15 @@ function toast(msg) {
 }
 
 function init() {
+  // One-time migration: remove old ft_library_v1 key so it no longer interferes
+  localStorage.removeItem('ft_library_v1');
+
+  // Initialise state (loadJSON is now defined above)
+  library = buildLibrary();
+  log = loadJSON(STORAGE_KEYS.LOG, {});
+  targets = loadJSON(STORAGE_KEYS.TARGETS, DEFAULT_TARGETS);
+  weights = loadJSON(STORAGE_KEYS.WEIGHTS, { today: null, yesterday: null, goal: null });
+
   document.getElementById('todayDate').textContent = todayDisplay();
   document.getElementById('dayNum').textContent = dayOfYear();
 
