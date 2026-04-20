@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
+    :root {
     --bg: #0d0d0d; --bg2: #141414; --bg3: #1a1a1a;
     --border: #2a2a2a;
     --green: #39d353; --amber: #f0a500; --red: #ff4444;
@@ -121,12 +120,12 @@
   .log-row > *:not(:first-child):not(:last-child) { text-align: right; font-size: 12px; color: var(--muted); }
   .log-row .name { color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .log-row .name::before { content: '$ '; color: var(--green); }
-  .log-row input[type=”number”] {
+  .log-row input[type="number"] {
     width: 100%; background: transparent; border: none;
     border-bottom: 1px solid var(--border);
     text-align: right; font-family: inherit; font-size: 12px; color: var(--text); padding: 2px 0;
   }
-  .log-row input[type=”number”]:focus { outline: none; border-bottom-color: var(--green); }
+  .log-row input[type="number"]:focus { outline: none; border-bottom-color: var(--green); }
   .del-btn {
     background: none; border: none; color: var(--muted); cursor: pointer;
     font-family: inherit; font-size: 14px; justify-self: center; padding: 4px 8px; transition: color 0.2s;
@@ -191,7 +190,7 @@
     .lib-row > * { text-align: left !important; }
     .lib-row .actions { justify-content: flex-start; margin-top: 4px; }
     .lib-row .macro-cell::before {
-      content: attr(data-lbl) “: “; color: var(--muted); font-size: 10px;
+      content: attr(data-lbl) ": "; color: var(--muted); font-size: 10px;
       letter-spacing: 0.1em; text-transform: uppercase;
     }
   }
@@ -214,7 +213,7 @@
   }
   @media (max-width: 720px) { .projection { grid-template-columns: repeat(2, 1fr); } }
   .projection::before {
-    content: “// projection”; position: absolute; top: -10px; left: 16px;
+    content: "// projection"; position: absolute; top: -10px; left: 16px;
     background: var(--bg2); padding: 0 8px;
     font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green);
   }
@@ -269,7 +268,6 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
-
 </head>
 <body>
 <div class="wrap">
@@ -282,11 +280,9 @@
   <div class="crumbs" id="crumbs"></div>
 
   <!-- ============== LANDING ============== -->
-
-  <section class="view active" id="view-home">
+  <section class="view" id="view-home">
     <div class="flourish">&middot; &#10086; &middot;</div>
     <p class="landing-intro">Today's intake, library of provisions, and the ever-unfolding arithmetic of the body.</p>
-
 
 <div class="nav-cards">
   <button class="nav-card" onclick="navigate('tracker')">
@@ -306,19 +302,16 @@
   </button>
 </div>
 
-<div class="glance">
-  <div class="glance-item"><div class="lbl">Today's Calories</div><div class="val" id="glanceCal">0<span class="unit">cal</span></div></div>
-  <div class="glance-item"><div class="lbl">Items Logged</div><div class="val" id="glanceItems">0</div></div>
-  <div class="glance-item"><div class="lbl">Spent Today</div><div class="val" id="glanceCost">$0.00</div></div>
-  <div class="glance-item"><div class="lbl">Library Size</div><div class="val" id="glanceLib">0</div></div>
-  <div class="glance-item"><div class="lbl">Current Weight</div><div class="val" id="glanceWeight">&mdash; <span class="unit">kg</span></div></div>
-</div>
-
-
+    <div class="glance">
+      <div class="glance-item"><div class="lbl">Today's Calories</div><div class="val" id="glanceCal">0<span class="unit">cal</span></div></div>
+      <div class="glance-item"><div class="lbl">Items Logged</div><div class="val" id="glanceItems">0</div></div>
+      <div class="glance-item"><div class="lbl">Spent Today</div><div class="val" id="glanceCost">$0.00</div></div>
+      <div class="glance-item"><div class="lbl">Library Size</div><div class="val" id="glanceLib">0</div></div>
+      <div class="glance-item"><div class="lbl">Current Weight</div><div class="val" id="glanceWeight">&mdash; <span class="unit">kg</span></div></div>
+    </div>
   </section>
 
   <!-- ============== TRACKER ============== -->
-
   <section class="view" id="view-tracker">
     <div class="targets-panel">
       <div class="section-head" style="border: none; padding: 0; margin-bottom: 10px;">
@@ -333,121 +326,113 @@
       </div>
     </div>
 
-
-<section>
-  <div class="section-head">
-    <h2>Macro Totals</h2>
-    <span class="meta" id="macroMeta">0 items logged</span>
-  </div>
-  <div class="dials">
-    <div class="dial" id="dialCal">
-      <div class="label">Energy</div>
-      <div class="value"><span id="valCal">0</span><span class="unit">cal</span></div>
-      <div class="bar"><div class="fill" id="barCal" style="width: 0%"></div></div>
-      <div class="target">of <span id="tgtCal">0</span></div>
-    </div>
-    <div class="dial" id="dialP">
-      <div class="label">Protein</div>
-      <div class="value"><span id="valP">0</span><span class="unit">g</span></div>
-      <div class="bar"><div class="fill" id="barP" style="width: 0%"></div></div>
-      <div class="target">of <span id="tgtP">0</span>g</div>
-    </div>
-    <div class="dial" id="dialF">
-      <div class="label">Fat</div>
-      <div class="value"><span id="valF">0</span><span class="unit">g</span></div>
-      <div class="bar"><div class="fill" id="barF" style="width: 0%"></div></div>
-      <div class="target">of <span id="tgtF">0</span>g</div>
-    </div>
-    <div class="dial" id="dialC">
-      <div class="label">Carbs</div>
-      <div class="value"><span id="valC">0</span><span class="unit">g</span></div>
-      <div class="bar"><div class="fill" id="barC" style="width: 0%"></div></div>
-      <div class="target">of <span id="tgtC">0</span>g</div>
-    </div>
-  </div>
-
-  <div class="ratio-ribbon" id="ratioRibbon">
-    <div class="ratio-fat" style="flex: 1">&mdash;</div>
-    <div class="ratio-pro" style="flex: 1">&mdash;</div>
-    <div class="ratio-carb" style="flex: 1">&mdash;</div>
-  </div>
-  <div class="ratio-targets">
-    <span>TARGET &middot; Fat 70-80% / Protein 10-20% / Carbs 5-10%</span>
-    <span>Cost today: <strong id="totalCost">$0.00</strong></span>
-  </div>
-</section>
-
-<section>
-  <div class="section-head">
-    <h2>Add Food to Today</h2>
-    <span class="meta"><a onclick="navigate('library')" style="cursor:pointer; color:var(--green); text-decoration:none;">Manage library &rarr;</a></span>
-  </div>
-  <div class="quick-add">
-    <div class="quick-add-row">
-      <div>
-        <span class="field-lbl">Select food</span>
-        <select id="quickSelect"></select>
+    <section>
+      <div class="section-head">
+        <h2>Macro Totals</h2>
+        <span class="meta" id="macroMeta">0 items logged</span>
       </div>
-      <div>
-        <span class="field-lbl">Quantity</span>
-        <input type="number" id="quickQty" value="1" step="0.1" min="0.1">
+      <div class="dials">
+        <div class="dial" id="dialCal">
+          <div class="label">Energy</div>
+          <div class="value"><span id="valCal">0</span><span class="unit">cal</span></div>
+          <div class="bar"><div class="fill" id="barCal" style="width: 0%"></div></div>
+          <div class="target">of <span id="tgtCal">0</span></div>
+        </div>
+        <div class="dial" id="dialP">
+          <div class="label">Protein</div>
+          <div class="value"><span id="valP">0</span><span class="unit">g</span></div>
+          <div class="bar"><div class="fill" id="barP" style="width: 0%"></div></div>
+          <div class="target">of <span id="tgtP">0</span>g</div>
+        </div>
+        <div class="dial" id="dialF">
+          <div class="label">Fat</div>
+          <div class="value"><span id="valF">0</span><span class="unit">g</span></div>
+          <div class="bar"><div class="fill" id="barF" style="width: 0%"></div></div>
+          <div class="target">of <span id="tgtF">0</span>g</div>
+        </div>
+        <div class="dial" id="dialC">
+          <div class="label">Carbs</div>
+          <div class="value"><span id="valC">0</span><span class="unit">g</span></div>
+          <div class="bar"><div class="fill" id="barC" style="width: 0%"></div></div>
+          <div class="target">of <span id="tgtC">0</span>g</div>
+        </div>
       </div>
-      <button class="btn" id="quickAddBtn">+ Add to Log</button>
-    </div>
-  </div>
-</section>
 
-<section>
-  <div class="section-head">
-    <h2>Today's Entries</h2>
-    <span class="meta"><button class="btn ghost" id="clearDay">Clear Day</button></span>
-  </div>
-  <div class="log-wrap">
-    <div class="log-head">
-      <div>Food</div><div>Qty</div><div>Cal</div><div>Pro</div><div>Fat</div><div>Carb</div><div>Cost</div><div>&times;</div>
-    </div>
-    <div id="logBody"></div>
-    <div class="log-total" id="logTotalRow" style="display: none;">
-      <div class="label">Daily total</div>
-      <div></div>
-      <div id="totCal">0</div>
-      <div id="totP">0</div>
-      <div id="totF">0</div>
-      <div id="totC">0</div>
-      <div id="totCost">$0.00</div>
-      <div></div>
-    </div>
-  </div>
-</section>
+      <div class="ratio-ribbon" id="ratioRibbon">
+        <div class="ratio-fat" style="flex: 1">&mdash;</div>
+        <div class="ratio-pro" style="flex: 1">&mdash;</div>
+        <div class="ratio-carb" style="flex: 1">&mdash;</div>
+      </div>
+      <div class="ratio-targets">
+        <span>TARGET &middot; Fat 70-80% / Protein 10-20% / Carbs 5-10%</span>
+        <span>Cost today: <strong id="totalCost">$0.00</strong></span>
+      </div>
+    </section>
 
+    <section>
+      <div class="section-head">
+        <h2>Add Food to Today</h2>
+        <span class="meta"><a onclick="navigate('library')" style="cursor:pointer; color:var(--accent); text-decoration:none;">Manage library &rarr;</a></span>
+      </div>
+      <div class="quick-add">
+        <div class="quick-add-row">
+          <div>
+            <span class="field-lbl">Select food</span>
+            <select id="quickSelect"></select>
+          </div>
+          <div>
+            <span class="field-lbl">Quantity</span>
+            <input type="number" id="quickQty" value="1" step="0.1" min="0.1">
+          </div>
+          <button class="btn" id="quickAddBtn">+ Add to Log</button>
+        </div>
+      </div>
+    </section>
 
+    <section>
+      <div class="section-head">
+        <h2>Today's Entries</h2>
+        <span class="meta"><button class="btn ghost" id="clearDay">Clear Day</button></span>
+      </div>
+      <div class="log-wrap">
+        <div class="log-head">
+          <div>Food</div><div>Qty</div><div>Cal</div><div>Pro</div><div>Fat</div><div>Carb</div><div>Cost</div><div>&times;</div>
+        </div>
+        <div id="logBody"></div>
+        <div class="log-total" id="logTotalRow" style="display: none;">
+          <div class="label">Daily total</div>
+          <div></div>
+          <div id="totCal">0</div>
+          <div id="totP">0</div>
+          <div id="totF">0</div>
+          <div id="totC">0</div>
+          <div id="totCost">$0.00</div>
+          <div></div>
+        </div>
+      </div>
+    </section>
   </section>
 
   <!-- ============== LIBRARY ============== -->
-
   <section class="view" id="view-library">
     <div class="section-head">
       <h2>Food Library</h2>
       <span class="meta"><span id="libCount">0</span> foods &middot; <button class="btn" id="addFoodBtn">+ New Food</button></span>
     </div>
 
+    <div class="lib-search-row">
+      <input type="text" class="lib-search" id="librarySearch" placeholder="Search foods by name...">
+    </div>
 
-<div class="lib-search-row">
-  <input type="text" class="lib-search" id="librarySearch" placeholder="Search foods by name...">
-</div>
-
-<div class="lib-grid">
-  <div class="lib-table-head">
-    <div>Name</div><div>Cal</div><div>P (g)</div><div>F (g)</div><div>C (g)</div><div>Price</div><div>Actions</div>
-  </div>
-  <div id="libraryBody"></div>
-</div>
-
-
+    <div class="lib-grid">
+      <div class="lib-table-head">
+        <div>Name</div><div>Cal</div><div>P (g)</div><div>F (g)</div><div>C (g)</div><div>Price</div><div>Actions</div>
+      </div>
+      <div id="libraryBody"></div>
+    </div>
   </section>
 
   <!-- ============== WEIGHT ============== -->
-
   <section class="view" id="view-weight">
     <section>
       <div class="section-head">
@@ -473,21 +458,18 @@
       </div>
     </section>
 
-
-<section>
-  <div class="section-head">
-    <h2>Energy Balance &amp; Projection</h2>
-    <span class="meta">Based on today's log</span>
-  </div>
-  <div class="projection">
-    <div class="proj-item"><div class="lbl">Energy Balance</div><div class="val" id="projBal">&mdash; <span class="unit">cal</span></div></div>
-    <div class="proj-item"><div class="lbl">Daily Fat &Delta;</div><div class="val" id="projDaily">&mdash; <span class="unit">g</span></div></div>
-    <div class="proj-item"><div class="lbl">Weekly &Delta;</div><div class="val" id="projWeekly">&mdash; <span class="unit">kg</span></div></div>
-    <div class="proj-item"><div class="lbl">Days to Goal</div><div class="val" id="projDays">&mdash;</div></div>
-  </div>
-</section>
-
-
+    <section>
+      <div class="section-head">
+        <h2>Energy Balance &amp; Projection</h2>
+        <span class="meta">Based on today's log</span>
+      </div>
+      <div class="projection">
+        <div class="proj-item"><div class="lbl">Energy Balance</div><div class="val" id="projBal">&mdash; <span class="unit">cal</span></div></div>
+        <div class="proj-item"><div class="lbl">Daily Fat &Delta;</div><div class="val" id="projDaily">&mdash; <span class="unit">g</span></div></div>
+        <div class="proj-item"><div class="lbl">Weekly &Delta;</div><div class="val" id="projWeekly">&mdash; <span class="unit">kg</span></div></div>
+        <div class="proj-item"><div class="lbl">Days to Goal</div><div class="val" id="projDays">&mdash;</div></div>
+      </div>
+    </section>
   </section>
 
 </div>
@@ -512,6 +494,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<script src="food-library.js"></script>
 <div id="js-error" style="display:none;position:fixed;top:0;left:0;right:0;background:#b8391a;color:#f4ede0;padding:12px 16px;z-index:9999;font-family:monospace;font-size:12px;white-space:pre-wrap"></div>
 <script>
 window.onerror = function(msg, src, line) {
@@ -519,58 +502,36 @@ window.onerror = function(msg, src, line) {
   el.textContent = 'JS ERROR (line ' + line + '): ' + msg;
   el.style.display = 'block';
 };
-const DEFAULT_LIBRARY = [
-  { name: "Instant Coffee with Milk", cal: 77.78, kj: 325, p: 4.21, f: 4.25, c: 6, price: 0.20 },
-  { name: "Avocado whole", cal: 330, kj: 1379, p: 3.2, f: 34.2, c: 0.8, price: 2.00 },
-  { name: "Tuna Can Large Chilli", cal: 192.15, kj: 804, p: 33.6, f: 6, c: 0, price: 2.90 },
-  { name: "Protein Shake", cal: 124.28, kj: 520, p: 23.4, f: 1.8, c: 3.2, price: 1.50 },
-  { name: "Strawberries", cal: 5.74, kj: 24, p: 0.1, f: 0, c: 1.4, price: 0.50 },
-  { name: "3 teaspoon Protein Peanut Butter", cal: 82.70, kj: 346, p: 3, f: 4, c: 1.9, price: 0.25 },
-  { name: "yoPro Caramel", cal: 93.69, kj: 392, p: 15.2, f: 0.8, c: 6.1, price: 0.25 },
-  { name: "Pho packet soup", cal: 135.76, kj: 568, p: 2.8, f: 8.8, c: 10.4, price: 3.50 },
-  { name: "Lebanese Cucumber", cal: 12.43, kj: 52, p: 1, f: 0, c: 4, price: 0.88 },
-  { name: "Coffee", cal: 35.37, kj: 148, p: 1.4, f: 1.4, c: 2.9, price: 0.88 },
-  { name: "Broccoli serving raw", cal: 33.94, kj: 142, p: 2.8, f: 0, c: 7, price: 0.40 },
-  { name: "Broccolini serving", cal: 70.27, kj: 294, p: 6.6, f: 0, c: 12, price: 2.00 },
-  { name: "Carmin Nut Bar", cal: 182.13, kj: 762, p: 5.6, f: 12.9, c: 10.3, price: 0.70 },
-  { name: "Chicken stroganoff meal pre made", cal: 497.13, kj: 2080, p: 41.3, f: 18.9, c: 4.2, price: 9.00 },
-  { name: "Roast Pork 100g", cal: 221.34, kj: 926, p: 31.2, f: 10, c: 0, price: 2.00 },
-  { name: "Tomato", cal: 17.93, kj: 75, p: 1, f: 0, c: 4, price: 0.65 },
-  { name: "Tuna with mayo", cal: 110.89, kj: 464, p: 11.3, f: 5.4, c: 3.1, price: 2.00 },
-  { name: "Sardines with Tomato sauce", cal: 160.37, kj: 671, p: 15.2, f: 10.4, c: 1.1, price: 3.50 },
-  { name: "Hommus", cal: 63.11, kj: 264, p: 1.4, f: 5, c: 3.3, price: 1.20 },
-  { name: "Braised beef ragu pre made", cal: 475.60, kj: 1990, p: 30.7, f: 15.3, c: 49.7, price: 9.00 },
-  { name: "Banana", cal: 88.67, kj: 371, p: 1.1, f: 0.3, c: 23, price: 0.81 },
-  { name: "Apple", cal: 78.16, kj: 327, p: 0.9, f: 0.8, c: 17.6, price: 1.00 },
-  { name: "Mushrooms 100g", cal: 20.55, kj: 86, p: 3.1, f: 0.3, c: 3.3, price: 2.00 },
-  { name: "Zucchini 100g", cal: 16.97, kj: 71, p: 1.2, f: 0.3, c: 3.1, price: 0 },
-  { name: "Weetbix (1)", cal: 58.33, kj: 244, p: 3.42, f: 0.4, c: 18.08, price: 0 },
-  { name: "Chicken Breast 100g", cal: 164.91, kj: 690, p: 31, f: 3.6, c: 0, price: 1.20 },
-  { name: "Carrot 100g", cal: 40.86, kj: 171, p: 0.9, f: 0.2, c: 10, price: 0 },
-  { name: "Brown Rice", cal: 255.74, kj: 1070, p: 6.4, f: 4, c: 45.7, price: 0 },
-  { name: "Babybel Cheese", cal: 46.84, kj: 196, p: 5, f: 3, c: 0, price: 0 },
-  { name: "Boiled Egg", cal: 76.96, kj: 322, p: 6.3, f: 5.3, c: 0.6, price: 0.60 },
-  { name: "Almonds (10)", cal: 69.31, kj: 290, p: 3, f: 5, c: 3, price: 0 },
-  { name: "Cashew (10)", cal: 62.86, kj: 263, p: 2, f: 5, c: 7, price: 0 },
-  { name: "Orange", cal: 68.12, kj: 285, p: 1.3, f: 0.2, c: 16.5, price: 0.63 },
-  { name: "Tuna Beans Can", cal: 286.81, kj: 1200, p: 23.7, f: 12.8, c: 15.7, price: 4.00 },
-  { name: "Honey (tspn)", cal: 21.03, kj: 88, p: 0, f: 0, c: 6, price: 0.10 },
-  { name: "Dinner (Steak, Salad, Sweet Potato)", cal: 737.09, kj: 3084, p: 79.6, f: 30.3, c: 26, price: 9.30 },
-  { name: "Brazil Nut", cal: 31.31, kj: 131, p: 0.7, f: 3.2, c: 0.3, price: 0.20 },
-  { name: "Chickpea Can Small", cal: 157.50, kj: 659, p: 5.2, f: 9.2, c: 12.5, price: 1.50 },
-  { name: "Cacao", cal: 23.33, kj: 97.6, p: 4, f: 2, c: 7, price: 0 }
-];
+
+
 
 const STORAGE_KEYS = {
-LIBRARY: 'ft_library_v1',
-LOG: 'ft_log_v1',
-TARGETS: 'ft_targets_v1',
-WEIGHTS: 'ft_weights_v1'
+  LIBRARY: 'ft_library_v1',
+  LOG: 'ft_log_v1',
+  TARGETS: 'ft_targets_v1',
+  WEIGHTS: 'ft_weights_v1'
 };
 const DEFAULT_TARGETS = { p: 75, f: 165, c: 40, burn: 2726 };
 const KJ_PER_KG_FAT = 37000;
 
-let library = loadJSON(STORAGE_KEYS.LIBRARY, DEFAULT_LIBRARY);
+// Merge strategy:
+// DEFAULT_LIBRARY (from food-library.js) is the shared base — always used on refresh.
+// ft_local_library = foods the user added themselves.
+// ft_deleted_foods = names of default foods the user deleted locally.
+// ft_edited_foods = user-edited versions of default foods (keyed by original name).
+// Final library = (DEFAULT_LIBRARY minus deletions, with edits applied) + local additions.
+function buildLibrary() {
+  const local = loadJSON('ft_local_library', []);
+  const deleted = new Set(loadJSON('ft_deleted_foods', []));
+  const edited = loadJSON('ft_edited_foods', {});
+  const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
+  const additions = local.filter(f => !baseNames.has(f.name));
+  const base = DEFAULT_LIBRARY
+    .filter(f => !deleted.has(f.name))
+    .map(f => edited[f.name] ? { ...f, ...edited[f.name] } : f);
+  return [...base, ...additions];
+}
+let library = buildLibrary();
 let log = loadJSON(STORAGE_KEYS.LOG, {});
 let targets = loadJSON(STORAGE_KEYS.TARGETS, DEFAULT_TARGETS);
 let weights = loadJSON(STORAGE_KEYS.WEIGHTS, { today: null, yesterday: null, goal: null });
@@ -578,492 +539,485 @@ let editingFoodIdx = null;
 let currentView = 'home';
 
 function loadJSON(key, fallback) {
-try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-catch { return fallback; }
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch { return fallback; }
 }
 function saveJSON(key, val) {
-try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
 }
 
-function todayKey() { const d = new Date(); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); }
+function todayKey() { return new Date().toISOString().split('T')[0]; }
 function todayDisplay() {
-return new Date().toLocaleDateString('en-US', {
-weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-}).toUpperCase();
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  }).toUpperCase();
 }
 function dayOfYear() {
-const d = new Date();
-return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const d = new Date();
+  return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
 }
 
 // ============================================================
 // VIEW ROUTER — the case statement
 // ============================================================
 const VIEW_TITLES = {
-home: 'Home',
-tracker: 'Daily Tracker',
-library: 'Food Library',
-weight: 'Weight & Projection'
+  home: 'Home',
+  tracker: 'Daily Tracker',
+  library: 'Food Library',
+  weight: 'Weight & Projection'
 };
 const VALID_VIEWS = ['home', 'tracker', 'library', 'weight'];
 
 function navigate(view) {
-if (!VALID_VIEWS.includes(view)) view = 'home';
-currentView = view;
+  if (!VALID_VIEWS.includes(view)) view = 'home';
+  currentView = view;
 
-document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
 
-window.scrollTo({ top: 0, behavior: 'smooth' });
-renderCrumbs();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderCrumbs();
 
-switch (view) {
-case 'home':
-renderGlance();
-break;
-case 'tracker':
-renderQuickSelect();
-renderLog();
-renderTotals();
-break;
-case 'library':
-renderLibraryTable(document.getElementById('librarySearch').value);
-break;
-case 'weight':
-renderTotals();
-break;
-}
+  switch (view) {
+    case 'home':
+      renderGlance();
+      break;
+    case 'tracker':
+      renderQuickSelect();
+      renderLog();
+      renderTotals();
+      break;
+    case 'library':
+      renderLibraryTable(document.getElementById('librarySearch').value);
+      break;
+    case 'weight':
+      renderTotals();
+      break;
+  }
 
-history.replaceState(null, '', '#' + view);
+  history.replaceState(null, '', '#' + view);
 }
 
 function renderCrumbs() {
-const el = document.getElementById('crumbs');
-if (currentView === 'home') {
-el.innerHTML = '<span class="current">Home</span>';
-} else {
-el.innerHTML = '<a onclick="navigate(\'home\')">Home</a> <span>/</span> <span class="current">' + VIEW_TITLES[currentView] + '</span>';
-}
+  const el = document.getElementById('crumbs');
+  if (currentView === 'home') {
+    el.innerHTML = '<span class="current">Home</span>';
+  } else {
+    el.innerHTML = '<a onclick="navigate(\'home\')">Home</a> <span>/</span> <span class="current">' + VIEW_TITLES[currentView] + '</span>';
+  }
 }
 
 function getTodayLog() {
-if (!log[todayKey()]) log[todayKey()] = [];
-return log[todayKey()];
+  if (!log[todayKey()]) log[todayKey()] = [];
+  return log[todayKey()];
 }
 
 function renderLog() {
-const body = document.getElementById('logBody');
-if (!body) return;
-const entries = getTodayLog();
+  const body = document.getElementById('logBody');
+  if (!body) return;
+  const entries = getTodayLog();
 
-if (entries.length === 0) {
-body.innerHTML = '<div class="empty-log">No entries yet. Add food above or from the library.</div>';
-document.getElementById('logTotalRow').style.display = 'none';
-} else {
-body.innerHTML = entries.map((e, i) =>
-'<div class="log-row">' +
-'<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
-'<div><input type="number" step="0.1" value="' + e.qty + '" data-i="' + i + '" class="qty-input"></div>' +
-'<div>' + fmt(e.cal * e.qty) + '</div>' +
-'<div>' + fmt(e.p * e.qty) + '</div>' +
-'<div>' + fmt(e.f * e.qty) + '</div>' +
-'<div>' + fmt(e.c * e.qty) + '</div>' +
-'<div>$' + (e.price * e.qty).toFixed(2) + '</div>' +
-'<div><button class="del-btn" data-i="' + i + '" title="Remove">×</button></div>' +
-'</div>'
-).join('');
-document.getElementById('logTotalRow').style.display = 'grid';
+  if (entries.length === 0) {
+    body.innerHTML = '<div class="empty-log">No entries yet. Add food above or from the library.</div>';
+    document.getElementById('logTotalRow').style.display = 'none';
+  } else {
+    body.innerHTML = entries.map((e, i) =>
+      '<div class="log-row">' +
+        '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
+        '<div><input type="number" step="0.1" value="' + e.qty + '" data-i="' + i + '" class="qty-input"></div>' +
+        '<div>' + fmt(e.cal * e.qty) + '</div>' +
+        '<div>' + fmt(e.p * e.qty) + '</div>' +
+        '<div>' + fmt(e.f * e.qty) + '</div>' +
+        '<div>' + fmt(e.c * e.qty) + '</div>' +
+        '<div>$' + (e.price * e.qty).toFixed(2) + '</div>' +
+        '<div><button class="del-btn" data-i="' + i + '" title="Remove">&times;</button></div>' +
+      '</div>'
+    ).join('');
+    document.getElementById('logTotalRow').style.display = 'grid';
 
+    body.querySelectorAll('.qty-input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const i = +e.target.dataset.i;
+        const v = parseFloat(e.target.value);
+        if (!isNaN(v) && v >= 0) {
+          entries[i].qty = v;
+          persist();
+          renderTotals();
+          const cells = e.target.closest('.log-row').children;
+          cells[2].textContent = fmt(entries[i].cal * v);
+          cells[3].textContent = fmt(entries[i].p * v);
+          cells[4].textContent = fmt(entries[i].f * v);
+          cells[5].textContent = fmt(entries[i].c * v);
+          cells[6].textContent = '$' + (entries[i].price * v).toFixed(2);
+        }
+      });
+    });
+    body.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const i = +e.target.dataset.i;
+        entries.splice(i, 1);
+        persist();
+        renderLog();
+        renderTotals();
+      });
+    });
+  }
 
-body.querySelectorAll('.qty-input').forEach(inp => {
-  inp.addEventListener('input', e => {
-    const i = +e.target.dataset.i;
-    const v = parseFloat(e.target.value);
-    if (!isNaN(v) && v >= 0) {
-      entries[i].qty = v;
-      persist();
-      renderTotals();
-      const cells = e.target.closest('.log-row').children;
-      cells[2].textContent = fmt(entries[i].cal * v);
-      cells[3].textContent = fmt(entries[i].p * v);
-      cells[4].textContent = fmt(entries[i].f * v);
-      cells[5].textContent = fmt(entries[i].c * v);
-      cells[6].textContent = '$' + (entries[i].price * v).toFixed(2);
-    }
-  });
-});
-body.querySelectorAll('.del-btn').forEach(btn => {
-  btn.addEventListener('click', e => {
-    const i = +e.target.dataset.i;
-    entries.splice(i, 1);
-    persist();
-    renderLog();
-    renderTotals();
-  });
-});
-
-
-}
-
-const meta = document.getElementById('macroMeta');
-if (meta) meta.textContent = entries.length + ' item' + (entries.length === 1 ? '' : 's') + ' logged';
+  const meta = document.getElementById('macroMeta');
+  if (meta) meta.textContent = entries.length + ' item' + (entries.length === 1 ? '' : 's') + ' logged';
 }
 
 function totals() {
-const t = { cal: 0, p: 0, f: 0, c: 0, cost: 0 };
-for (const e of getTodayLog()) {
-t.cal += e.cal * e.qty;
-t.p += e.p * e.qty;
-t.f += e.f * e.qty;
-t.c += e.c * e.qty;
-t.cost += e.price * e.qty;
-}
-return t;
+  const t = { cal: 0, p: 0, f: 0, c: 0, cost: 0 };
+  for (const e of getTodayLog()) {
+    t.cal += e.cal * e.qty;
+    t.p += e.p * e.qty;
+    t.f += e.f * e.qty;
+    t.c += e.c * e.qty;
+    t.cost += e.price * e.qty;
+  }
+  return t;
 }
 
 function renderTotals() {
-const t = totals();
-const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const t = totals();
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
-setText('valCal', Math.round(t.cal));
-setText('valP', t.p.toFixed(1));
-setText('valF', t.f.toFixed(1));
-setText('valC', t.c.toFixed(1));
-setText('tgtCal', targets.burn);
-setText('tgtP', targets.p);
-setText('tgtF', targets.f);
-setText('tgtC', targets.c);
+  setText('valCal', Math.round(t.cal));
+  setText('valP', t.p.toFixed(1));
+  setText('valF', t.f.toFixed(1));
+  setText('valC', t.c.toFixed(1));
+  setText('tgtCal', targets.burn);
+  setText('tgtP', targets.p);
+  setText('tgtF', targets.f);
+  setText('tgtC', targets.c);
 
-setBar('barCal', 'dialCal', t.cal, targets.burn);
-setBar('barP', 'dialP', t.p, targets.p);
-setBar('barF', 'dialF', t.f, targets.f);
-setBar('barC', 'dialC', t.c, targets.c);
+  setBar('barCal', 'dialCal', t.cal, targets.burn);
+  setBar('barP', 'dialP', t.p, targets.p);
+  setBar('barF', 'dialF', t.f, targets.f);
+  setBar('barC', 'dialC', t.c, targets.c);
 
-setText('totCal', Math.round(t.cal));
-setText('totP', t.p.toFixed(1));
-setText('totF', t.f.toFixed(1));
-setText('totC', t.c.toFixed(1));
-setText('totCost', '$' + t.cost.toFixed(2));
-setText('totalCost', '$' + t.cost.toFixed(2));
+  setText('totCal', Math.round(t.cal));
+  setText('totP', t.p.toFixed(1));
+  setText('totF', t.f.toFixed(1));
+  setText('totC', t.c.toFixed(1));
+  setText('totCost', '$' + t.cost.toFixed(2));
+  setText('totalCost', '$' + t.cost.toFixed(2));
 
-const calFromP = t.p * 4;
-const calFromF = t.f * 9;
-const calFromC = t.c * 4;
-const totalMacroCal = calFromP + calFromF + calFromC;
-const ribbon = document.getElementById('ratioRibbon');
-if (ribbon) {
-if (totalMacroCal > 0) {
-const pctF = (calFromF / totalMacroCal) * 100;
-const pctP = (calFromP / totalMacroCal) * 100;
-const pctC = (calFromC / totalMacroCal) * 100;
-ribbon.innerHTML =
-'<div class="ratio-fat" style="flex: ' + pctF + '">Fat ' + pctF.toFixed(0) + '%</div>' +
-'<div class="ratio-pro" style="flex: ' + pctP + '">Pro ' + pctP.toFixed(0) + '%</div>' +
-'<div class="ratio-carb" style="flex: ' + pctC + '">Carb ' + pctC.toFixed(0) + '%</div>';
-} else {
-ribbon.innerHTML =
-'<div class="ratio-fat" style="flex: 1">—</div>' +
-'<div class="ratio-pro" style="flex: 1">—</div>' +
-'<div class="ratio-carb" style="flex: 1">—</div>';
-}
-}
+  const calFromP = t.p * 4;
+  const calFromF = t.f * 9;
+  const calFromC = t.c * 4;
+  const totalMacroCal = calFromP + calFromF + calFromC;
+  const ribbon = document.getElementById('ratioRibbon');
+  if (ribbon) {
+    if (totalMacroCal > 0) {
+      const pctF = (calFromF / totalMacroCal) * 100;
+      const pctP = (calFromP / totalMacroCal) * 100;
+      const pctC = (calFromC / totalMacroCal) * 100;
+      ribbon.innerHTML =
+        '<div class="ratio-fat" style="flex: ' + pctF + '">Fat ' + pctF.toFixed(0) + '%</div>' +
+        '<div class="ratio-pro" style="flex: ' + pctP + '">Pro ' + pctP.toFixed(0) + '%</div>' +
+        '<div class="ratio-carb" style="flex: ' + pctC + '">Carb ' + pctC.toFixed(0) + '%</div>';
+    } else {
+      ribbon.innerHTML =
+        '<div class="ratio-fat" style="flex: 1">&mdash;</div>' +
+        '<div class="ratio-pro" style="flex: 1">&mdash;</div>' +
+        '<div class="ratio-carb" style="flex: 1">&mdash;</div>';
+    }
+  }
 
-renderProjection(t);
-renderGlance();
+  renderProjection(t);
+  renderGlance();
 }
 
 function setBar(barId, dialId, val, tgt) {
-const bar = document.getElementById(barId);
-const dial = document.getElementById(dialId);
-if (!bar || !dial) return;
-if (!tgt || tgt <= 0) { bar.style.width = '0%'; return; }
-bar.style.width = Math.min(100, (val / tgt) * 100) + '%';
-dial.classList.remove('over', 'under');
-if (val > tgt * 1.05) dial.classList.add('over');
-else if (val >= tgt * 0.9 && val <= tgt * 1.05) dial.classList.add('under');
+  const bar = document.getElementById(barId);
+  const dial = document.getElementById(dialId);
+  if (!bar || !dial) return;
+  if (!tgt || tgt <= 0) { bar.style.width = '0%'; return; }
+  bar.style.width = Math.min(100, (val / tgt) * 100) + '%';
+  dial.classList.remove('over', 'under');
+  if (val > tgt * 1.05) dial.classList.add('over');
+  else if (val >= tgt * 0.9 && val <= tgt * 1.05) dial.classList.add('under');
 }
 
 function renderProjection(t) {
-const setHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
-const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-const toggleClass = (id, cls, on) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, on); };
+  const setHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const toggleClass = (id, cls, on) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, on); };
 
-const bal = t.cal - targets.burn;
-setHTML('projBal', (bal >= 0 ? '+' : '') + Math.round(bal) + ' <span class="unit">cal</span>');
-toggleClass('projBal', 'neg', bal < 0);
-toggleClass('projBal', 'pos', bal > 0);
+  const bal = t.cal - targets.burn;
+  setHTML('projBal', (bal >= 0 ? '+' : '') + Math.round(bal) + ' <span class="unit">cal</span>');
+  toggleClass('projBal', 'neg', bal < 0);
+  toggleClass('projBal', 'pos', bal > 0);
 
-const kjBal = bal * 4.184;
-const dailyFatG = (kjBal / KJ_PER_KG_FAT) * 1000;
-const weeklyKg = (dailyFatG * 7) / 1000;
+  const kjBal = bal * 4.184;
+  const dailyFatG = (kjBal / KJ_PER_KG_FAT) * 1000;
+  const weeklyKg = (dailyFatG * 7) / 1000;
 
-setHTML('projDaily', (dailyFatG >= 0 ? '+' : '') + dailyFatG.toFixed(1) + ' <span class="unit">g</span>');
-toggleClass('projDaily', 'neg', dailyFatG < 0);
-toggleClass('projDaily', 'pos', dailyFatG > 0);
+  setHTML('projDaily', (dailyFatG >= 0 ? '+' : '') + dailyFatG.toFixed(1) + ' <span class="unit">g</span>');
+  toggleClass('projDaily', 'neg', dailyFatG < 0);
+  toggleClass('projDaily', 'pos', dailyFatG > 0);
 
-setHTML('projWeekly', (weeklyKg >= 0 ? '+' : '') + weeklyKg.toFixed(2) + ' <span class="unit">kg</span>');
-toggleClass('projWeekly', 'neg', weeklyKg < 0);
-toggleClass('projWeekly', 'pos', weeklyKg > 0);
+  setHTML('projWeekly', (weeklyKg >= 0 ? '+' : '') + weeklyKg.toFixed(2) + ' <span class="unit">kg</span>');
+  toggleClass('projWeekly', 'neg', weeklyKg < 0);
+  toggleClass('projWeekly', 'pos', weeklyKg > 0);
 
-const daysEl = document.getElementById('projDays');
-if (daysEl) {
-if (weights.today && weights.goal && dailyFatG < 0) {
-const kgToLose = weights.today - weights.goal;
-if (kgToLose > 0) {
-const days = Math.round((kgToLose * 1000) / Math.abs(dailyFatG));
-daysEl.innerHTML = days + ' <span class="unit">days</span>';
-} else {
-daysEl.innerHTML = '✓ <span class="unit">at goal</span>';
-}
-} else {
-daysEl.innerHTML = '— <span class="unit">—</span>';
-}
-}
+  const daysEl = document.getElementById('projDays');
+  if (daysEl) {
+    if (weights.today && weights.goal && dailyFatG < 0) {
+      const kgToLose = weights.today - weights.goal;
+      if (kgToLose > 0) {
+        const days = Math.round((kgToLose * 1000) / Math.abs(dailyFatG));
+        daysEl.innerHTML = days + ' <span class="unit">days</span>';
+      } else {
+        daysEl.innerHTML = '&check; <span class="unit">at goal</span>';
+      }
+    } else {
+      daysEl.innerHTML = '&mdash; <span class="unit">&mdash;</span>';
+    }
+  }
 
-if (weights.today != null && weights.yesterday != null) {
-setText('dayLoss', Math.round((weights.yesterday - weights.today) * 1000));
-} else setText('dayLoss', '-');
+  if (weights.today != null && weights.yesterday != null) {
+    setText('dayLoss', Math.round((weights.yesterday - weights.today) * 1000));
+  } else setText('dayLoss', '-');
 
-if (weights.today != null && weights.goal != null) {
-setText('toLose', (weights.today - weights.goal).toFixed(1));
-} else setText('toLose', '-');
+  if (weights.today != null && weights.goal != null) {
+    setText('toLose', (weights.today - weights.goal).toFixed(1));
+  } else setText('toLose', '-');
 }
 
 function renderGlance() {
-const t = totals();
-const entries = getTodayLog();
-const setHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
-setHTML('glanceCal', Math.round(t.cal) + '<span class="unit">cal</span>');
-setHTML('glanceItems', entries.length);
-setHTML('glanceCost', '$' + t.cost.toFixed(2));
-setHTML('glanceLib', library.length);
-setHTML('glanceWeight', weights.today != null ? weights.today + ' <span class="unit">kg</span>' : '— <span class="unit">kg</span>');
+  const t = totals();
+  const entries = getTodayLog();
+  const setHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+  setHTML('glanceCal', Math.round(t.cal) + '<span class="unit">cal</span>');
+  setHTML('glanceItems', entries.length);
+  setHTML('glanceCost', '$' + t.cost.toFixed(2));
+  setHTML('glanceLib', library.length);
+  setHTML('glanceWeight', weights.today != null ? weights.today + ' <span class="unit">kg</span>' : '&mdash; <span class="unit">kg</span>');
 }
 
 function renderQuickSelect() {
-const sel = document.getElementById('quickSelect');
-if (!sel) return;
-const prevName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].dataset.name : null;
-const indexed = library.map((f, i) => ({ f, i }))
-.sort((a, b) => a.f.name.localeCompare(b.f.name));
-sel.innerHTML = indexed.map(({ f, i }) =>
-'<option value="' + i + '" data-name="' + escapeHtml(f.name) + '">' +
-escapeHtml(f.name) + ' — ' + Math.round(f.cal) + 'c</option>'
-).join('');
-if (prevName) {
-for (const opt of sel.options) {
-if (opt.dataset.name === prevName) { opt.selected = true; break; }
-}
-}
+  const sel = document.getElementById('quickSelect');
+  if (!sel) return;
+  const prevName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].dataset.name : null;
+  const indexed = library.map((f, i) => ({ f, i }))
+    .sort((a, b) => a.f.name.localeCompare(b.f.name));
+  sel.innerHTML = indexed.map(({ f, i }) =>
+    '<option value="' + i + '" data-name="' + escapeHtml(f.name) + '">' +
+    escapeHtml(f.name) + ' &mdash; ' + Math.round(f.cal) + 'c</option>'
+  ).join('');
+  if (prevName) {
+    for (const opt of sel.options) {
+      if (opt.dataset.name === prevName) { opt.selected = true; break; }
+    }
+  }
 }
 
 function quickAdd() {
-const sel = document.getElementById('quickSelect');
-const qtyInp = document.getElementById('quickQty');
-const idx = parseInt(sel.value);
-const qty = parseFloat(qtyInp.value) || 1;
-if (isNaN(idx) || !library[idx]) return;
-const food = library[idx];
-const entries = getTodayLog();
-const existing = entries.find(e => e.name === food.name);
-if (existing) existing.qty += qty;
-else entries.push(Object.assign({}, food, { qty: qty }));
-persist();
-renderLog();
-renderTotals();
-toast('Added ' + food.name);
-qtyInp.value = 1;
+  const sel = document.getElementById('quickSelect');
+  const qtyInp = document.getElementById('quickQty');
+  const idx = parseInt(sel.value);
+  const qty = parseFloat(qtyInp.value) || 1;
+  if (isNaN(idx) || !library[idx]) return;
+  const food = library[idx];
+  const entries = getTodayLog();
+  const existing = entries.find(e => e.name === food.name);
+  if (existing) existing.qty += qty;
+  else entries.push(Object.assign({}, food, { qty: qty }));
+  persist();
+  renderLog();
+  renderTotals();
+  toast('Added ' + food.name);
+  qtyInp.value = 1;
 }
 
 function renderLibraryTable(filter) {
-filter = filter || '';
-const body = document.getElementById('libraryBody');
-if (!body) return;
-const q = filter.toLowerCase().trim();
+  filter = filter || '';
+  const body = document.getElementById('libraryBody');
+  if (!body) return;
+  const q = filter.toLowerCase().trim();
 
-const filtered = library.map((f, i) => ({ f, i }))
-.filter(({ f }) => !q || f.name.toLowerCase().includes(q))
-.sort((a, b) => a.f.name.localeCompare(b.f.name));
+  const filtered = library.map((f, i) => ({ f, i }))
+    .filter(({ f }) => !q || f.name.toLowerCase().includes(q))
+    .sort((a, b) => a.f.name.localeCompare(b.f.name));
 
-document.getElementById('libCount').textContent = library.length;
+  document.getElementById('libCount').textContent = library.length;
 
-if (filtered.length === 0) {
-body.innerHTML = '<div style="padding: 40px 16px; text-align: center; font-style: italic; color: var(--muted);">No foods match your search.</div>';
-return;
-}
+  if (filtered.length === 0) {
+    body.innerHTML = '<div style="padding: 40px 16px; text-align: center; font-style: italic; color: var(--muted);">No foods match your search.</div>';
+    return;
+  }
 
-body.innerHTML = filtered.map(({ f, i }) =>
-'<div class="lib-row">' +
-'<div class="lib-name">' + escapeHtml(f.name) + '</div>' +
-'<div class="macro-cell" data-lbl="Cal">' + Math.round(f.cal) + '</div>' +
-'<div class="macro-cell" data-lbl="P">' + f.p + '</div>' +
-'<div class="macro-cell" data-lbl="F">' + f.f + '</div>' +
-'<div class="macro-cell" data-lbl="C">' + f.c + '</div>' +
-'<div class="macro-cell" data-lbl="$">$' + (f.price || 0).toFixed(2) + '</div>' +
-'<div class="actions">' +
-'<button class="add-btn" data-act="add" data-i="' + i + '">+ LOG</button>' +
-'<button data-act="edit" data-i="' + i + '">EDIT</button>' +
-'<button data-act="del" data-i="' + i + '">DEL</button>' +
-'</div>' +
-'</div>'
-).join('');
+  body.innerHTML = filtered.map(({ f, i }) =>
+    '<div class="lib-row">' +
+      '<div class="lib-name">' + escapeHtml(f.name) + '</div>' +
+      '<div class="macro-cell" data-lbl="Cal">' + Math.round(f.cal) + '</div>' +
+      '<div class="macro-cell" data-lbl="P">' + f.p + '</div>' +
+      '<div class="macro-cell" data-lbl="F">' + f.f + '</div>' +
+      '<div class="macro-cell" data-lbl="C">' + f.c + '</div>' +
+      '<div class="macro-cell" data-lbl="$">$' + (f.price || 0).toFixed(2) + '</div>' +
+      '<div class="actions">' +
+        '<button class="add-btn" data-act="add" data-i="' + i + '">+ LOG</button>' +
+        '<button data-act="edit" data-i="' + i + '">EDIT</button>' +
+        '<button data-act="del" data-i="' + i + '">DEL</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
 
-body.querySelectorAll('[data-act]').forEach(btn => {
-btn.addEventListener('click', () => {
-const i = +btn.dataset.i;
-if (btn.dataset.act === 'add') {
-const entries = getTodayLog();
-const existing = entries.find(e => e.name === library[i].name);
-if (existing) existing.qty += 1;
-else entries.push(Object.assign({}, library[i], { qty: 1 }));
-persist();
-renderTotals();
-toast('Added ' + library[i].name);
-}
-if (btn.dataset.act === 'edit') openFoodModal(i);
-if (btn.dataset.act === 'del') {
-if (confirm('Remove “' + library[i].name + '” from library?')) {
-library.splice(i, 1);
-persist();
-renderLibraryTable(document.getElementById('librarySearch').value);
-renderQuickSelect();
-toast('Removed from library');
-}
-}
-});
-});
+  body.querySelectorAll('[data-act]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.i;
+      if (btn.dataset.act === 'add') {
+        const entries = getTodayLog();
+        const existing = entries.find(e => e.name === library[i].name);
+        if (existing) existing.qty += 1;
+        else entries.push(Object.assign({}, library[i], { qty: 1 }));
+        persist();
+        renderTotals();
+        toast('Added ' + library[i].name);
+      }
+      if (btn.dataset.act === 'edit') openFoodModal(i);
+      if (btn.dataset.act === 'del') {
+        if (confirm('Remove "' + library[i].name + '" from library?')) {
+          library.splice(i, 1);
+          persist();
+          renderLibraryTable(document.getElementById('librarySearch').value);
+          renderQuickSelect();
+          toast('Removed from library');
+        }
+      }
+    });
+  });
 }
 
 function openFoodModal(idx) {
-if (idx === undefined) idx = null;
-editingFoodIdx = idx;
-document.getElementById('modalTitle').textContent = idx === null ? 'New Food' : 'Edit Food';
-const f = idx === null ? { name: '', cal: '', kj: '', p: '', f: '', c: '', price: '' } : library[idx];
-document.getElementById('fName').value = f.name;
-document.getElementById('fCal').value = f.cal;
-document.getElementById('fKj').value = f.kj || '';
-document.getElementById('fP').value = f.p;
-document.getElementById('fF').value = f.f;
-document.getElementById('fC').value = f.c;
-document.getElementById('fPrice').value = f.price || 0;
-document.getElementById('foodModal').classList.add('open');
-setTimeout(() => document.getElementById('fName').focus(), 50);
+  if (idx === undefined) idx = null;
+  editingFoodIdx = idx;
+  document.getElementById('modalTitle').textContent = idx === null ? 'New Food' : 'Edit Food';
+  const f = idx === null ? { name: '', cal: '', kj: '', p: '', f: '', c: '', price: '' } : library[idx];
+  document.getElementById('fName').value = f.name;
+  document.getElementById('fCal').value = f.cal;
+  document.getElementById('fKj').value = f.kj || '';
+  document.getElementById('fP').value = f.p;
+  document.getElementById('fF').value = f.f;
+  document.getElementById('fC').value = f.c;
+  document.getElementById('fPrice').value = f.price || 0;
+  document.getElementById('foodModal').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 50);
 }
 function closeFoodModal() {
-document.getElementById('foodModal').classList.remove('open');
-editingFoodIdx = null;
+  document.getElementById('foodModal').classList.remove('open');
+  editingFoodIdx = null;
 }
 function saveFood() {
-const name = document.getElementById('fName').value.trim();
-if (!name) { alert('Name is required.'); return; }
-const cal = parseFloat(document.getElementById('fCal').value) || 0;
-const kj = parseFloat(document.getElementById('fKj').value) || (cal * 4.184);
-const p = parseFloat(document.getElementById('fP').value) || 0;
-const f = parseFloat(document.getElementById('fF').value) || 0;
-const c = parseFloat(document.getElementById('fC').value) || 0;
-const price = parseFloat(document.getElementById('fPrice').value) || 0;
-const item = { name, cal, kj, p, f, c, price };
-if (editingFoodIdx === null) { library.push(item); toast('Added to library'); }
-else { library[editingFoodIdx] = item; toast('Food updated'); }
-persist();
-renderLibraryTable(document.getElementById('librarySearch').value);
-renderQuickSelect();
-closeFoodModal();
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { alert('Name is required.'); return; }
+  const cal = parseFloat(document.getElementById('fCal').value) || 0;
+  const kj = parseFloat(document.getElementById('fKj').value) || (cal * 4.184);
+  const p = parseFloat(document.getElementById('fP').value) || 0;
+  const f = parseFloat(document.getElementById('fF').value) || 0;
+  const c = parseFloat(document.getElementById('fC').value) || 0;
+  const price = parseFloat(document.getElementById('fPrice').value) || 0;
+  const item = { name, cal, kj, p, f, c, price };
+  if (editingFoodIdx === null) { library.push(item); toast('Added to library'); }
+  else { library[editingFoodIdx] = item; toast('Food updated'); }
+  persist();
+  renderLibraryTable(document.getElementById('librarySearch').value);
+  renderQuickSelect();
+  closeFoodModal();
 }
 
 function fmt(n) {
-if (Math.abs(n) < 10) return n.toFixed(1);
-return Math.round(n).toString();
+  if (Math.abs(n) < 10) return n.toFixed(1);
+  return Math.round(n).toString();
 }
 function escapeHtml(s) {
-return String(s)
-.replace(/&/g, '&amp;')
-.replace(/</g, '&lt;')
-.replace(/>/g, '&gt;')
-.replace(/”/g, '&quot;')
-.replace(/'/g, '&#039;');
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 }
 function persist() {
-saveJSON(STORAGE_KEYS.LIBRARY, library);
-saveJSON(STORAGE_KEYS.LOG, log);
-saveJSON(STORAGE_KEYS.TARGETS, targets);
-saveJSON(STORAGE_KEYS.WEIGHTS, weights);
+  saveJSON(STORAGE_KEYS.LIBRARY, library);
+  saveJSON(STORAGE_KEYS.LOG, log);
+  saveJSON(STORAGE_KEYS.TARGETS, targets);
+  saveJSON(STORAGE_KEYS.WEIGHTS, weights);
 }
 let toastTimer;
 function toast(msg) {
-const t = document.getElementById('toast');
-t.textContent = msg;
-t.classList.add('show');
-clearTimeout(toastTimer);
-toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
 function init() {
-document.getElementById('todayDate').textContent = todayDisplay();
-document.getElementById('dayNum').textContent = dayOfYear();
+  document.getElementById('todayDate').textContent = todayDisplay();
+  document.getElementById('dayNum').textContent = dayOfYear();
 
-document.getElementById('targetP').value = targets.p;
-document.getElementById('targetF').value = targets.f;
-document.getElementById('targetC').value = targets.c;
-document.getElementById('targetBurn').value = targets.burn;
+  document.getElementById('targetP').value = targets.p;
+  document.getElementById('targetF').value = targets.f;
+  document.getElementById('targetC').value = targets.c;
+  document.getElementById('targetBurn').value = targets.burn;
 
-['targetP', 'targetF', 'targetC', 'targetBurn'].forEach(id => {
-document.getElementById(id).addEventListener('input', e => {
-const key = { targetP: 'p', targetF: 'f', targetC: 'c', targetBurn: 'burn' }[id];
-targets[key] = parseFloat(e.target.value) || 0;
-persist();
-renderTotals();
-});
-});
+  ['targetP', 'targetF', 'targetC', 'targetBurn'].forEach(id => {
+    document.getElementById(id).addEventListener('input', e => {
+      const key = { targetP: 'p', targetF: 'f', targetC: 'c', targetBurn: 'burn' }[id];
+      targets[key] = parseFloat(e.target.value) || 0;
+      persist();
+      renderTotals();
+    });
+  });
 
-if (weights.today != null) document.getElementById('todayWeight').value = weights.today;
-if (weights.yesterday != null) document.getElementById('yestWeight').value = weights.yesterday;
-if (weights.goal != null) document.getElementById('goalWeight').value = weights.goal;
+  if (weights.today != null) document.getElementById('todayWeight').value = weights.today;
+  if (weights.yesterday != null) document.getElementById('yestWeight').value = weights.yesterday;
+  if (weights.goal != null) document.getElementById('goalWeight').value = weights.goal;
 
-document.getElementById('todayWeight').addEventListener('input', e => {
-weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
-});
-document.getElementById('yestWeight').addEventListener('input', e => {
-weights.yesterday = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
-});
-document.getElementById('goalWeight').addEventListener('input', e => {
-weights.goal = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
-});
+  document.getElementById('todayWeight').addEventListener('input', e => {
+    weights.today = parseFloat(e.target.value) || null; persist(); renderTotals();
+  });
+  document.getElementById('yestWeight').addEventListener('input', e => {
+    weights.yesterday = parseFloat(e.target.value) || null; persist(); renderTotals();
+  });
+  document.getElementById('goalWeight').addEventListener('input', e => {
+    weights.goal = parseFloat(e.target.value) || null; persist(); renderTotals();
+  });
 
-document.getElementById('librarySearch').addEventListener('input', e => {
-renderLibraryTable(e.target.value);
-});
-document.getElementById('quickAddBtn').addEventListener('click', quickAdd);
-document.getElementById('addFoodBtn').addEventListener('click', () => openFoodModal(null));
-document.getElementById('cancelFood').addEventListener('click', closeFoodModal);
-document.getElementById('saveFood').addEventListener('click', saveFood);
-document.getElementById('foodModal').addEventListener('click', e => {
-if (e.target.id === 'foodModal') closeFoodModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFoodModal(); });
+  document.getElementById('librarySearch').addEventListener('input', e => {
+    renderLibraryTable(e.target.value);
+  });
+  document.getElementById('quickAddBtn').addEventListener('click', quickAdd);
+  document.getElementById('addFoodBtn').addEventListener('click', () => openFoodModal(null));
+  document.getElementById('cancelFood').addEventListener('click', closeFoodModal);
+  document.getElementById('saveFood').addEventListener('click', saveFood);
+  document.getElementById('foodModal').addEventListener('click', e => {
+    if (e.target.id === 'foodModal') closeFoodModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFoodModal(); });
 
-document.getElementById('clearDay').addEventListener('click', () => {
-if (getTodayLog().length === 0) return;
-if (confirm('Clear all entries for today?')) {
-log[todayKey()] = [];
-persist();
-renderLog();
-renderTotals();
-toast('Day cleared');
-}
-});
+  document.getElementById('clearDay').addEventListener('click', () => {
+    if (getTodayLog().length === 0) return;
+    if (confirm('Clear all entries for today?')) {
+      log[todayKey()] = [];
+      persist();
+      renderLog();
+      renderTotals();
+      toast('Day cleared');
+    }
+  });
 
-const hash = window.location.hash.replace('#', '');
-navigate(VALID_VIEWS.includes(hash) ? hash : 'home');
+  const hash = window.location.hash.replace('#', '');
+  navigate(VALID_VIEWS.includes(hash) ? hash : 'home');
 
-window.addEventListener('hashchange', () => {
-const h = window.location.hash.replace('#', '');
-if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
-});
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash.replace('#', '');
+    if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
+  });
 }
 
 init();
 </script>
-
 </body>
 </html>
