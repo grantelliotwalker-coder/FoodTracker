@@ -184,9 +184,9 @@ section { margin-bottom: 20px; }
 }
 .lib-row:last-child { border-bottom: none; }
 .lib-row:hover, .lib-row:active { background: var(--bg3); }
-.lib-row .lib-name { font-size: 12px; color: var(--text-bright); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.lib-row .lib-macros { font-size: 9px; color: var(--muted); white-space: nowrap; flex-shrink: 0; display: none; }
-@media (min-width: 400px) { .lib-row .lib-macros { display: block; } }
+.lib-row .lib-info { flex: 1; min-width: 0; }
+.lib-row .lib-name { font-size: 13px; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.lib-row .lib-macros { font-size: 9px; color: var(--muted); display: block; margin-top: 2px; letter-spacing: 0.03em; }
 .lib-row .macro-cell { display: none; }
 .lib-row .actions { display: flex; gap: 4px; flex-shrink: 0; }
 /* Desktop: table layout */
@@ -908,8 +908,10 @@ function renderLibraryTable(filter) {
   }
   body.innerHTML = filtered.map(({f,i}) =>
     '<div class="lib-row">' +
-      '<div class="lib-name">' + escapeHtml(f.name) + '</div>' +
-      '<div class="lib-macros">' + Math.round(f.cal) + 'c P'+f.p+' F'+f.f+' C'+f.c + '</div>' +
+      '<div class="lib-info">' +
+        '<span class="lib-name">' + escapeHtml(f.name) + '</span>' +
+        '<span class="lib-macros">' + Math.round(f.cal) + 'cal · P'+f.p+' F'+f.f+' C'+f.c+' · $'+(f.price||0).toFixed(2) + '</span>' +
+      '</div>' +
       '<div class="macro-cell">' + Math.round(f.cal) + '</div>' +
       '<div class="macro-cell">' + f.p + '</div>' +
       '<div class="macro-cell">' + f.f + '</div>' +
