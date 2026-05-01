@@ -1304,6 +1304,18 @@ function init() {
   document.getElementById('saveFood').addEventListener('click', saveFood);
   document.getElementById('foodModal').addEventListener('click', e => { if (e.target.id === 'foodModal') closeFoodModal(); });
 
+  // Auto-calculate kJ <-> cal
+  document.getElementById('fCal').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v) && v > 0) document.getElementById('fKj').value = (v * 4.184).toFixed(1);
+    else document.getElementById('fKj').value = '';
+  });
+  document.getElementById('fKj').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v) && v > 0) document.getElementById('fCal').value = (v / 4.184).toFixed(1);
+    else document.getElementById('fCal').value = '';
+  });
+
   // Routines
   document.getElementById('addRoutineBtn').addEventListener('click', () => openRoutineModal(null));
   document.getElementById('cancelRoutine').addEventListener('click', closeRoutineModal);
