@@ -342,14 +342,33 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   <section class="view" id="view-tracker">
     <div class="targets-panel">
       <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
-        <h2 style=">Daily Targets</h2>
-        <span class="meta">Adjustable</span>
+        <h2>Daily Targets</h2>
+        <span class="meta">Calorie &amp; macro split</span>
       </div>
-      <div class="targets-grid">
-        <div class="field"><label>Protein (g)</label><input type="number" id="targetP" step="1" inputmode="numeric"></div>
-        <div class="field"><label>Fat (g)</label><input type="number" id="targetF" step="1" inputmode="numeric"></div>
-        <div class="field"><label>Carbs (g)</label><input type="number" id="targetC" step="1" inputmode="numeric"></div>
-        <div class="field"><label>Burn (cal)</label><input type="number" id="targetBurn" step="1" inputmode="numeric"></div>
+      <div class="targets-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div class="field">
+          <label>Calorie Target</label>
+          <input type="number" id="targetBurn" step="10" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Protein %</label>
+          <input type="number" id="targetPpct" step="1" min="0" max="100" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Fat %</label>
+          <input type="number" id="targetFpct" step="1" min="0" max="100" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Carb %</label>
+          <input type="number" id="targetCpct" step="1" min="0" max="100" inputmode="numeric">
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:10px 12px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;flex-shrink:0;">Targets</span>
+        <span style="font-size:11px;color:var(--text);">P <strong id="derivedP" style="color:var(--green);">0</strong>g</span>
+        <span style="font-size:11px;color:var(--text);">F <strong id="derivedF" style="color:var(--green);">0</strong>g</span>
+        <span style="font-size:11px;color:var(--text);">C <strong id="derivedC" style="color:var(--green);">0</strong>g</span>
+        <span style="font-size:10px;" id="pctWarning"></span>
       </div>
     </div>
 
@@ -620,7 +639,7 @@ window.onerror = function(msg, src, line) {
 
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
-const DEFAULT_TARGETS = { p:75, f:165, c:40, burn:2726 };
+const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', settings:'Settings' };
@@ -1255,6 +1274,28 @@ function toast(msg) {
 }
 
 // ── INIT ───────────────────────────────────────────
+function updateDerivedTargets() {
+  const burn = targets.burn || 0;
+  const ppct = targets.ppct || 0;
+  const fpct = targets.fpct || 0;
+  const cpct = targets.cpct || 0;
+  targets.p = Math.round((burn * ppct / 100) / 4);
+  targets.f = Math.round((burn * fpct / 100) / 9);
+  targets.c = Math.round((burn * cpct / 100) / 4);
+  const pEl = document.getElementById('derivedP');
+  const fEl = document.getElementById('derivedF');
+  const cEl = document.getElementById('derivedC');
+  const wEl = document.getElementById('pctWarning');
+  if (pEl) pEl.textContent = targets.p;
+  if (fEl) fEl.textContent = targets.f;
+  if (cEl) cEl.textContent = targets.c;
+  if (wEl) {
+    const total = ppct + fpct + cpct;
+    wEl.textContent = total !== 100 ? '⚠ ' + total + '% (needs to equal 100%)' : '✓ ' + total + '%';
+    wEl.style.color = total !== 100 ? 'var(--amber)' : 'var(--green)';
+  }
+}
+
 function init() {
   localStorage.removeItem('ft_library_v1');
 
@@ -1271,13 +1312,15 @@ function init() {
   document.getElementById('dayNum').textContent = dayOfYear();
 
   // Targets
-  document.getElementById('targetP').value = targets.p;
-  document.getElementById('targetF').value = targets.f;
-  document.getElementById('targetC').value = targets.c;
   document.getElementById('targetBurn').value = targets.burn;
-  ['targetP','targetF','targetC','targetBurn'].forEach(id => {
-    document.getElementById(id).addEventListener('change', e => {
-      targets[{targetP:'p',targetF:'f',targetC:'c',targetBurn:'burn'}[id]] = parseFloat(e.target.value)||0;
+  document.getElementById('targetPpct').value = targets.ppct;
+  document.getElementById('targetFpct').value = targets.fpct;
+  document.getElementById('targetCpct').value = targets.cpct;
+  updateDerivedTargets();
+  ['targetBurn','targetPpct','targetFpct','targetCpct'].forEach(id => {
+    document.getElementById(id).addEventListener('input', e => {
+      targets[{targetBurn:'burn',targetPpct:'ppct',targetFpct:'fpct',targetCpct:'cpct'}[id]] = parseFloat(e.target.value) || 0;
+      updateDerivedTargets();
       persist(); renderTotals();
     });
   });
