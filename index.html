@@ -74,8 +74,7 @@ input, select, button { -webkit-tap-highlight-color: transparent; touch-action: 
 .nav-desc { font-size: 10px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 
 /* ── GLANCE ──────────────────────────────────────────────── */
-.glance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 20px; }
-@media (min-width: 480px) { .glance { grid-template-columns: repeat(5, 1fr); } }
+.glance { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 20px; }
 .glance-item { background: var(--bg2); padding: 12px 10px; }
 .glance-item .lbl { font-size: 8px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
 .glance-item .val { font-size: 18px; font-weight: 700; color: var(--green); letter-spacing: -0.02em; }
@@ -110,28 +109,46 @@ section { margin-bottom: 20px; }
 .ratio-targets { font-size: 9px; color: var(--muted); letter-spacing: 0.04em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
 
 /* ── LOG TABLE ───────────────────────────────────────────── */
-.log-wrap { border: 1px solid var(--border); background: var(--bg2); overflow-x: auto; }
-.log-head, .log-row, .log-total {
-  display: grid;
-  grid-template-columns: 2fr 0.5fr 0.6fr 0.6fr 0.6fr 0.6fr 0.6fr 0.4fr;
-  padding: 8px 10px; gap: 6px; min-width: 480px;
-}
-.log-head { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-.log-head > *:not(:first-child):not(:last-child) { text-align: right; }
-.log-head > *:last-child { text-align: center; }
-.log-row { font-size: 12px; border-bottom: 1px solid var(--border); align-items: center; color: var(--text); }
+.log-wrap { border: 1px solid var(--border); background: var(--bg2); }
+/* Mobile: card per entry */
+.log-head { display: none; }
+.log-row { display: flex; flex-wrap: wrap; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 4px 8px; }
 .log-row:last-child { border-bottom: none; }
-.log-row > *:not(:first-child):not(:last-child) { text-align: right; font-size: 11px; color: var(--muted); }
-.log-row .name { color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.log-row .name { font-size: 12px; color: var(--text-bright); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .log-row .name::before { content: '$ '; color: var(--green); }
-.log-row input[type="number"] { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); text-align: right; font-family: inherit; font-size: 11px; color: var(--text); padding: 2px 0; }
+.log-row .log-qty-wrap { display: flex; align-items: center; gap: 4px; }
+.log-row .log-qty-wrap .ql { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+.log-row input[type="number"] { width: 50px; background: transparent; border: none; border-bottom: 1px solid var(--border); text-align: right; font-family: inherit; font-size: 12px; color: var(--text); padding: 2px 0; }
 .log-row input[type="number"]:focus { outline: none; border-bottom-color: var(--green); }
-.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 14px; justify-self: center; padding: 4px 6px; transition: color 0.2s; }
+.log-row .log-macros { font-size: 10px; color: var(--muted); flex: 1; }
+.log-row .log-cost { font-size: 10px; color: var(--muted); }
+.log-row .log-spacer { display: none; }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 18px; padding: 2px 4px; transition: color 0.2s; margin-left: auto; line-height: 1; }
 .del-btn:hover, .del-btn:active { color: var(--red); }
-.log-total { background: var(--bg3); color: var(--green); font-weight: 700; font-size: 11px; letter-spacing: 0.05em; border-top: 1px solid var(--green); }
-.log-total .label { font-size: 11px; }
-.log-total > *:not(:first-child):not(:last-child) { text-align: right; }
+.log-total { display: flex; flex-wrap: wrap; gap: 8px 16px; background: var(--bg3); color: var(--green); font-weight: 700; font-size: 11px; border-top: 1px solid var(--green); padding: 10px 12px; }
+.log-total .label { width: 100%; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 300; margin-bottom: 2px; }
+.tot-item { display: flex; flex-direction: column; align-items: center; }
+.tot-item .ti-lbl { font-size: 8px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 300; }
+.tot-item .ti-val { font-size: 13px; }
 .empty-log { padding: 28px 10px; text-align: center; color: var(--muted); font-size: 10px; letter-spacing: 0.1em; }
+/* Desktop: table */
+@media (min-width: 560px) {
+  .log-head { display: grid; grid-template-columns: 2fr 0.5fr 0.6fr 0.6fr 0.6fr 0.6fr 0.6fr 0.4fr; padding: 8px 10px; gap: 6px; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .log-head > *:not(:first-child):not(:last-child) { text-align: right; }
+  .log-head > *:last-child { text-align: center; }
+  .log-row { display: grid; grid-template-columns: 2fr 0.5fr 0.6fr 0.6fr 0.6fr 0.6fr 0.6fr 0.4fr; padding: 8px 10px; gap: 6px; align-items: center; flex-wrap: nowrap; }
+  .log-row .name { width: auto; }
+  .log-row .log-qty-wrap .ql { display: none; }
+  .log-row .log-qty-wrap { display: contents; }
+  .log-row .log-macros, .log-row .log-cost { font-size: 11px; text-align: right; }
+  .log-row .log-spacer { display: block; }
+  .del-btn { justify-self: center; margin-left: 0; font-size: 14px; }
+  .log-total { display: grid; grid-template-columns: 2fr 0.5fr 0.6fr 0.6fr 0.6fr 0.6fr 0.6fr 0.4fr; padding: 8px 10px; gap: 6px; }
+  .log-total .label { width: auto; font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--green); font-weight: 700; margin-bottom: 0; }
+  .tot-item { display: contents; }
+  .tot-item .ti-lbl { display: none; }
+  .tot-item .ti-val { font-size: 11px; text-align: right; }
+}
 
 /* ── QUICK ADD ───────────────────────────────────────────── */
 .quick-add { border: 1px solid var(--border); background: var(--bg2); padding: 12px; margin-bottom: 16px; }
@@ -158,18 +175,19 @@ section { margin-bottom: 20px; }
   .lib-table-head > *:not(:first-child):not(:last-child) { text-align: right; }
   .lib-table-head > *:last-child { text-align: center; }
 }
-/* Mobile: card layout */
+/* Mobile: compact single-line flex */
 .lib-row {
   border-bottom: 1px solid var(--border);
-  padding: 12px 14px;
+  padding: 9px 12px;
   transition: background 0.15s; color: var(--text);
-  display: block;
+  display: flex; align-items: center; gap: 8px;
 }
 .lib-row:last-child { border-bottom: none; }
 .lib-row:hover, .lib-row:active { background: var(--bg3); }
-.lib-row .lib-name { font-size: 13px; color: var(--text-bright); margin-bottom: 4px; }
-.lib-row .lib-macros { font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.04em; }
-.lib-row .actions { display: flex; gap: 6px; }
+.lib-row .lib-name { font-size: 12px; color: var(--text-bright); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.lib-row .lib-macros { font-size: 9px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.lib-row .macro-cell { display: none; }
+.lib-row .actions { display: flex; gap: 4px; flex-shrink: 0; }
 /* Desktop: table layout */
 @media (min-width: 640px) {
   .lib-row {
@@ -177,9 +195,9 @@ section { margin-bottom: 20px; }
     grid-template-columns: 2.2fr 0.7fr 0.6fr 0.6fr 0.6fr 0.7fr 1.1fr;
     padding: 10px 14px; gap: 8px; align-items: center;
   }
-  .lib-row .lib-name { margin-bottom: 0; font-size: 13px; }
+  .lib-row .lib-name { font-size: 13px; }
   .lib-row .lib-macros { display: none; }
-  .lib-row .macro-cell { text-align: right; font-size: 11px; color: var(--muted); }
+  .lib-row .macro-cell { display: block; text-align: right; font-size: 11px; color: var(--muted); }
   .lib-row .actions { justify-content: center; }
 }
 .lib-row .actions button { background: transparent; border: 1px solid var(--border); padding: 5px 8px; font-family: inherit; font-size: 9px; cursor: pointer; color: var(--muted); letter-spacing: 0.08em; transition: all 0.15s; }
@@ -196,8 +214,8 @@ section { margin-bottom: 20px; }
 .routine-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 /* ── WEIGHT ──────────────────────────────────────────────── */
-.weight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media (min-width: 480px) { .weight-grid { grid-template-columns: repeat(3, 1fr); } }
+.weight-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 380px) { .weight-grid { grid-template-columns: repeat(3, 1fr); } }
 .weight-card { border: 1px solid var(--border); padding: 12px; background: var(--bg2); }
 .weight-card .lbl { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .weight-card input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 4px 0; font-family: inherit; font-size: 22px; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; -webkit-appearance: none; border-radius: 0; }
@@ -226,7 +244,8 @@ section { margin-bottom: 20px; }
 .history-date-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
 .history-date-row input[type="date"] { background: var(--bg2); border: 1px solid var(--border); padding: 10px; font-family: inherit; font-size: 13px; color: var(--text); border-radius: 0; flex: 1; min-width: 140px; }
 .history-date-row input[type="date"]:focus { outline: none; border-color: var(--green); }
-.history-summary { background: var(--bg2); border: 1px solid var(--border); padding: 14px; margin-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.history-summary { background: var(--bg2); border: 1px solid var(--border); padding: 14px; margin-bottom: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 480px) { .history-summary { grid-template-columns: repeat(4, 1fr); } }
 .history-summary .h-item .lbl { font-size: 8px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
 .history-summary .h-item .val { font-size: 18px; font-weight: 700; color: var(--green); }
 
@@ -322,7 +341,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   <section class="view" id="view-tracker">
     <div class="targets-panel">
       <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
-        <h2 style="font-size:11px;">Daily Targets</h2>
+        <h2 style=">Daily Targets</h2>
         <span class="meta">Adjustable</span>
       </div>
       <div class="targets-grid">
@@ -406,13 +425,12 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         </div>
         <div id="logBody"></div>
         <div class="log-total" id="logTotalRow" style="display:none;">
-          <div class="label">Total</div>
-          <div></div>
-          <div id="totCal">0</div>
-          <div id="totP">0</div>
-          <div id="totF">0</div>
-          <div id="totC">0</div>
-          <div id="totCost">$0.00</div>
+          <div class="label">Daily Total</div>
+          <div class="tot-item"><div class="ti-lbl">Cal</div><div class="ti-val" id="totCal">0</div></div>
+          <div class="tot-item"><div class="ti-lbl">Pro</div><div class="ti-val" id="totP">0</div></div>
+          <div class="tot-item"><div class="ti-lbl">Fat</div><div class="ti-val" id="totF">0</div></div>
+          <div class="tot-item"><div class="ti-lbl">Carb</div><div class="ti-val" id="totC">0</div></div>
+          <div class="tot-item"><div class="ti-lbl">Cost</div><div class="ti-val" id="totCost">$0.00</div></div>
           <div></div>
         </div>
       </div>
@@ -568,7 +586,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <div class="form-grid">
       <div class="field full"><label>Routine Name</label><input type="text" id="rName" placeholder="e.g. Morning Routine" inputmode="text"></div>
     </div>
-    <div id="routineItemList" style="margin-bottom:12px;border:1px solid var(--border);"></div>
+    <div id="routineItemList" style="margin-bottom:12px;border:1px solid var(--border);max-height:200px;overflow-y:auto;"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <select id="routineFoodSelect" style="flex:1;background:var(--bg3);border:1px solid var(--border);padding:8px;font-family:inherit;font-size:13px;color:var(--text);"></select>
       <input type="number" id="routineFoodQty" value="1" step="1" min="0.1" inputmode="decimal" style="width:60px;background:var(--bg3);border:1px solid var(--border);padding:8px;font-family:inherit;font-size:13px;color:var(--text);">
@@ -685,14 +703,17 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
     body.innerHTML = entries.map((e, i) =>
       '<div class="log-row">' +
         '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
-        '<div>' + (isEditable
-          ? '<input type="number" step="1" value="' + e.qty + '" data-i="' + i + '" data-date="' + dateKey + '" class="qty-input" inputmode="decimal">'
-          : e.qty) + '</div>' +
-        '<div>' + fmt(e.cal * e.qty) + '</div>' +
-        '<div>' + fmt(e.p * e.qty) + '</div>' +
-        '<div>' + fmt(e.f * e.qty) + '</div>' +
-        '<div>' + fmt(e.c * e.qty) + '</div>' +
-        '<div>$' + (e.price * e.qty).toFixed(2) + '</div>' +
+        '<div class="log-qty-wrap">' +
+          '<span class="ql">Qty</span>' +
+          (isEditable
+            ? '<input type="number" step="1" value="' + e.qty + '" data-i="' + i + '" data-date="' + dateKey + '" class="qty-input" inputmode="decimal">'
+            : '<span style="font-size:12px;color:var(--text);">' + e.qty + '</span>') +
+        '</div>' +
+        '<div class="log-macros">' + fmt(e.cal*e.qty) + 'cal · P' + fmt(e.p*e.qty) + ' F' + fmt(e.f*e.qty) + ' C' + fmt(e.c*e.qty) + '</div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-cost">$' + (e.price * e.qty).toFixed(2) + '</div>' +
         '<div>' + (isEditable ? '<button class="del-btn" data-i="' + i + '" data-date="' + dateKey + '">&times;</button>' : '') + '</div>' +
       '</div>'
     ).join('');
@@ -989,21 +1010,29 @@ function openRoutineModal(idx) {
 function renderRoutineItemList() {
   const el = document.getElementById('routineItemList');
   if (!routineItems.length) {
-    el.innerHTML = '<div style="padding:10px 12px;color:var(--muted);font-size:10px;">No items yet.</div>';
+    el.innerHTML = '<div style="padding:10px 12px;color:var(--muted);font-size:10px;">No items yet. Select a food and tap + Add.</div>';
     return;
   }
   el.innerHTML = routineItems.map((it,i) =>
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">' +
-      '<span style="font-size:12px;color:var(--text-bright);">' + escapeHtml(it.name) + '</span>' +
-      '<span style="font-size:11px;color:var(--muted);margin:0 8px;">×' + it.qty + '</span>' +
-      '<button class="btn ghost" style="padding:4px 8px;font-size:9px;" onclick="removeRoutineItem('+i+')">×</button>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px;">' +
+      '<span style="font-size:12px;color:var(--text-bright);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(it.name) + '</span>' +
+      '<span style="font-size:11px;color:var(--muted);flex-shrink:0;">×' + it.qty + '</span>' +
+      '<button class="btn ghost" data-ri="'+i+'" style="padding:4px 10px;font-size:11px;flex-shrink:0;">&times;</button>' +
     '</div>'
   ).join('');
+  // Use event delegation - no inline onclick needed
+  el.querySelectorAll('[data-ri]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      routineItems.splice(+btn.dataset.ri, 1);
+      renderRoutineItemList();
+    });
+  });
 }
 
 function addRoutineItem() {
   const name = document.getElementById('routineFoodSelect').value;
   const qty = parseFloat(document.getElementById('routineFoodQty').value) || 1;
+  if (!name) return;
   const existing = routineItems.find(it => it.name === name);
   if (existing) existing.qty = Math.round((existing.qty + qty)*10)/10;
   else routineItems.push({ name, qty });
