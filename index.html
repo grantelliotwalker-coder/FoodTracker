@@ -185,7 +185,8 @@ section { margin-bottom: 20px; }
 .lib-row:last-child { border-bottom: none; }
 .lib-row:hover, .lib-row:active { background: var(--bg3); }
 .lib-row .lib-name { font-size: 12px; color: var(--text-bright); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.lib-row .lib-macros { font-size: 9px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.lib-row .lib-macros { font-size: 9px; color: var(--muted); white-space: nowrap; flex-shrink: 0; display: none; }
+@media (min-width: 400px) { .lib-row .lib-macros { display: block; } }
 .lib-row .macro-cell { display: none; }
 .lib-row .actions { display: flex; gap: 4px; flex-shrink: 0; }
 /* Desktop: table layout */
@@ -587,11 +588,11 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
       <div class="field full"><label>Routine Name</label><input type="text" id="rName" placeholder="e.g. Morning Routine" inputmode="text"></div>
     </div>
     <div id="routineItemList" style="margin-bottom:12px;border:1px solid var(--border);max-height:200px;overflow-y:auto;"></div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <select id="routineFoodSelect" style="flex:1;background:var(--bg3);border:1px solid var(--border);padding:8px;font-family:inherit;font-size:13px;color:var(--text);"></select>
-      <input type="number" id="routineFoodQty" value="1" step="1" min="0.1" inputmode="decimal" style="width:60px;background:var(--bg3);border:1px solid var(--border);padding:8px;font-family:inherit;font-size:13px;color:var(--text);">
-      <button class="btn" onclick="addRoutineItem()">+ Add</button>
+    <div style="display:grid;grid-template-columns:1fr 60px;gap:8px;margin-bottom:8px;">
+      <select id="routineFoodSelect" style="background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:13px;color:var(--text);width:100%;"></select>
+      <input type="number" id="routineFoodQty" value="1" step="1" min="0.1" inputmode="decimal" style="background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:13px;color:var(--text);width:100%;">
     </div>
+    <button class="btn" onclick="addRoutineItem()" style="width:100%;margin-bottom:12px;">+ Add to Routine</button>
     <div class="modal-actions">
       <button class="btn ghost" id="cancelRoutine">Cancel</button>
       <button class="btn" id="saveRoutine">Save Routine</button>
@@ -908,7 +909,7 @@ function renderLibraryTable(filter) {
   body.innerHTML = filtered.map(({f,i}) =>
     '<div class="lib-row">' +
       '<div class="lib-name">' + escapeHtml(f.name) + '</div>' +
-      '<div class="lib-macros">' + Math.round(f.cal) + ' cal · P'+f.p+' F'+f.f+' C'+f.c + ' · $'+(f.price||0).toFixed(2) + '</div>' +
+      '<div class="lib-macros">' + Math.round(f.cal) + 'c P'+f.p+' F'+f.f+' C'+f.c + '</div>' +
       '<div class="macro-cell">' + Math.round(f.cal) + '</div>' +
       '<div class="macro-cell">' + f.p + '</div>' +
       '<div class="macro-cell">' + f.f + '</div>' +
