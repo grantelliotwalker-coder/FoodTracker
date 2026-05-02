@@ -1353,7 +1353,7 @@ function init() {
   library  = buildLibrary();
   log      = loadJSON(SK.LOG, {});
   targets  = loadJSON(SK.TARGETS, DEFAULT_TARGETS);
-  weights  = loadJSON(SK.WEIGHTS, { today:null, yesterday:null, goal:null });
+  weights  = Object.assign({}, DEFAULT_WEIGHTS, loadJSON(SK.WEIGHTS, {}));
   settings = loadJSON(SK.SETTINGS, { lightMode: false });
   routines = loadJSON(SK.ROUTINES, []);
 
