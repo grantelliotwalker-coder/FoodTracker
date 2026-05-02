@@ -665,6 +665,21 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- MEAL TAG PICKER -->
+<div class="modal-bg" id="mealModal">
+  <div class="modal" style="max-width:320px;text-align:center;">
+    <h3>When did you eat this?</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;" id="mealModalName"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;">Breakfast</button>
+      <button class="btn" data-meal="L" style="padding:14px;">Lunch</button>
+      <button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>
+      <button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;">Snack</button>
+    </div>
+    <button class="btn ghost" id="mealModalSkip" style="width:100%;">Skip</button>
+  </div>
+</div>
 <div id="js-error"></div>
 
 <script src="food-library.js"></script>
@@ -1048,25 +1063,28 @@ function renderQuickSelect() {
   if (prev) for (const opt of sel.options) { if (opt.dataset.name === prev) { opt.selected = true; break; } }
 }
 
-function quickAdd() {
+async function quickAdd() {
   const sel = document.getElementById('quickSelect');
   const qty = parseFloat(document.getElementById('quickQty').value) || 1;
   const idx = parseInt(sel.value);
   if (isNaN(idx) || !library[idx]) return;
-  addFoodToLog(todayKey(), library[idx], qty);
+  const food = library[idx];
+  const meal = await promptMealTag(todayKey(), food.name);
+  addFoodToLog(todayKey(), food, qty, meal);
   renderLog(); renderTotals();
-  toast('Added ' + library[idx].name);
+  toast('Added ' + food.name);
   document.getElementById('quickQty').value = 1;
 }
 
-function addFoodToLog(dateKey, food, qty) {
+function addFoodToLog(dateKey, food, qty, mealTag) {
   const entries = getLog(dateKey);
   const existing = entries.find(e => e.name === food.name);
   if (existing) {
     existing.qty = Math.round((existing.qty + qty) * 10) / 10;
     existing._updated = new Date().toISOString();
+    if (mealTag !== undefined) existing._meal = mealTag;
   } else {
-    entries.push(Object.assign({}, food, { qty, _logged: new Date().toISOString() }));
+    entries.push(Object.assign({}, food, { qty, _meal: mealTag || null, _logged: new Date().toISOString() }));
   }
   persist();
 }
@@ -1107,9 +1125,11 @@ function renderLibraryTable(filter) {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.i;
       if (btn.dataset.act === 'add') {
-        addFoodToLog(todayKey(), library[i], 1);
-        renderTotals();
-        toast('Added ' + library[i].name);
+        promptMealTag(todayKey(), library[i].name).then(meal => {
+          addFoodToLog(todayKey(), library[i], 1, meal);
+          renderTotals();
+          toast('Added ' + library[i].name);
+        });
       }
       if (btn.dataset.act === 'edit') openFoodModal(i);
       if (btn.dataset.act === 'del') {
@@ -1152,9 +1172,10 @@ function renderRoutines() {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.i;
       if (btn.dataset.act === 'log') {
+        // Log all items with their stored meal tags
         routines[i].items.forEach(it => {
           const food = library.find(f => f.name === it.name);
-          if (food) addFoodToLog(todayKey(), food, it.qty);
+          if (food) addFoodToLog(todayKey(), food, it.qty, it._meal || null);
         });
         renderTotals();
         toast('Logged: ' + routines[i].name);
@@ -1216,6 +1237,8 @@ function renderRoutineItemList() {
       '<input type="number" value="'+it.qty+'" step="1" min="0.1" data-rqty="'+i+'" ' +
         'style="width:48px;background:var(--bg3);border:1px solid var(--border);padding:6px;font-family:inherit;font-size:12px;color:var(--text);text-align:center;" ' +
         'inputmode="decimal">' +
+      // Meal tag
+      '<button class="meal-tag ' + (it._meal||'') + '" data-rmeal="'+i+'" style="padding:4px 6px;">' + (it._meal||'·') + '</button>' +
       // Delete
       '<button data-ri="'+i+'" data-del="1" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;padding:4px 8px;cursor:pointer;flex-shrink:0;">&times;</button>' +
     '</div>';
@@ -1231,6 +1254,15 @@ function renderRoutineItemList() {
       } else if (dir === 'dn' && i < routineItems.length - 1) {
         [routineItems[i], routineItems[i+1]] = [routineItems[i+1], routineItems[i]];
       }
+      renderRoutineItemList();
+    });
+  });
+
+  // Routine meal tag cycling
+  el.querySelectorAll('[data-rmeal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.rmeal;
+      routineItems[i]._meal = MEAL_CYCLE[routineItems[i]._meal || null];
       renderRoutineItemList();
     });
   });
@@ -1670,6 +1702,39 @@ function downloadReport(text) {
   toast('Report downloaded');
 }
 
+// ── MEAL PICKER ──────────────────────────────────────────
+let mealPickerQueue = []; // { dateKey, foodName, resolve }
+
+function promptMealTag(dateKey, foodName) {
+  return new Promise(resolve => {
+    mealPickerQueue.push({ dateKey, foodName, resolve });
+    if (mealPickerQueue.length === 1) showNextMealPicker();
+  });
+}
+
+function showNextMealPicker() {
+  if (!mealPickerQueue.length) return;
+  const { foodName } = mealPickerQueue[0];
+  const nameEl = document.getElementById('mealModalName');
+  if (nameEl) nameEl.textContent = foodName;
+  document.getElementById('mealModal').classList.add('open');
+}
+
+function closeMealModal() {
+  document.getElementById('mealModal').classList.remove('open');
+}
+
+function resolveMealPicker(tag) {
+  closeMealModal();
+  if (!mealPickerQueue.length) return;
+  const { resolve } = mealPickerQueue.shift();
+  resolve(tag);
+  // Show next in queue if any
+  if (mealPickerQueue.length) {
+    setTimeout(showNextMealPicker, 150);
+  }
+}
+
 function init() {
   localStorage.removeItem('ft_library_v1');
 
@@ -1775,7 +1840,16 @@ function init() {
 
   // Escape closes modals
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); }
+    if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); }
+  });
+
+  // Meal modal buttons
+  document.querySelectorAll('[data-meal]').forEach(btn => {
+    btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
+  });
+  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
+  document.getElementById('mealModal').addEventListener('click', e => {
+    if (e.target.id === 'mealModal') resolveMealPicker(null);
   });
 
   // Import file listener
