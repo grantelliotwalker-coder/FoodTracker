@@ -860,7 +860,7 @@ function renderProjection(t) {
   const tog = (id,cls,on) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, on); };
 
   // Use TDEE for projection — meaningful even at 0 food logged
-  const tdee = weights.tdee || targets.burn || 2726;
+  const tdee = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
   const bal = t.cal - tdee;
   setHTML('projBal', (bal>=0?'+':'') + Math.round(bal) + ' <span class="unit">cal</span>');
   tog('projBal','neg',bal<0); tog('projBal','pos',bal>0);
@@ -1392,7 +1392,7 @@ function init() {
   if (weights.today != null)     document.getElementById('todayWeight').value = weights.today;
   if (weights.yesterday != null) document.getElementById('yestWeight').value  = weights.yesterday;
   if (weights.goal != null)      document.getElementById('goalWeight').value   = weights.goal;
-  if (weights.tdee)              document.getElementById('tdeeInput').value    = weights.tdee;
+  if (weights.tdee != null)       document.getElementById('tdeeInput').value    = weights.tdee;
 
   document.getElementById('todayWeight').addEventListener('change', e => {
     weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null;
@@ -1405,8 +1405,10 @@ function init() {
   document.getElementById('goalWeight').addEventListener('change', e => {
     weights.goal = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
   });
-  document.getElementById('tdeeInput').addEventListener('change', e => {
-    weights.tdee = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
+  document.getElementById('tdeeInput').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    weights.tdee = !isNaN(v) ? v : null;
+    persist(); renderTotals();
   });
 
   // Library
