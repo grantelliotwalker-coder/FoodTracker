@@ -493,8 +493,8 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     </div>
     <div class="history-date-row">
       <input type="date" id="historyDate">
-      <button class="btn ghost" onclick="loadHistory()">Load</button>
-      <button class="btn ghost" onclick="goYesterday()">Yesterday</button>
+      <button class="btn ghost" id="historyToggleBtn" onclick="toggleHistory()">Show</button>
+      <button class="btn" onclick="copyHistoryToToday()" id="copyToTodayBtn" style="display:none;">Copy to Today</button>
     </div>
     <div class="history-summary" id="historySummary" style="display:none;">
       <div class="h-item"><div class="lbl">Calories</div><div class="val" id="hCal">0</div></div>
@@ -537,6 +537,11 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     </section>
     <section>
       <div class="section-head"><h2>Projection</h2></div>
+      <div class="weight-card" style="margin-bottom:12px;">
+        <div class="lbl">TDEE (cal) — Total Daily Energy Expenditure</div>
+        <input type="number" id="tdeeInput" step="10" placeholder="e.g. 2726" inputmode="numeric">
+        <div class="sub">Calories your body burns per day. Projection uses this vs food logged.</div>
+      </div>
       <div class="projection">
         <div class="proj-item"><div class="lbl">Balance</div><div class="val" id="projBal">— <span class="unit">cal</span></div></div>
         <div class="proj-item"><div class="lbl">Daily Fat Δ</div><div class="val" id="projDaily">— <span class="unit">g</span></div></div>
@@ -852,29 +857,43 @@ function renderProjection(t) {
   const setHTML = (id,v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   const setText = (id,v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   const tog = (id,cls,on) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, on); };
-  const bal = t.cal - targets.burn;
+
+  // Use TDEE for projection — meaningful even at 0 food logged
+  const tdee = weights.tdee || targets.burn || 2726;
+  const bal = t.cal - tdee;
   setHTML('projBal', (bal>=0?'+':'') + Math.round(bal) + ' <span class="unit">cal</span>');
   tog('projBal','neg',bal<0); tog('projBal','pos',bal>0);
+
   const dailyFatG = (bal * 4.184 / KJ_PER_KG_FAT) * 1000;
   const weeklyKg = (dailyFatG * 7) / 1000;
   setHTML('projDaily', (dailyFatG>=0?'+':'') + dailyFatG.toFixed(1) + ' <span class="unit">g</span>');
   tog('projDaily','neg',dailyFatG<0); tog('projDaily','pos',dailyFatG>0);
   setHTML('projWeekly', (weeklyKg>=0?'+':'') + weeklyKg.toFixed(2) + ' <span class="unit">kg</span>');
   tog('projWeekly','neg',weeklyKg<0); tog('projWeekly','pos',weeklyKg>0);
+
+  // Days to goal — always calculate if we have weight + goal + deficit
   const daysEl = document.getElementById('projDays');
   if (daysEl) {
-    if (weights.today && weights.goal && dailyFatG < 0) {
+    if (weights.today != null && weights.goal != null && weights.today <= weights.goal) {
+      daysEl.innerHTML = '&#10003; <span class="unit">at goal</span>';
+    } else if (weights.today != null && weights.goal != null && dailyFatG < 0) {
       const kgToLose = weights.today - weights.goal;
-      daysEl.innerHTML = kgToLose > 0
-        ? Math.round((kgToLose*1000)/Math.abs(dailyFatG)) + ' <span class="unit">days</span>'
-        : '✓ <span class="unit">goal</span>';
-    } else daysEl.innerHTML = '—';
+      const days = Math.round((kgToLose * 1000) / Math.abs(dailyFatG));
+      const weeks = Math.round(days / 7);
+      daysEl.innerHTML = days + ' <span class="unit">days</span> <span style="font-size:10px;color:var(--muted);">(' + weeks + 'wk)</span>';
+    } else {
+      daysEl.innerHTML = '<span style="font-size:9px;color:var(--muted);">set TDEE &amp; weights</span>';
+    }
   }
-  if (weights.today != null && weights.yesterday != null)
-    setText('dayLoss', Math.round((weights.yesterday - weights.today)*1000));
-  else setText('dayLoss','—');
+
+  // Weight loss today vs yesterday
+  if (weights.today != null && weights.yesterday != null) {
+    const lossG = Math.round((weights.yesterday - weights.today) * 1000);
+    setText('dayLoss', (lossG >= 0 ? '' : '+') + lossG);
+  } else setText('dayLoss','—');
+
   if (weights.today != null && weights.goal != null)
-    setText('toLose', (weights.today - weights.goal).toFixed(1));
+    setText('toLose', Math.max(0, weights.today - weights.goal).toFixed(1));
   else setText('toLose','—');
 }
 
@@ -1119,45 +1138,77 @@ function closeRoutineModal() {
 }
 
 // ── HISTORY ────────────────────────────────────────
+let historyVisible = false;
+
 function initHistory() {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yk = yesterday.toISOString().split('T')[0];
-  document.getElementById('historyDate').value = yk;
-  historyDate = yk;
-  loadHistory();
+  const inp = document.getElementById('historyDate');
+  if (!historyDate) {
+    inp.value = yk;
+    historyDate = yk;
+  } else {
+    inp.value = historyDate;
+  }
+  hideHistory();
+  updateHistoryMeta();
+  inp.onchange = e => {
+    historyDate = e.target.value;
+    hideHistory();
+    updateHistoryMeta();
+  };
 }
 
-function goYesterday() {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yk = yesterday.toISOString().split('T')[0];
-  document.getElementById('historyDate').value = yk;
-  historyDate = yk;
-  loadHistory();
+function updateHistoryMeta() {
+  const meta = document.getElementById('historyMeta');
+  const btn = document.getElementById('copyToTodayBtn');
+  if (!historyDate) { if (meta) meta.textContent = 'Select a date'; return; }
+  const entries = getLog(historyDate);
+  if (meta) meta.textContent = fmtDateKey(historyDate) + ' · ' + entries.length + ' item' + (entries.length===1?'':'s');
+  if (btn) btn.style.display = entries.length ? 'inline-block' : 'none';
 }
 
-function loadHistory() {
-  const dateInput = document.getElementById('historyDate').value;
-  if (!dateInput) return;
-  historyDate = dateInput;
+function toggleHistory() {
+  if (!historyDate) { historyDate = document.getElementById('historyDate').value; }
+  if (!historyDate) return;
+  historyVisible ? hideHistory() : showHistory();
+}
+
+function showHistory() {
   const entries = getLog(historyDate);
   const summary = document.getElementById('historySummary');
   const logWrap = document.getElementById('historyLogWrap');
   const empty = document.getElementById('historyEmpty');
-
+  const btn = document.getElementById('historyToggleBtn');
   if (!entries.length) {
-    summary.style.display = 'none';
-    logWrap.style.display = 'none';
-    empty.style.display = 'block';
-    return;
+    summary.style.display = 'none'; logWrap.style.display = 'none'; empty.style.display = 'block';
+  } else {
+    summary.style.display = 'grid'; logWrap.style.display = 'block'; empty.style.display = 'none';
+    renderHistorySummary();
+    renderLogFor(historyDate, 'historyBody', null, true);
   }
+  if (btn) btn.textContent = 'Hide';
+  historyVisible = true;
+}
 
-  summary.style.display = 'grid';
-  logWrap.style.display = 'block';
-  empty.style.display = 'none';
-  renderHistorySummary();
-  renderLogFor(historyDate, 'historyBody', null, true);
+function hideHistory() {
+  document.getElementById('historySummary').style.display = 'none';
+  document.getElementById('historyLogWrap').style.display = 'none';
+  document.getElementById('historyEmpty').style.display = 'none';
+  const btn = document.getElementById('historyToggleBtn');
+  if (btn) btn.textContent = 'Show';
+  historyVisible = false;
+}
+
+function copyHistoryToToday() {
+  if (!historyDate) return;
+  const entries = getLog(historyDate);
+  if (!entries.length) return;
+  if (!confirm('Add all ' + entries.length + ' items from ' + fmtDateKey(historyDate) + ' to today?')) return;
+  entries.forEach(e => addFoodToLog(todayKey(), e, e.qty));
+  persist(); renderTotals();
+  toast('Copied to today');
 }
 
 function renderHistorySummary() {
@@ -1325,18 +1376,36 @@ function init() {
     });
   });
 
+  // Weight carry-forward: new day → shift today's weight to yesterday
+  const td = todayKey();
+  if (weights.weightDate && weights.weightDate !== td && weights.today != null) {
+    weights.yesterday = weights.today;
+    weights.weightDate = td;
+    persist();
+  } else if (!weights.weightDate && weights.today != null) {
+    weights.weightDate = td;
+    persist();
+  }
+
   // Weights
   if (weights.today != null)     document.getElementById('todayWeight').value = weights.today;
   if (weights.yesterday != null) document.getElementById('yestWeight').value  = weights.yesterday;
   if (weights.goal != null)      document.getElementById('goalWeight').value   = weights.goal;
+  if (weights.tdee)              document.getElementById('tdeeInput').value    = weights.tdee;
+
   document.getElementById('todayWeight').addEventListener('change', e => {
-    weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
+    weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null;
+    weights.weightDate = todayKey();
+    persist(); renderTotals();
   });
   document.getElementById('yestWeight').addEventListener('change', e => {
     weights.yesterday = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
   });
   document.getElementById('goalWeight').addEventListener('change', e => {
     weights.goal = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
+  });
+  document.getElementById('tdeeInput').addEventListener('change', e => {
+    weights.tdee = e.target.value !== '' ? parseFloat(e.target.value) : null; persist(); renderTotals();
   });
 
   // Library
