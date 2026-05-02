@@ -264,6 +264,13 @@ section { margin-bottom: 20px; }
 .toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: var(--bg); }
 
 /* ── BUTTONS ─────────────────────────────────────────────── */
+.meal-tag { display: inline-block; font-size: 8px; font-weight: 700; letter-spacing: 0.1em; padding: 2px 5px; border: 1px solid var(--border); cursor: pointer; font-family: inherit; background: transparent; color: var(--muted); transition: all 0.15s; flex-shrink: 0; }
+.meal-tag.B { border-color: #4a9eff; color: #4a9eff; }
+.meal-tag.L { border-color: var(--green); color: var(--green); }
+.meal-tag.D { border-color: var(--amber); color: var(--amber); }
+.meal-tag.S { border-color: #cc66ff; color: #cc66ff; }
+.meal-group-header { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 8px 12px 4px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+
 button.btn { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 14px; font-family: inherit; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 button.btn:hover, button.btn:active { background: var(--green); color: var(--bg); }
 button.btn.ghost { color: var(--muted); border-color: var(--border); }
@@ -703,7 +710,12 @@ let historyDate = null, historyEditing = false;
 let routineItems = []; // temp buffer while editing routine modal
 
 // ── DATE HELPERS ───────────────────────────────────
-function todayKey() { return new Date().toISOString().split('T')[0]; }
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
 function todayDisplay() {
   return new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }).toUpperCase();
 }
@@ -813,7 +825,97 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
   if (meta) meta.textContent = entries.length + ' item' + (entries.length === 1 ? '' : 's');
 }
 
-function renderLog() { renderLogFor(todayKey(), 'logBody', 'logTotalRow', true); }
+const MEAL_ORDER = ['B','L','D','S',null];
+const MEAL_LABELS = { B:'Breakfast', L:'Lunch', D:'Dinner', S:'Snack', null:'Other' };
+const MEAL_CYCLE = { B:'L', L:'D', D:'S', S:null, null:'B' };
+
+function renderLog() {
+  const body = document.getElementById('logBody');
+  if (!body) return;
+  const entries = getTodayLog();
+
+  if (entries.length === 0) {
+    body.innerHTML = '<div class="empty-log">No entries.</div>';
+    document.getElementById('logTotalRow').style.display = 'none';
+    document.getElementById('macroMeta').textContent = '0 items';
+    return;
+  }
+
+  // Group by meal tag
+  const groups = {};
+  MEAL_ORDER.forEach(k => groups[k] = []);
+  entries.forEach((e, i) => {
+    const tag = e._meal || null;
+    if (!groups[tag]) groups[tag] = [];
+    groups[tag].push({ e, i });
+  });
+
+  let html = '';
+  MEAL_ORDER.forEach(tag => {
+    const group = groups[tag];
+    if (!group.length) return;
+    const label = MEAL_LABELS[tag] || 'Other';
+    html += '<div class="meal-group-header">' + label + '</div>';
+    group.forEach(({ e, i }) => {
+      const tagClass = e._meal || '';
+      html += '<div class="log-row">' +
+        '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
+        '<div class="log-qty-wrap">' +
+          '<span class="ql">Qty</span>' +
+          '<input type="number" step="1" value="' + e.qty + '" data-i="' + i + '" data-date="' + todayKey() + '" class="qty-input" inputmode="decimal">' +
+        '</div>' +
+        '<div class="log-macros">' + fmt(e.cal*e.qty) + 'cal · P' + fmt(e.p*e.qty) + ' F' + fmt(e.f*e.qty) + ' C' + fmt(e.c*e.qty) + '</div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-spacer"></div>' +
+        '<div class="log-cost">$' + (e.price * e.qty).toFixed(2) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:4px;">' +
+          '<button class="meal-tag ' + tagClass + '" data-meal-i="' + i + '">' + (e._meal || '·') + '</button>' +
+          '<button class="del-btn" data-i="' + i + '" data-date="' + todayKey() + '">&times;</button>' +
+        '</div>' +
+      '</div>';
+    });
+  });
+
+  body.innerHTML = html;
+  document.getElementById('logTotalRow').style.display = 'grid';
+  updateTotalRow(entries, 'logTotalRow');
+
+  const meta = document.getElementById('macroMeta');
+  if (meta) meta.textContent = entries.length + ' item' + (entries.length === 1 ? '' : 's');
+
+  // Meal tag buttons
+  body.querySelectorAll('.meal-tag').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.mealI;
+      const current = entries[i]._meal || null;
+      entries[i]._meal = MEAL_CYCLE[current];
+      persist();
+      renderLog();
+    });
+  });
+
+  // Qty inputs
+  body.querySelectorAll('.qty-input').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const i = +e.target.dataset.i;
+      const v = parseFloat(e.target.value);
+      if (!isNaN(v) && v > 0) {
+        entries[i].qty = v;
+        persist(); renderLog(); renderTotals();
+      }
+    });
+  });
+
+  // Delete buttons
+  body.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = +e.target.dataset.i;
+      entries.splice(i, 1);
+      persist(); renderLog(); renderTotals();
+    });
+  });
+}
 
 function updateTotalRow(entries, rowId) {
   const t = entrySums(entries);
@@ -960,8 +1062,12 @@ function quickAdd() {
 function addFoodToLog(dateKey, food, qty) {
   const entries = getLog(dateKey);
   const existing = entries.find(e => e.name === food.name);
-  if (existing) existing.qty = Math.round((existing.qty + qty) * 10) / 10;
-  else entries.push(Object.assign({}, food, { qty }));
+  if (existing) {
+    existing.qty = Math.round((existing.qty + qty) * 10) / 10;
+    existing._updated = new Date().toISOString();
+  } else {
+    entries.push(Object.assign({}, food, { qty, _logged: new Date().toISOString() }));
+  }
   persist();
 }
 
@@ -1094,24 +1200,71 @@ function renderRoutineItemList() {
 
   el.innerHTML = routineItems.map((it,i) => {
     const food = library.find(f => f.name === it.name);
-    const calLine = food ? '<span style="font-size:10px;color:var(--muted);margin-left:6px;">' + Math.round(food.cal * it.qty) + 'cal</span>' : '';
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px;">' +
+    const cal = food ? Math.round(food.cal * it.qty) : 0;
+    return '<div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px;">' +
+      // Reorder buttons
+      '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
+        '<button data-move="up" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▲</button>' +
+        '<button data-move="dn" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▼</button>' +
+      '</div>' +
+      // Name + cal
       '<div style="flex:1;min-width:0;">' +
         '<span style="font-size:12px;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">' + escapeHtml(it.name) + '</span>' +
-        '<span style="font-size:10px;color:var(--muted);">×' + it.qty + calLine + '</span>' +
+        '<span style="font-size:10px;color:var(--muted);" id="rcal-'+i+'">' + cal + 'cal</span>' +
       '</div>' +
-      '<button class="btn ghost" data-ri="'+i+'" style="padding:4px 10px;font-size:11px;flex-shrink:0;">&times;</button>' +
+      // Qty input
+      '<input type="number" value="'+it.qty+'" step="1" min="0.1" data-rqty="'+i+'" ' +
+        'style="width:48px;background:var(--bg3);border:1px solid var(--border);padding:6px;font-family:inherit;font-size:12px;color:var(--text);text-align:center;" ' +
+        'inputmode="decimal">' +
+      // Delete
+      '<button data-ri="'+i+'" data-del="1" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;padding:4px 8px;cursor:pointer;flex-shrink:0;">&times;</button>' +
     '</div>';
   }).join('');
 
-  el.querySelectorAll('[data-ri]').forEach(btn => {
+  // Reorder
+  el.querySelectorAll('[data-move]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.ri;
+      const dir = btn.dataset.move;
+      if (dir === 'up' && i > 0) {
+        [routineItems[i-1], routineItems[i]] = [routineItems[i], routineItems[i-1]];
+      } else if (dir === 'dn' && i < routineItems.length - 1) {
+        [routineItems[i], routineItems[i+1]] = [routineItems[i+1], routineItems[i]];
+      }
+      renderRoutineItemList();
+    });
+  });
+
+  // Qty change
+  el.querySelectorAll('[data-rqty]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.rqty;
+      const v = parseFloat(e.target.value);
+      if (!isNaN(v) && v > 0) {
+        routineItems[i].qty = v;
+        const food = library.find(f => f.name === routineItems[i].name);
+        const calEl = document.getElementById('rcal-' + i);
+        if (calEl && food) calEl.textContent = Math.round(food.cal * v) + 'cal';
+        renderRoutineSummary();
+      }
+    });
+  });
+
+  // Delete
+  el.querySelectorAll('[data-del]').forEach(btn => {
     btn.addEventListener('click', () => {
       routineItems.splice(+btn.dataset.ri, 1);
       renderRoutineItemList();
     });
   });
 
-  // Update summary
+  renderRoutineSummary();
+}
+
+function renderRoutineSummary() {
+  const sumEl = document.getElementById('routineSummary');
+  if (!sumEl) return;
+  if (!routineItems.length) { sumEl.style.display = 'none'; return; }
   let totCal = 0, totP = 0, totF = 0, totC = 0;
   routineItems.forEach(it => {
     const food = library.find(f => f.name === it.name);
@@ -1121,13 +1274,11 @@ function renderRoutineItemList() {
     totF   += food.f   * it.qty;
     totC   += food.c   * it.qty;
   });
-  if (sumEl) {
-    sumEl.style.display = 'flex';
-    document.getElementById('rSumCal').textContent = Math.round(totCal) + ' cal';
-    document.getElementById('rSumP').textContent   = 'P ' + totP.toFixed(1) + 'g';
-    document.getElementById('rSumF').textContent   = 'F ' + totF.toFixed(1) + 'g';
-    document.getElementById('rSumC').textContent   = 'C ' + totC.toFixed(1) + 'g';
-  }
+  sumEl.style.display = 'flex';
+  document.getElementById('rSumCal').textContent = Math.round(totCal) + ' cal';
+  document.getElementById('rSumP').textContent   = 'P ' + totP.toFixed(1) + 'g';
+  document.getElementById('rSumF').textContent   = 'F ' + totF.toFixed(1) + 'g';
+  document.getElementById('rSumC').textContent   = 'C ' + totC.toFixed(1) + 'g';
 }
 
 function addRoutineItem() {
@@ -1450,10 +1601,10 @@ function copyDailyReport() {
     r += 'No entries logged today.' + nl;
   } else {
     entries.forEach(e => {
-      const name = e.name.length > 22 ? e.name.slice(0, 21) + '...' : e.name;
       const cal = Math.round(e.cal * e.qty);
       const qty = e.qty !== 1 ? ' x' + e.qty : '';
-      r += name + qty + '  ' + cal + 'cal' + nl;
+      r += e.name + qty + nl;
+      r += '  -> ' + cal + 'cal' + nl;
     });
     r += nl;
   }
