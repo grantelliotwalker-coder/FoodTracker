@@ -437,7 +437,10 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <section>
       <div class="section-head">
         <h2>Today's Entries</h2>
-        <span class="meta"><button class="btn ghost" id="clearDay">Clear</button></span>
+        <span class="meta">
+          <button class="btn ghost" onclick="copyDailyReport()">&#128203; Report</button>
+          <button class="btn ghost" id="clearDay">Clear</button>
+        </span>
       </div>
       <div class="log-wrap">
         <div class="log-head">
@@ -565,6 +568,29 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
           <span class="toggle-slider"></span>
         </label>
       </div>
+    </div>
+
+    <div class="section-head" style="margin-top:16px;"><h2>Backup &amp; Restore</h2></div>
+    <div class="settings-group">
+      <div class="settings-row">
+        <div>
+          <div class="s-label">Export Backup</div>
+          <div class="s-sub">Download all data as a .json file</div>
+        </div>
+        <button class="btn" onclick="exportBackup()">Export</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="s-label">Import Backup</div>
+          <div class="s-sub">Restore from a previously exported file</div>
+        </div>
+        <button class="btn ghost" onclick="document.getElementById('importFile').click()">Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none;">
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:16px;"><h2>Danger Zone</h2></div>
+    <div class="settings-group">
       <div class="settings-row">
         <div>
           <div class="s-label">Reset Library</div>
@@ -1348,6 +1374,170 @@ function updateDerivedTargets() {
   }
 }
 
+// ── BACKUP EXPORT ────────────────────────────────────────
+function exportBackup() {
+  const BACKUP_KEYS = [
+    'ft_log_v1','ft_targets_v1','ft_weights_v1',
+    'ft_settings_v1','ft_routines_v1',
+    'ft_local_library','ft_deleted_foods','ft_edited_foods'
+  ];
+  const data = { _version: 1, _exported: new Date().toISOString() };
+  BACKUP_KEYS.forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) data[k] = JSON.parse(v);
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'food-tracker-backup-' + todayKey() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup exported');
+}
+
+// ── BACKUP IMPORT ─────────────────────────────────────────
+function importBackup(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data._version) { alert('Invalid backup file.'); return; }
+      if (!confirm('This will overwrite all current data. Continue?')) return;
+      const BACKUP_KEYS = [
+        'ft_log_v1','ft_targets_v1','ft_weights_v1',
+        'ft_settings_v1','ft_routines_v1',
+        'ft_local_library','ft_deleted_foods','ft_edited_foods'
+      ];
+      BACKUP_KEYS.forEach(k => {
+        if (data[k] !== undefined) localStorage.setItem(k, JSON.stringify(data[k]));
+      });
+      toast('Backup restored — reloading...');
+      setTimeout(() => location.reload(), 1200);
+    } catch(err) {
+      alert('Failed to read backup: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── DAILY REPORT ──────────────────────────────────────────
+function copyDailyReport() {
+  const entries = getTodayLog();
+  const t = totals();
+  const tdee = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
+  const bal = t.cal - tdee;
+  const calFromP = t.p * 4, calFromF = t.f * 9, calFromC = t.c * 4;
+  const totalMacroCal = calFromP + calFromF + calFromC;
+  const pctF = totalMacroCal > 0 ? ((calFromF / totalMacroCal) * 100).toFixed(0) : 0;
+  const pctP = totalMacroCal > 0 ? ((calFromP / totalMacroCal) * 100).toFixed(0) : 0;
+  const pctC = totalMacroCal > 0 ? ((calFromC / totalMacroCal) * 100).toFixed(0) : 0;
+
+  const pad = (s, n) => String(s).padEnd(n);
+  const line = '─'.repeat(44);
+
+  let report = '';
+  report += 'DAILY FOOD REPORT
+';
+  report += todayDisplay() + '
+';
+  report += line + '
+
+';
+
+  if (!entries.length) {
+    report += 'No entries logged today.
+';
+  } else {
+    report += pad('FOOD', 24) + pad('QTY', 5) + pad('CAL', 6) + pad('PRO', 5) + pad('FAT', 5) + 'CARB
+';
+    report += line + '
+';
+    entries.forEach(e => {
+      const name = e.name.length > 22 ? e.name.slice(0, 21) + '…' : e.name;
+      report += pad(name, 24) +
+                pad(e.qty, 5) +
+                pad(Math.round(e.cal * e.qty), 6) +
+                pad(e.p * e.qty < 10 ? (e.p * e.qty).toFixed(1) : Math.round(e.p * e.qty), 5) +
+                pad(e.f * e.qty < 10 ? (e.f * e.qty).toFixed(1) : Math.round(e.f * e.qty), 5) +
+                (e.c * e.qty < 10 ? (e.c * e.qty).toFixed(1) : Math.round(e.c * e.qty)) + '
+';
+    });
+    report += line + '
+';
+    report += pad('TOTAL (' + entries.length + ' items)', 24) +
+              pad('', 5) +
+              pad(Math.round(t.cal), 6) +
+              pad(t.p.toFixed(1), 5) +
+              pad(t.f.toFixed(1), 5) +
+              t.c.toFixed(1) + '
+
+';
+  }
+
+  report += 'MACRO SPLIT
+';
+  report += '  Fat   ' + pctF + '%  (' + t.f.toFixed(1) + 'g / target ' + targets.f + 'g)
+';
+  report += '  Protein ' + pctP + '%  (' + t.p.toFixed(1) + 'g / target ' + targets.p + 'g)
+';
+  report += '  Carbs ' + pctC + '%  (' + t.c.toFixed(1) + 'g / target ' + targets.c + 'g)
+
+';
+
+  report += 'ENERGY BALANCE
+';
+  report += '  Calories in:  ' + Math.round(t.cal) + ' cal
+';
+  report += '  TDEE:         ' + tdee + ' cal
+';
+  report += '  Balance:      ' + (bal >= 0 ? '+' : '') + Math.round(bal) + ' cal
+
+';
+
+  report += 'COST
+';
+  report += '  Today: $' + t.cost.toFixed(2) + '
+
+';
+
+  if (weights.today != null) {
+    report += 'WEIGHT
+';
+    report += '  Current: ' + weights.today + ' kg
+';
+    if (weights.goal != null) report += '  Goal:    ' + weights.goal + ' kg
+';
+  }
+
+  report += '
+' + line + '
+';
+  report += 'Generated by FOOD/TRACKER
+';
+
+  // Try clipboard, fall back to download
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(report)
+      .then(() => toast('Report copied to clipboard'))
+      .catch(() => downloadReport(report));
+  } else {
+    downloadReport(report);
+  }
+}
+
+function downloadReport(text) {
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'food-report-' + todayKey() + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Report downloaded');
+}
+
 function init() {
   localStorage.removeItem('ft_library_v1');
 
@@ -1454,6 +1644,12 @@ function init() {
   // Escape closes modals
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); }
+  });
+
+  // Import file listener
+  document.getElementById('importFile').addEventListener('change', e => {
+    importBackup(e.target.files[0]);
+    e.target.value = ''; // reset so same file can be re-imported
   });
 
   // Qty input: step=1 for arrows, allow decimals by typing
