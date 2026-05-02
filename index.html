@@ -645,6 +645,7 @@ window.onerror = function(msg, src, line) {
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
+const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', settings:'Settings' };
