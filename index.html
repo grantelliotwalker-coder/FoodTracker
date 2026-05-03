@@ -1024,12 +1024,16 @@ function renderLog() {
   }
 
   // Build ordered sections using time-aware snack slots
-  const sections = buildMealSections(entries);
+  // Tag each entry with its real index before grouping
+  const indexedEntries = entries.map((e, i) => ({ e, i }));
+  const sectionsRaw = buildMealSections(entries);
+  // Re-map section entries to include original index
   let html = '';
-  sections.forEach(section => {
+  sectionsRaw.forEach(section => {
     html += '<div class="meal-group-header">' + section.label + '</div>';
     section.entries.forEach(e => {
-      const i = entries.indexOf(e);
+      const idx = indexedEntries.find(x => x.e === e);
+      const i = idx ? idx.i : entries.indexOf(e);
       html += buildLogRow(e, i);
     });
   });
@@ -1383,12 +1387,14 @@ function renderRoutineItemList() {
   }
 
   // Build ordered sections using time-aware snack slots
+  const indexedItems = routineItems.map((it, i) => ({ it, i }));
   const sections = buildMealSections(routineItems);
   let html = '';
   sections.forEach(section => {
     html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + section.label + '</div>';
     section.entries.forEach(it => {
-      const i = routineItems.indexOf(it);
+      const found = indexedItems.find(x => x.it === it);
+      const i = found ? found.i : routineItems.indexOf(it);
       if (i === -1) return;
       const food = library.find(f => f.name === it.name);
       const cal = food ? Math.round(food.cal * it.qty) : 0;
