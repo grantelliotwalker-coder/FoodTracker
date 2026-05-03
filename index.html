@@ -1215,38 +1215,55 @@ function openRoutineModal(idx) {
 
 function renderRoutineItemList() {
   const el = document.getElementById('routineItemList');
-  const sumEl = document.getElementById('routineSummary');
 
   if (!routineItems.length) {
     el.innerHTML = '<div style="padding:10px 12px;color:var(--muted);font-size:10px;">No items yet. Select a food and tap + Add.</div>';
-    if (sumEl) sumEl.style.display = 'none';
+    renderRoutineSummary();
     return;
   }
 
-  el.innerHTML = routineItems.map((it,i) => {
-    const food = library.find(f => f.name === it.name);
-    const cal = food ? Math.round(food.cal * it.qty) : 0;
-    return '<div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px;">' +
-      // Reorder buttons
-      '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
-        '<button data-move="up" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▲</button>' +
-        '<button data-move="dn" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▼</button>' +
-      '</div>' +
-      // Name + cal
-      '<div style="flex:1;min-width:0;">' +
-        '<span style="font-size:12px;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">' + escapeHtml(it.name) + '</span>' +
-        '<span style="font-size:10px;color:var(--muted);" id="rcal-'+i+'">' + cal + 'cal</span>' +
-      '</div>' +
-      // Qty input
-      '<input type="number" value="'+it.qty+'" step="1" min="0.1" data-rqty="'+i+'" ' +
-        'style="width:48px;background:var(--bg3);border:1px solid var(--border);padding:6px;font-family:inherit;font-size:12px;color:var(--text);text-align:center;" ' +
-        'inputmode="decimal">' +
-      // Meal tag
-      '<button class="meal-tag ' + (it._meal||'') + '" data-rmeal="'+i+'" style="padding:4px 6px;">' + (it._meal||'·') + '</button>' +
-      // Delete
-      '<button data-ri="'+i+'" data-del="1" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;padding:4px 8px;cursor:pointer;flex-shrink:0;">&times;</button>' +
-    '</div>';
-  }).join('');
+  // Group by meal tag in BLDS order
+  const groups = {};
+  MEAL_ORDER.forEach(k => groups[k] = []);
+  routineItems.forEach((it, i) => {
+    const tag = it._meal || null;
+    groups[tag].push({ it, i });
+  });
+
+  let html = '';
+  MEAL_ORDER.forEach(tag => {
+    const group = groups[tag];
+    if (!group.length) return;
+    const label = MEAL_LABELS[tag] || 'Other';
+    html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + label + '</div>';
+    group.forEach(({ it, i }) => {
+      const food = library.find(f => f.name === it.name);
+      const cal = food ? Math.round(food.cal * it.qty) : 0;
+      const tagClass = it._meal || '';
+      html += '<div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px;">' +
+        // Reorder buttons
+        '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
+          '<button data-move="up" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▲</button>' +
+          '<button data-move="dn" data-ri="'+i+'" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:9px;padding:2px 5px;cursor:pointer;line-height:1;">▼</button>' +
+        '</div>' +
+        // Name + cal
+        '<div style="flex:1;min-width:0;">' +
+          '<span style="font-size:12px;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">' + escapeHtml(it.name) + '</span>' +
+          '<span style="font-size:10px;color:var(--muted);" id="rcal-'+i+'">' + cal + 'cal</span>' +
+        '</div>' +
+        // Qty input
+        '<input type="number" value="'+it.qty+'" step="1" min="0.1" data-rqty="'+i+'" ' +
+          'style="width:48px;background:var(--bg3);border:1px solid var(--border);padding:6px;font-family:inherit;font-size:12px;color:var(--text);text-align:center;" ' +
+          'inputmode="decimal">' +
+        // Meal tag
+        '<button class="meal-tag ' + tagClass + '" data-rmeal="'+i+'" style="padding:4px 6px;">' + (it._meal||'·') + '</button>' +
+        // Delete
+        '<button data-ri="'+i+'" data-del="1" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;padding:4px 8px;cursor:pointer;flex-shrink:0;">&times;</button>' +
+      '</div>';
+    });
+  });
+
+  el.innerHTML = html;
 
   // Reorder
   el.querySelectorAll('[data-move]').forEach(btn => {
@@ -1300,7 +1317,6 @@ function renderRoutineItemList() {
 
   renderRoutineSummary();
 }
-
 function renderRoutineSummary() {
   const sumEl = document.getElementById('routineSummary');
   if (!sumEl) return;
