@@ -774,7 +774,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   <div class="modal" style="max-width:320px;text-align:center;">
     <h3>When did you eat this?</h3>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;" id="mealModalName"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+    <div id="mealModalGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
       <button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;">Breakfast</button>
       <button class="btn" data-meal="L" style="padding:14px;">Lunch</button>
       <button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>
@@ -990,9 +990,9 @@ function buildMealSections(entries) {
     (SNACK_TIME_HOURS[a] || 99) - (SNACK_TIME_HOURS[b] || 99)
   );
 
-  const morningSnacks   = sortedSnackTimes.filter(t => (SNACK_TIME_HOURS[t]||99) < 12);
-  const afternoonSnacks = sortedSnackTimes.filter(t => { const h=SNACK_TIME_HOURS[t]||99; return h>=12 && h<18; });
-  const eveningSnacks   = sortedSnackTimes.filter(t => (SNACK_TIME_HOURS[t]||99) >= 18);
+  const morningSnacks   = sortedSnackTimes.filter(t => t !== 'Snack' && (SNACK_TIME_HOURS[t]||99) < 12);
+  const afternoonSnacks = sortedSnackTimes.filter(t => t !== 'Snack' && (SNACK_TIME_HOURS[t]||99) >= 12 && (SNACK_TIME_HOURS[t]||99) < 18);
+  const eveningSnacks   = sortedSnackTimes.filter(t => t !== 'Snack' && (SNACK_TIME_HOURS[t]||99) >= 18);
   const unscheduled     = sortedSnackTimes.filter(t => t === 'Snack');
 
   if (breakfast.length)    sections.push({ label:'Breakfast', entries: breakfast });
@@ -1593,7 +1593,7 @@ function copyHistoryToToday() {
   const entries = getLog(historyDate);
   if (!entries.length) return;
   if (!confirm('Add all ' + entries.length + ' items from ' + fmtDateKey(historyDate) + ' to today?')) return;
-  entries.forEach(e => addFoodToLog(todayKey(), e, e.qty));
+  entries.forEach(e => addFoodToLog(todayKey(), Object.assign({}, e), e.qty));
   persist(); renderTotals();
   toast('Copied to today');
 }
@@ -2184,27 +2184,26 @@ function resolveMealPicker(tag) {
 
 function showSnackTimePicker(item, tag) {
   const times = ['6am','8am','10am','12pm','2pm','4pm','6pm','8pm','10pm'];
-  const modal = document.getElementById('mealModal');
   const nameEl = document.getElementById('mealModalName');
   if (nameEl) nameEl.textContent = 'What time was this snack?';
-  modal.querySelector('h3').textContent = 'Snack Time';
-  const grid = modal.querySelector('div');
-  grid.style.gridTemplateColumns = 'repeat(3,1fr)';
-  grid.innerHTML = times.map(t =>
-    '<button class="btn ghost" data-snacktime="'+t+'" style="padding:10px;font-size:11px;">'+t+'</button>'
-  ).join('');
-  modal.classList.add('open');
-  grid.querySelectorAll('[data-snacktime]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      closeMealModal();
-      // Reset modal for next use
-      resetMealModal();
-      mealPickerQueue.shift();
-      item.resolve({ meal: tag, snackTime: btn.dataset.snacktime });
-      if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
+  // Replace the button grid content using a dedicated container
+  const grid = document.getElementById('mealModalGrid');
+  if (grid) {
+    grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+    grid.innerHTML = times.map(t =>
+      '<button class="btn ghost" data-snacktime="'+t+'" style="padding:10px;font-size:11px;">'+t+'</button>'
+    ).join('');
+    grid.querySelectorAll('[data-snacktime]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeMealModal();
+        resetMealModal();
+        mealPickerQueue.shift();
+        item.resolve({ meal: tag, snackTime: btn.dataset.snacktime });
+        if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
+      });
     });
-  });
-  // Skip time
+  }
+  document.getElementById('mealModal').classList.add('open');
   const skipBtn = document.getElementById('mealModalSkip');
   if (skipBtn) skipBtn.onclick = () => {
     closeMealModal();
@@ -2216,19 +2215,20 @@ function showSnackTimePicker(item, tag) {
 }
 
 function resetMealModal() {
-  const modal = document.getElementById('mealModal');
-  modal.querySelector('h3').textContent = 'When did you eat this?';
-  const grid = modal.querySelector('div');
-  grid.style.gridTemplateColumns = 'repeat(2,1fr)';
-  grid.innerHTML =
-    '<button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;">Breakfast</button>' +
-    '<button class="btn" data-meal="L" style="padding:14px;">Lunch</button>' +
-    '<button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>' +
-    '<button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;">Snack</button>';
-  grid.querySelectorAll('[data-meal]').forEach(btn => {
-    btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
-  });
-  // Re-wire skip — it's a sibling, not inside grid
+  const nameEl = document.getElementById('mealModalName');
+  if (nameEl) nameEl.textContent = '';
+  const grid = document.getElementById('mealModalGrid');
+  if (grid) {
+    grid.style.gridTemplateColumns = 'repeat(2,1fr)';
+    grid.innerHTML =
+      '<button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;">Breakfast</button>' +
+      '<button class="btn" data-meal="L" style="padding:14px;">Lunch</button>' +
+      '<button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>' +
+      '<button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;">Snack</button>';
+    grid.querySelectorAll('[data-meal]').forEach(btn => {
+      btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
+    });
+  }
   const skipBtn = document.getElementById('mealModalSkip');
   if (skipBtn) skipBtn.onclick = () => resolveMealPicker(null);
 }
