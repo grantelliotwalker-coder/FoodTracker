@@ -973,11 +973,13 @@ const SNACK_TIME_HOURS = {
 // Build ordered sections: B, morning snacks, L, afternoon snacks, D, evening snacks, Other
 function buildMealSections(entries) {
   const sections = [];
-  const breakfast = entries.filter(e => e._meal === 'B');
-  const lunch     = entries.filter(e => e._meal === 'L');
-  const dinner    = entries.filter(e => e._meal === 'D');
-  const snacks    = entries.filter(e => e._meal === 'S');
-  const other     = entries.filter(e => !e._meal);
+  // Tag each entry with its original index so renderers can use it reliably
+  const tagged = entries.map((e, _origIdx) => Object.assign({}, e, { _origIdx }));
+  const breakfast = tagged.filter(e => e._meal === 'B');
+  const lunch     = tagged.filter(e => e._meal === 'L');
+  const dinner    = tagged.filter(e => e._meal === 'D');
+  const snacks    = tagged.filter(e => e._meal === 'S');
+  const other     = tagged.filter(e => !e._meal);
 
   // Group snacks by time
   const snackGroups = {};
@@ -1023,18 +1025,13 @@ function renderLog() {
     return;
   }
 
-  // Build ordered sections using time-aware snack slots
-  // Tag each entry with its real index before grouping
-  const indexedEntries = entries.map((e, i) => ({ e, i }));
+  // Build ordered sections — entries tagged with _origIdx by buildMealSections
   const sectionsRaw = buildMealSections(entries);
-  // Re-map section entries to include original index
   let html = '';
   sectionsRaw.forEach(section => {
     html += '<div class="meal-group-header">' + section.label + '</div>';
     section.entries.forEach(e => {
-      const idx = indexedEntries.find(x => x.e === e);
-      const i = idx ? idx.i : entries.indexOf(e);
-      html += buildLogRow(e, i);
+      html += buildLogRow(e, e._origIdx);
     });
   });
   body.innerHTML = html;
@@ -1386,16 +1383,14 @@ function renderRoutineItemList() {
     return;
   }
 
-  // Build ordered sections using time-aware snack slots
-  const indexedItems = routineItems.map((it, i) => ({ it, i }));
+  // Build ordered sections — items tagged with _origIdx by buildMealSections
   const sections = buildMealSections(routineItems);
   let html = '';
   sections.forEach(section => {
     html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + section.label + '</div>';
     section.entries.forEach(it => {
-      const found = indexedItems.find(x => x.it === it);
-      const i = found ? found.i : routineItems.indexOf(it);
-      if (i === -1) return;
+      const i = it._origIdx;
+      if (i === undefined || i === -1) return;
       const food = library.find(f => f.name === it.name);
       const cal = food ? Math.round(food.cal * it.qty) : 0;
       const tagClass = it._meal || '';
