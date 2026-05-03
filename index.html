@@ -946,7 +946,7 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
 
 function buildLogRow(e, i) {
   const tagClass = e._meal || '';
-  const tagLabel = e._meal === 'S' && e._snackTime ? e._meal : (e._meal || '·');
+  const tagLabel = e._meal || '·';
   return '<div class="log-row">' +
     '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
     '<div class="log-qty-wrap">' +
@@ -1243,11 +1243,11 @@ function addFoodToLog(dateKey, food, qty, mealInfo) {
   const entries = getLog(dateKey);
   const meal = mealInfo && typeof mealInfo === 'object' ? mealInfo.meal : (mealInfo || null);
   const snackTime = mealInfo && typeof mealInfo === 'object' ? mealInfo.snackTime : null;
-  const existing = entries.find(e => e.name === food.name);
+  // Match by name AND meal tag so same food in different meals stays separate
+  const existing = entries.find(e => e.name === food.name && e._meal === meal && e._snackTime === snackTime);
   if (existing) {
     existing.qty = Math.round((existing.qty + qty) * 10) / 10;
     existing._updated = new Date().toISOString();
-    if (mealInfo !== undefined) { existing._meal = meal; if (snackTime) existing._snackTime = snackTime; }
   } else {
     entries.push(Object.assign({}, food, { qty, _meal: meal, _snackTime: snackTime || null, _logged: new Date().toISOString() }));
   }
