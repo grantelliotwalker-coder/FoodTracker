@@ -899,14 +899,18 @@ function renderLog() {
   const meta = document.getElementById('macroMeta');
   if (meta) meta.textContent = entries.length + ' item' + (entries.length === 1 ? '' : 's');
 
-  // Meal tag buttons
+  // Meal tag buttons — show picker popup
   body.querySelectorAll('.meal-tag').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.mealI;
-      const current = entries[i]._meal || null;
-      entries[i]._meal = MEAL_CYCLE[current];
-      persist();
-      renderLog();
+      const food = entries[i];
+      promptMealTag(todayKey(), food.name).then(meal => {
+        if (meal !== undefined) {
+          entries[i]._meal = meal;
+          persist();
+          renderLog();
+        }
+      });
     });
   });
 
@@ -1258,12 +1262,16 @@ function renderRoutineItemList() {
     });
   });
 
-  // Routine meal tag cycling
+  // Routine meal tag — show picker popup
   el.querySelectorAll('[data-rmeal]').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.rmeal;
-      routineItems[i]._meal = MEAL_CYCLE[routineItems[i]._meal || null];
-      renderRoutineItemList();
+      promptMealTag(null, routineItems[i].name).then(meal => {
+        if (meal !== undefined) {
+          routineItems[i]._meal = meal;
+          renderRoutineItemList();
+        }
+      });
     });
   });
 
