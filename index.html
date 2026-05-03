@@ -564,7 +564,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
           </div>
           <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;justify-content:center;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Calculated TDEE</div>
-            <div style="font-size:18px;font-weight:700;color:var(--green);" id="tdeeCalcResult">—</div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);" id="tdeeCalcResult">Enter BMR to begin</div>
           </div>
         </div>
         <input type="range" id="activitySlider" min="0" max="4" step="1" value="1"
@@ -573,7 +573,6 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
           <div style="font-size:11px;font-weight:700;color:var(--text-bright);" id="activityLabel">Lightly Active</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="activityDesc">Light exercise 1–3 days/week · ×1.375</div>
         </div>
-        <button class="btn" style="width:100%;" onclick="applyTDEE()">Apply to Projection ↓</button>
       </div>
       <div class="weight-card" style="margin-bottom:12px;">
         <div class="lbl">TDEE (cal) — or enter manually</div>
@@ -1941,21 +1940,17 @@ function updateBMRCalc() {
   const bmr = parseFloat(bmrEl ? bmrEl.value : 0);
   if (bmr > 0) {
     const tdee = Math.round(bmr * level.mult);
-    if (resultEl) resultEl.textContent = tdee + ' cal';
+    if (resultEl) { resultEl.textContent = tdee + ' cal'; resultEl.style.fontSize = '18px'; }
     weights._calcTDEE = tdee;
+    // Auto-apply to TDEE field and projection
+    weights.tdee = tdee;
+    const tdeeEl = document.getElementById('tdeeInput');
+    if (tdeeEl) tdeeEl.value = tdee;
+    persist(); renderTotals();
   } else {
-    if (resultEl) resultEl.textContent = '—';
+    if (resultEl) { resultEl.textContent = 'Enter BMR to begin'; resultEl.style.fontSize = '13px'; }
     weights._calcTDEE = null;
   }
-}
-
-function applyTDEE() {
-  if (!weights._calcTDEE) { toast('Enter your BMR first'); return; }
-  const tdeeEl = document.getElementById('tdeeInput');
-  if (tdeeEl) tdeeEl.value = weights._calcTDEE;
-  weights.tdee = weights._calcTDEE;
-  persist(); renderTotals();
-  toast('TDEE set to ' + weights._calcTDEE + ' cal');
 }
 
 function persist() {
