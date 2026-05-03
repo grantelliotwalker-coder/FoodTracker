@@ -1031,6 +1031,48 @@ function buildLogRow(e, i) {
   '</div>';
 }
 
+// Snack time to hour mapping
+const SNACK_TIME_HOURS = {
+  '6am':6,'8am':8,'10am':10,'12pm':12,'2pm':14,'4pm':16,'6pm':18,'8pm':20,'10pm':22
+};
+
+// Build ordered sections: B, morning snacks, L, afternoon snacks, D, evening snacks, Other
+function buildMealSections(entries) {
+  const sections = [];
+  const breakfast = entries.filter(e => e._meal === 'B');
+  const lunch     = entries.filter(e => e._meal === 'L');
+  const dinner    = entries.filter(e => e._meal === 'D');
+  const snacks    = entries.filter(e => e._meal === 'S');
+  const other     = entries.filter(e => !e._meal);
+
+  // Group snacks by time
+  const snackGroups = {};
+  snacks.forEach(e => {
+    const t = e._snackTime || 'Snack';
+    if (!snackGroups[t]) snackGroups[t] = [];
+    snackGroups[t].push(e);
+  });
+  const sortedSnackTimes = Object.keys(snackGroups).sort((a,b) =>
+    (SNACK_TIME_HOURS[a] || 99) - (SNACK_TIME_HOURS[b] || 99)
+  );
+
+  const morningSnacks   = sortedSnackTimes.filter(t => (SNACK_TIME_HOURS[t]||99) < 12);
+  const afternoonSnacks = sortedSnackTimes.filter(t => { const h=SNACK_TIME_HOURS[t]||99; return h>=12 && h<18; });
+  const eveningSnacks   = sortedSnackTimes.filter(t => (SNACK_TIME_HOURS[t]||99) >= 18);
+  const unscheduled     = sortedSnackTimes.filter(t => t === 'Snack');
+
+  if (breakfast.length)    sections.push({ label:'Breakfast', entries: breakfast });
+  morningSnacks.forEach(t => sections.push({ label:'Snack ' + t, entries: snackGroups[t] }));
+  unscheduled.forEach(t  => sections.push({ label:'Snack',     entries: snackGroups[t] }));
+  if (lunch.length)        sections.push({ label:'Lunch',     entries: lunch });
+  afternoonSnacks.forEach(t => sections.push({ label:'Snack ' + t, entries: snackGroups[t] }));
+  if (dinner.length)       sections.push({ label:'Dinner',    entries: dinner });
+  eveningSnacks.forEach(t => sections.push({ label:'Snack ' + t, entries: snackGroups[t] }));
+  if (other.length)        sections.push({ label:'Other',     entries: other });
+
+  return sections;
+}
+
 const MEAL_ORDER = ['B','L','D','S',null];
 const MEAL_LABELS = { B:'Breakfast', L:'Lunch', D:'Dinner', S:'Snack', null:'Other' };
 const MEAL_CYCLE = { B:'L', L:'D', D:'S', S:null, null:'B' };
@@ -2518,4 +2560,41 @@ function init() {
     if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); }
   });
 
->
+  // Meal modal buttons
+  document.querySelectorAll('[data-meal]').forEach(btn => {
+    btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
+  });
+  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
+  document.getElementById('mealModal').addEventListener('click', e => {
+    if (e.target.id === 'mealModal') resolveMealPicker(null);
+  });
+
+  // Import file listener
+  document.getElementById('importFile').addEventListener('change', e => {
+    importBackup(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // Qty input
+  document.getElementById('quickQty').addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const el = e.target;
+      const v = parseFloat(el.value) || 1;
+      el.value = e.key === 'ArrowUp' ? Math.floor(v) + 1 : Math.max(1, Math.ceil(v) - 1);
+    }
+  });
+
+  // Route
+  const hash = window.location.hash.replace('#','');
+  navigate(VALID_VIEWS.includes(hash) ? hash : 'home');
+  window.addEventListener('hashchange', () => {
+    const h = window.location.hash.replace('#','');
+    if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
