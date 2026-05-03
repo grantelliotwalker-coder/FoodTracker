@@ -1340,7 +1340,7 @@ function renderRoutines() {
         // Log all items with their stored meal tags
         routines[i].items.forEach(it => {
           const food = library.find(f => f.name === it.name);
-          if (food) addFoodToLog(todayKey(), food, it.qty, it._meal || null);
+          if (food) addFoodToLog(todayKey(), food, it.qty, { meal: it._meal || null, snackTime: it._snackTime || null });
         });
         renderTotals();
         toast('Logged: ' + routines[i].name);
