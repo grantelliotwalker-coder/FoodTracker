@@ -337,18 +337,13 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="nav-title">WEIGHT LOG</div>
         <div class="nav-desc">Track weight &amp; projection.</div>
       </button>
-      <button class="nav-card" onclick="navigate('workout')">
-        <div class="nav-num">[ 05 ]</div>
-        <div class="nav-title">WORKOUT</div>
-        <div class="nav-desc">Log exercise &amp; steps.</div>
-      </button>
       <button class="nav-card" onclick="navigate('trends')">
-        <div class="nav-num">[ 06 ]</div>
+        <div class="nav-num">[ 05 ]</div>
         <div class="nav-title">TRENDS</div>
         <div class="nav-desc">Visualise your progress.</div>
       </button>
       <button class="nav-card" onclick="navigate('settings')">
-        <div class="nav-num">[ 07 ]</div>
+        <div class="nav-num">[ 06 ]</div>
         <div class="nav-title">SETTINGS</div>
         <div class="nav-desc">Theme &amp; preferences.</div>
       </button>
@@ -598,65 +593,6 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     </section>
   </section>
 
-  <!-- ═══════════════ WORKOUT ═══════════════ -->
-  <section class="view" id="view-workout">
-    <div class="section-head">
-      <h2>Workout</h2>
-      <span class="meta" id="workoutMeta">0 cal burned</span>
-    </div>
-
-    <!-- Steps -->
-    <div class="targets-panel" style="margin-bottom:14px;">
-      <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
-        <h2>Steps</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
-        <div class="field">
-          <label>Steps today</label>
-          <input type="number" id="stepsInput" step="500" inputmode="numeric" placeholder="e.g. 10000">
-        </div>
-        <div style="padding:10px;background:var(--bg3);border:1px solid var(--border);">
-          <div style="font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Estimated burn</div>
-          <div style="font-size:18px;font-weight:700;color:var(--green);" id="stepsCal">0 <span style="font-size:10px;color:var(--muted);">cal</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Workout log -->
-    <div class="section-head">
-      <h2>Activities</h2>
-      <span class="meta"><button class="btn ghost" id="clearWorkout">Clear</button></span>
-    </div>
-    <div class="quick-add" style="margin-bottom:12px;">
-      <div class="quick-add-row">
-        <div>
-          <span class="field-lbl">Activity</span>
-          <select id="workoutSelect"></select>
-        </div>
-        <div>
-          <span class="field-lbl">Cal</span>
-          <input type="number" id="workoutCal" value="" step="10" min="0" inputmode="numeric" style="width:70px;">
-        </div>
-        <button class="btn" id="workoutAddBtn" style="align-self:end;">+ ADD</button>
-      </div>
-    </div>
-    <div class="log-wrap" style="margin-bottom:14px;">
-      <div id="workoutBody"><div class="empty-log">No activities logged.</div></div>
-      <div id="workoutTotal" style="display:none;background:var(--bg3);border-top:1px solid var(--green);padding:10px 12px;display:flex;gap:16px;align-items:center;">
-        <span style="font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;">Total Burn</span>
-        <span style="font-size:18px;font-weight:700;color:var(--green);" id="workoutTotalCal">0</span>
-        <span style="font-size:10px;color:var(--muted);">cal</span>
-      </div>
-    </div>
-
-    <!-- Workout library -->
-    <div class="section-head">
-      <h2>Workout Library</h2>
-      <span class="meta"><button class="btn" id="addWorkoutPresetBtn">+ New Preset</button></span>
-    </div>
-    <div class="lib-grid" id="workoutLibraryBody"></div>
-  </section>
-
   <!-- ═══════════════ TRENDS ═══════════════ -->
   <section class="view" id="view-trends">
     <div class="section-head">
@@ -863,8 +799,8 @@ const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', 
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
 const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1 };
 const KJ_PER_KG_FAT = 37000;
-const VALID_VIEWS = ['home','tracker','library','history','weight','workout','trends','settings'];
-const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', workout:'Workout', trends:'Trends', settings:'Settings' };
+const VALID_VIEWS = ['home','tracker','library','history','weight','trends','settings'];
+const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', settings:'Settings' };
 
 function loadJSON(key, fallback) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
@@ -925,7 +861,6 @@ function navigate(view) {
     case 'library':  renderRoutines(); renderLibraryTable(document.getElementById('librarySearch').value); break;
     case 'history':  initHistory(); break;
     case 'weight':   renderTotals(); break;
-    case 'workout':  renderWorkout(); break;
     case 'trends':   renderTrends(); break;
     case 'settings': renderSettings(); break;
   }
@@ -1224,7 +1159,7 @@ function renderProjection(t) {
 
   // Use TDEE for projection — meaningful even at 0 food logged
   const tdee = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
-  const bal = t.cal - (tdee + workoutCal);
+  const bal = t.cal - tdee;
   // Live formula
   const fEl = document.getElementById('projFormula');
   if (fEl) {
@@ -1757,145 +1692,6 @@ function clearAllData() {
 }
 
 // ── PERSIST ────────────────────────────────────────
-// ── WORKOUT ──────────────────────────────────────────────
-const SK_WORKOUT = 'ft_workout_v1';
-const DEFAULT_WORKOUT_LIBRARY = [
-  { name:'Run 5km', cal:400 },
-  { name:'Gym session', cal:350 },
-  { name:'Cycle 30min', cal:300 },
-  { name:'Walk 30min', cal:150 },
-  { name:'Swim 30min', cal:280 },
-];
-let workoutLog = [];   // [{ name, cal }]
-let workoutLibrary = [];
-let workoutDate = null;
-let stepsToday = 0;
-
-function loadWorkout() {
-  const saved = loadJSON(SK_WORKOUT, {});
-  const today = todayKey();
-  if (saved.date === today) {
-    workoutLog = saved.log || [];
-    stepsToday = saved.steps || 0;
-  } else {
-    workoutLog = [];
-    stepsToday = 0;
-  }
-  workoutLibrary = loadJSON('ft_workout_library', DEFAULT_WORKOUT_LIBRARY);
-  workoutDate = today;
-}
-
-function saveWorkout() {
-  saveJSON(SK_WORKOUT, { date: todayKey(), log: workoutLog, steps: stepsToday });
-  saveJSON('ft_workout_library', workoutLibrary);
-}
-
-function workoutTotalCal() {
-  const activityCal = workoutLog.reduce((s,w) => s + w.cal, 0);
-  const stepsCal = Math.round(stepsToday * 0.04);
-  return activityCal + stepsCal;
-}
-
-function renderWorkout() {
-  renderWorkoutSelect();
-  renderWorkoutBody();
-  renderWorkoutLibrary();
-  const stepsEl = document.getElementById('stepsInput');
-  if (stepsEl) stepsEl.value = stepsToday || '';
-  updateStepsCal();
-  updateWorkoutMeta();
-}
-
-function renderWorkoutSelect() {
-  const sel = document.getElementById('workoutSelect');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">Custom...</option>' +
-    workoutLibrary.map((w,i) => '<option value="'+i+'">'+escapeHtml(w.name)+' — '+w.cal+'cal</option>').join('');
-  sel.addEventListener('change', () => {
-    const i = parseInt(sel.value);
-    if (!isNaN(i) && workoutLibrary[i]) {
-      document.getElementById('workoutCal').value = workoutLibrary[i].cal;
-    }
-  });
-}
-
-function renderWorkoutBody() {
-  const body = document.getElementById('workoutBody');
-  const totalEl = document.getElementById('workoutTotal');
-  if (!body) return;
-  if (!workoutLog.length) {
-    body.innerHTML = '<div class="empty-log">No activities logged.</div>';
-    if (totalEl) totalEl.style.display = 'none';
-    updateWorkoutMeta();
-    return;
-  }
-  body.innerHTML = workoutLog.map((w,i) =>
-    '<div class="log-row">' +
-      '<div class="name">' + escapeHtml(w.name) + '</div>' +
-      '<div class="log-macros">' + w.cal + ' cal</div>' +
-      '<div class="log-spacer"></div><div class="log-spacer"></div><div class="log-spacer"></div><div class="log-spacer"></div>' +
-      '<div><button class="del-btn" data-wi="'+i+'">&times;</button></div>' +
-    '</div>'
-  ).join('');
-  if (totalEl) {
-    totalEl.style.display = 'flex';
-    const tc = document.getElementById('workoutTotalCal');
-    if (tc) tc.textContent = workoutTotalCal();
-  }
-  body.querySelectorAll('[data-wi]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      workoutLog.splice(+btn.dataset.wi, 1);
-      saveWorkout(); renderWorkoutBody(); updateWorkoutMeta(); renderTotals();
-    });
-  });
-  updateWorkoutMeta();
-}
-
-function renderWorkoutLibrary() {
-  const body = document.getElementById('workoutLibraryBody');
-  if (!body) return;
-  if (!workoutLibrary.length) {
-    body.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:10px;">No presets yet.</div>';
-    return;
-  }
-  body.innerHTML = workoutLibrary.map((w,i) =>
-    '<div class="lib-row">' +
-      '<div class="lib-info">' +
-        '<span class="lib-name">' + escapeHtml(w.name) + '</span>' +
-        '<span class="lib-macros">' + w.cal + ' cal</span>' +
-      '</div>' +
-      '<div class="actions">' +
-        '<button class="add-btn" data-wadd="'+i+'">+ ADD</button>' +
-        '<button data-wdel="'+i+'">DEL</button>' +
-      '</div>' +
-    '</div>'
-  ).join('');
-  body.querySelectorAll('[data-wadd]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const w = workoutLibrary[+btn.dataset.wadd];
-      workoutLog.push({ name: w.name, cal: w.cal });
-      saveWorkout(); renderWorkoutBody(); renderTotals(); toast('Added ' + w.name);
-    });
-  });
-  body.querySelectorAll('[data-wdel]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (confirm('Delete preset?')) {
-        workoutLibrary.splice(+btn.dataset.wdel, 1);
-        saveWorkout(); renderWorkoutLibrary(); renderWorkoutSelect();
-      }
-    });
-  });
-}
-
-function updateStepsCal() {
-  const el = document.getElementById('stepsCal');
-  if (el) el.innerHTML = Math.round(stepsToday * 0.04) + ' <span style="font-size:10px;color:var(--muted);">cal</span>';
-}
-
-function updateWorkoutMeta() {
-  const el = document.getElementById('workoutMeta');
-  if (el) el.textContent = workoutTotalCal() + ' cal burned';
-}
 
 // ── INFO MODAL ───────────────────────────────────────────
 function openInfoModal() { document.getElementById('infoModal').classList.add('open'); }
