@@ -97,7 +97,7 @@ section { margin-bottom: 20px; }
 .dial .value .unit { font-size: 10px; color: var(--muted); font-weight: 300; margin-left: 2px; }
 .dial .target { font-size: 9px; color: var(--muted); margin-top: 4px; }
 .bar { height: 2px; background: var(--border); margin-top: 10px; }
-.bar .fill { height: 100%; background: var(--green); transition: width 0.4s; }
+.bar .fill { height: 100%; background: #39d353; transition: width 0.4s; }
 .dial.over .value { color: var(--amber); }
 .dial.over-red .value { color: var(--red); }
 
@@ -105,7 +105,7 @@ section { margin-bottom: 20px; }
 .ratio-ribbon { display: flex; border: 1px solid var(--border); height: 24px; margin-bottom: 6px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; overflow: hidden; }
 .ratio-ribbon > div { display: flex; align-items: center; justify-content: center; color: var(--bg); transition: flex 0.4s ease; white-space: nowrap; overflow: hidden; padding: 0 4px; }
 .ratio-fat { background: var(--text-bright); }
-.ratio-pro { background: var(--green); }
+.ratio-pro { background: #39d353; }
 .ratio-carb { background: var(--amber); }
 .ratio-targets { font-size: 9px; color: var(--muted); letter-spacing: 0.04em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
 
@@ -557,10 +557,33 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     </section>
     <section>
       <div class="section-head"><h2>Projection</h2></div>
+      <!-- BMR Calculator -->
+      <div class="targets-panel" style="margin-bottom:12px;">
+        <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
+          <h2>TDEE Calculator</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div class="field">
+            <label>BMR (cal)</label>
+            <input type="number" id="bmrInput" step="10" placeholder="e.g. 1800" inputmode="numeric">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Calculated TDEE</div>
+            <div style="font-size:18px;font-weight:700;color:var(--green);" id="tdeeCalcResult">—</div>
+          </div>
+        </div>
+        <input type="range" id="activitySlider" min="0" max="4" step="1" value="1"
+          style="width:100%;accent-color:var(--green);cursor:pointer;margin-bottom:8px;">
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text-bright);" id="activityLabel">Lightly Active</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="activityDesc">Light exercise 1–3 days/week · ×1.375</div>
+        </div>
+        <button class="btn" style="width:100%;" onclick="applyTDEE()">Apply to Projection ↓</button>
+      </div>
       <div class="weight-card" style="margin-bottom:12px;">
-        <div class="lbl">TDEE (cal) — Total Daily Energy Expenditure</div>
+        <div class="lbl">TDEE (cal) — or enter manually</div>
         <input type="number" id="tdeeInput" step="10" placeholder="e.g. 2726" inputmode="numeric">
-        <div class="sub">Calories your body burns per day. Projection uses this vs food logged.</div>
+        <div class="sub">Calories eaten - TDEE = calorie balance</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted);font-family:inherit;">
         <div style="font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Live Calculation</div>
@@ -838,7 +861,7 @@ window.onerror = function(msg, src, line) {
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
-const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null };
+const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1 };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','workout','trends','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', workout:'Workout', trends:'Trends', settings:'Settings' };
@@ -1024,42 +1047,16 @@ function renderLog() {
     return;
   }
 
-  // Group by meal tag
-  const groups = {};
-  MEAL_ORDER.forEach(k => groups[k] = []);
-  entries.forEach((e, i) => {
-    const tag = e._meal || null;
-    if (!groups[tag]) groups[tag] = [];
-    groups[tag].push({ e, i });
-  });
-
+  // Build ordered sections using time-aware snack slots
+  const sections = buildMealSections(entries);
   let html = '';
-  MEAL_ORDER.forEach(tag => {
-    const group = groups[tag];
-    if (!group.length) return;
-    const label = MEAL_LABELS[tag] || 'Other';
-    // For snacks, sub-group by time
-    if (tag === 'S') {
-      const timeGroups = {};
-      group.forEach(g => {
-        const t = g.e._snackTime || 'Snack';
-        if (!timeGroups[t]) timeGroups[t] = [];
-        timeGroups[t].push(g);
-      });
-      Object.keys(timeGroups).sort().forEach(t => {
-        const tlabel = t === 'Snack' ? 'Snack' : 'Snack ' + t;
-        html += '<div class="meal-group-header">' + tlabel + '</div>';
-        timeGroups[t].forEach(({ e, i }) => { html += buildLogRow(e, i); });
-      });
-      return;
-    }
-    html += '<div class="meal-group-header">' + label + '</div>';
-    group.forEach(({ e, i }) => {
-      const tagClass = e._meal || '';
+  sections.forEach(section => {
+    html += '<div class="meal-group-header">' + section.label + '</div>';
+    section.entries.forEach(e => {
+      const i = entries.indexOf(e);
       html += buildLogRow(e, i);
     });
   });
-
   body.innerHTML = html;
   document.getElementById('logTotalRow').style.display = 'grid';
   updateTotalRow(entries, 'logTotalRow');
@@ -1155,7 +1152,7 @@ function renderTotals() {
       ribbon.innerHTML = '<div class="ratio-fat" style="flex:1">—</div><div class="ratio-pro" style="flex:1">—</div><div class="ratio-carb" style="flex:1">—</div>';
     }
   }
-  renderProjection(t, workoutTotalCal());
+  renderProjection(t);
   renderGlance();
 }
 
@@ -1169,19 +1166,16 @@ function setBar(barId, dialId, val, tgt) {
   bar.style.background = '';
   if (pct > 120) {
     dial.classList.add('over-red');
-    bar.style.background = 'var(--red)';
+    bar.style.background = '#ff4444';
   } else if (pct > 100) {
     dial.classList.add('over');
-    bar.style.background = 'var(--amber)';
-  } else if (pct >= 85) {
-    bar.style.background = 'var(--green)';
+    bar.style.background = '#f0a500';
   } else {
-    bar.style.background = 'var(--green)';
+    bar.style.background = '#39d353';
   }
 }
 
-function renderProjection(t, workoutCal) {
-  workoutCal = workoutCal || 0;
+function renderProjection(t) {
   const setHTML = (id,v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   const setText = (id,v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   const tog = (id,cls,on) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, on); };
@@ -1193,10 +1187,9 @@ function renderProjection(t, workoutCal) {
   const fEl = document.getElementById('projFormula');
   if (fEl) {
     const eaten = Math.round(t.cal);
-    const wPart = workoutCal > 0 ? ' + ' + workoutCal : '';
     const result = Math.round(bal);
     const color = bal < 0 ? 'var(--green)' : 'var(--red)';
-    fEl.innerHTML = '<span style="color:var(--text-bright);">' + eaten + '</span> - (' + tdee + wPart + ') = <strong style="color:' + color + ';">' + (result >= 0 ? '+' : '') + result + '</strong>';
+    fEl.innerHTML = '<span style="color:var(--text-bright);">' + eaten + '</span> - ' + tdee + ' = <strong style="color:' + color + ';">' + (result >= 0 ? '+' : '') + result + '</strong>';
   }
   setHTML('projBal', (bal>=0?'+':'') + Math.round(bal) + ' <span class="unit">cal</span>');
   tog('projBal','neg',bal<0); tog('projBal','pos',bal>0);
@@ -1413,21 +1406,14 @@ function renderRoutineItemList() {
     return;
   }
 
-  // Group by meal tag in BLDS order
-  const groups = {};
-  MEAL_ORDER.forEach(k => groups[k] = []);
-  routineItems.forEach((it, i) => {
-    const tag = it._meal || null;
-    groups[tag].push({ it, i });
-  });
-
+  // Build ordered sections using time-aware snack slots
+  const sections = buildMealSections(routineItems);
   let html = '';
-  MEAL_ORDER.forEach(tag => {
-    const group = groups[tag];
-    if (!group.length) return;
-    const label = MEAL_LABELS[tag] || 'Other';
-    html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + label + '</div>';
-    group.forEach(({ it, i }) => {
+  sections.forEach(section => {
+    html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + section.label + '</div>';
+    section.entries.forEach(it => {
+      const i = routineItems.indexOf(it);
+      if (i === -1) return;
       const food = library.find(f => f.name === it.name);
       const cal = food ? Math.round(food.cal * it.qty) : 0;
       const tagClass = it._meal || '';
@@ -2077,6 +2063,63 @@ function drawTrendChart() {
   }
 }
 
+// ── BMR / ACTIVITY CALCULATOR ────────────────────────────
+const ACTIVITY_LEVELS = [
+  { label:'Sedentary',         desc:'Desk job, little or no exercise · ×1.2',   mult:1.2   },
+  { label:'Lightly Active',    desc:'Light exercise 1–3 days/week · ×1.375',    mult:1.375 },
+  { label:'Moderately Active', desc:'Moderate exercise 3–5 days/week · ×1.55',  mult:1.55  },
+  { label:'Very Active',       desc:'Hard exercise 6–7 days/week · ×1.725',     mult:1.725 },
+  { label:'Extremely Active',  desc:'Physical job + daily training · ×1.9',     mult:1.9   },
+];
+
+function initBMRCalc() {
+  const bmrEl = document.getElementById('bmrInput');
+  const slEl  = document.getElementById('activitySlider');
+  if (!bmrEl || !slEl) return;
+  if (weights.bmr)              bmrEl.value = weights.bmr;
+  if (weights.activityLevel != null) slEl.value = weights.activityLevel;
+  updateBMRCalc();
+  bmrEl.addEventListener('input', () => {
+    weights.bmr = parseFloat(bmrEl.value) || null;
+    persist(); updateBMRCalc();
+  });
+  slEl.addEventListener('input', () => {
+    weights.activityLevel = +slEl.value;
+    persist(); updateBMRCalc();
+  });
+}
+
+function updateBMRCalc() {
+  const bmrEl    = document.getElementById('bmrInput');
+  const slEl     = document.getElementById('activitySlider');
+  const resultEl = document.getElementById('tdeeCalcResult');
+  const labelEl  = document.getElementById('activityLabel');
+  const descEl   = document.getElementById('activityDesc');
+  if (!slEl) return;
+  const idx = +slEl.value;
+  const level = ACTIVITY_LEVELS[idx];
+  if (labelEl) labelEl.textContent = level.label;
+  if (descEl)  descEl.textContent  = level.desc;
+  const bmr = parseFloat(bmrEl ? bmrEl.value : 0);
+  if (bmr > 0) {
+    const tdee = Math.round(bmr * level.mult);
+    if (resultEl) resultEl.textContent = tdee + ' cal';
+    weights._calcTDEE = tdee;
+  } else {
+    if (resultEl) resultEl.textContent = '—';
+    weights._calcTDEE = null;
+  }
+}
+
+function applyTDEE() {
+  if (!weights._calcTDEE) { toast('Enter your BMR first'); return; }
+  const tdeeEl = document.getElementById('tdeeInput');
+  if (tdeeEl) tdeeEl.value = weights._calcTDEE;
+  weights.tdee = weights._calcTDEE;
+  persist(); renderTotals();
+  toast('TDEE set to ' + weights._calcTDEE + ' cal');
+}
+
 function persist() {
   const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
   const currentNames = new Set(library.map(f => f.name));
@@ -2185,8 +2228,7 @@ function copyDailyReport() {
   const entries = getTodayLog();
   const t = totals();
   const tdee = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
-  const wCal = workoutTotalCal();
-  const bal = t.cal - (tdee + wCal);
+  const bal = t.cal - tdee;
   const dailyFatG = (bal * 4.184 / KJ_PER_KG_FAT) * 1000;
   const weeklyKg = (dailyFatG * 7) / 1000;
   const calFromP = t.p * 4, calFromF = t.f * 9, calFromC = t.c * 4;
@@ -2196,79 +2238,38 @@ function copyDailyReport() {
   const pctC = totalMacroCal > 0 ? ((calFromC / totalMacroCal) * 100).toFixed(0) : 0;
   const nl = '\n';
   const div = '----------------------------' + nl;
-
   const d = new Date();
-  const shortDate = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }).toUpperCase();
+  const shortDate = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
-  let r = '';
-  r += 'DAILY FOOD REPORT — ' + shortDate + nl;
-  r += div + nl;
+  let r = 'DAILY FOOD REPORT — ' + shortDate + nl + div + nl;
 
   if (!entries.length) {
     r += 'No entries logged today.' + nl + nl;
   } else {
-    // Group by meal
-    const groups = {};
-    MEAL_ORDER.forEach(k => groups[String(k)] = []);
-    entries.forEach(e => {
-      const tag = e._meal || 'null';
-      if (!groups[tag]) groups[tag] = [];
-      groups[tag].push(e);
-    });
-
-    MEAL_ORDER.forEach(tag => {
-      const key = String(tag);
-      const group = groups[key];
-      if (!group || !group.length) return;
-
-      if (tag === 'S') {
-        // Sub-group snacks by time
-        const timeGroups = {};
-        group.forEach(e => {
-          const t = e._snackTime || 'Snack';
-          if (!timeGroups[t]) timeGroups[t] = [];
-          timeGroups[t].push(e);
-        });
-        Object.keys(timeGroups).sort().forEach(time => {
-          const label = time === 'Snack' ? 'Snack' : 'Snack ' + time;
-          r += label + nl;
-          let gCal = 0, gP = 0, gF = 0, gC = 0;
-          timeGroups[time].forEach(e => {
-            r += '-' + e.name + (e.qty !== 1 ? ' x' + e.qty : '') + nl;
-            r += '  -> ' + Math.round(e.cal * e.qty) + 'cal' + nl;
-            gCal += e.cal * e.qty; gP += e.p * e.qty;
-            gF += e.f * e.qty; gC += e.c * e.qty;
-          });
-          r += '  ' + Math.round(gCal) + 'cal | P' + gP.toFixed(1) + ' F' + gF.toFixed(1) + ' C' + gC.toFixed(1) + nl + nl;
-        });
-        return;
-      }
-
-      const label = MEAL_LABELS[tag] || 'Other';
-      r += label + nl;
-      let gCal = 0, gP = 0, gF = 0, gC = 0;
-      group.forEach(e => {
-        r += '-' + e.name + (e.qty !== 1 ? ' x' + e.qty : '') + nl;
-        r += '  -> ' + Math.round(e.cal * e.qty) + 'cal' + nl;
-        gCal += e.cal * e.qty; gP += e.p * e.qty;
-        gF += e.f * e.qty; gC += e.c * e.qty;
+    const sections = buildMealSections(entries);
+    sections.forEach(section => {
+      r += section.label + nl;
+      let gCal=0,gP=0,gF=0,gC=0;
+      section.entries.forEach(e => {
+        r += '-' + e.name + (e.qty!==1?' x'+e.qty:'') + nl;
+        r += '  -> ' + Math.round(e.cal*e.qty) + 'cal' + nl;
+        gCal+=e.cal*e.qty; gP+=e.p*e.qty; gF+=e.f*e.qty; gC+=e.c*e.qty;
       });
-      r += '  ' + Math.round(gCal) + 'cal | P' + gP.toFixed(1) + ' F' + gF.toFixed(1) + ' C' + gC.toFixed(1) + nl + nl;
+      r += div;
+      r += '  '+Math.round(gCal)+'cal | P'+gP.toFixed(1)+' F'+gF.toFixed(1)+' C'+gC.toFixed(1)+nl;
+      r += div + nl;
     });
   }
 
-  r += div;
   r += 'TOTALS (' + entries.length + ' items)' + nl;
   r += 'Calories: ' + Math.round(t.cal) + nl;
-  r += 'Protein:  ' + t.p.toFixed(1) + 'g  |  Fat: ' + t.f.toFixed(1) + 'g  |  Carbs: ' + t.c.toFixed(1) + 'g' + nl;
+  r += 'Protein: ' + t.p.toFixed(1) + 'g  |  Fat: ' + t.f.toFixed(1) + 'g  |  Carbs: ' + t.c.toFixed(1) + 'g' + nl;
   r += 'Split: Fat ' + pctF + '% / Pro ' + pctP + '% / Carb ' + pctC + '%' + nl + nl;
 
   r += div;
   r += 'ENERGY BALANCE' + nl;
-  r += 'Eaten: ' + Math.round(t.cal) + 'cal' + nl;
-  r += 'TDEE: ' + tdee + 'cal' + (wCal > 0 ? '  |  Workout: +' + wCal + 'cal' : '') + nl;
-  r += 'Balance: ' + (bal >= 0 ? '+' : '') + Math.round(bal) + 'cal' + nl;
-  r += '  = ' + Math.round(t.cal) + ' - (' + tdee + (wCal > 0 ? ' + ' + wCal : '') + ')' + nl;
+  r += 'Eaten: ' + Math.round(t.cal) + 'cal  |  TDEE: ' + tdee + 'cal' + nl;
+  r += 'Balance: ' + (bal>=0?'+':'') + Math.round(bal) + 'cal  ('+Math.round(t.cal)+' - '+tdee+')' + nl;
   if (dailyFatG < 0) {
     r += 'Est. daily fat loss: ' + Math.abs(dailyFatG).toFixed(1) + 'g' + nl;
     r += 'Est. weekly loss: ' + Math.abs(weeklyKg).toFixed(2) + 'kg' + nl;
@@ -2280,34 +2281,25 @@ function copyDailyReport() {
   if (weights.today != null) {
     r += 'Current: ' + weights.today + 'kg' + nl;
     if (weights.yesterday != null) {
-      const lossG = Math.round((weights.yesterday - weights.today) * 1000);
+      const lossG = Math.round((weights.yesterday - weights.today)*1000);
       r += 'Yesterday: ' + weights.yesterday + 'kg  |  Lost today: ' + lossG + 'g' + nl;
     }
     if (weights.goal != null) {
       const remaining = Math.max(0, weights.today - weights.goal).toFixed(1);
       r += 'Goal: ' + weights.goal + 'kg  |  Remaining: ' + remaining + 'kg' + nl;
       if (dailyFatG < 0 && weights.today > weights.goal) {
-        const days = Math.round(((weights.today - weights.goal) * 1000) / Math.abs(dailyFatG));
+        const days = Math.round(((weights.today-weights.goal)*1000)/Math.abs(dailyFatG));
         r += 'Est. to goal: ' + days + ' days (' + Math.round(days/7) + ' wk)' + nl;
       }
     }
-  } else {
-    r += 'No weight logged.' + nl;
-  }
-  r += nl;
-
-  r += div;
+  } else { r += 'No weight logged.' + nl; }
+  r += nl + div;
   r += 'Daily Food Cost: $' + t.cost.toFixed(2) + nl;
-  r += div;
-  r += '— FOOD/TRACKER' + nl;
+  r += div + '— FOOD/TRACKER' + nl;
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(r)
-      .then(() => toast('Report copied to clipboard'))
-      .catch(() => downloadReport(r));
-  } else {
-    downloadReport(r);
-  }
+    navigator.clipboard.writeText(r).then(() => toast('Report copied to clipboard')).catch(() => downloadReport(r));
+  } else { downloadReport(r); }
 }
 
 function downloadReport(text) {
@@ -2380,7 +2372,8 @@ function showSnackTimePicker(item, tag) {
     });
   });
   // Skip time
-  document.getElementById('mealModalSkip').onclick = () => {
+  const skipBtn = document.getElementById('mealModalSkip');
+  if (skipBtn) skipBtn.onclick = () => {
     closeMealModal();
     resetMealModal();
     mealPickerQueue.shift();
@@ -2399,11 +2392,12 @@ function resetMealModal() {
     '<button class="btn" data-meal="L" style="padding:14px;">Lunch</button>' +
     '<button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>' +
     '<button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;">Snack</button>';
-  // Re-wire meal buttons
   grid.querySelectorAll('[data-meal]').forEach(btn => {
     btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
   });
-  document.getElementById('mealModalSkip').onclick = () => resolveMealPicker(null);
+  // Re-wire skip — it's a sibling, not inside grid
+  const skipBtn = document.getElementById('mealModalSkip');
+  if (skipBtn) skipBtn.onclick = () => resolveMealPicker(null);
 }
 
 function init() {
@@ -2411,7 +2405,6 @@ function init() {
 
   library  = buildLibrary();
   log      = loadJSON(SK.LOG, {});
-  loadWorkout();
   targets  = loadJSON(SK.TARGETS, DEFAULT_TARGETS);
   weights  = Object.assign({}, DEFAULT_WEIGHTS, loadJSON(SK.WEIGHTS, {}));
   settings = loadJSON(SK.SETTINGS, { lightMode: false });
@@ -2448,6 +2441,7 @@ function init() {
   }
 
   // Weights
+  initBMRCalc();
   if (weights.today != null)     document.getElementById('todayWeight').value = weights.today;
   if (weights.yesterday != null) document.getElementById('yestWeight').value  = weights.yesterday;
   if (weights.goal != null)      document.getElementById('goalWeight').value   = weights.goal;
@@ -2524,77 +2518,4 @@ function init() {
     if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); }
   });
 
-  // Workout
-  loadWorkout();
-  document.getElementById('workoutAddBtn').addEventListener('click', () => {
-    const sel = document.getElementById('workoutSelect');
-    const calVal = parseFloat(document.getElementById('workoutCal').value);
-    if (isNaN(calVal) || calVal <= 0) { toast('Enter calories'); return; }
-    const name = sel.value !== '' && workoutLibrary[+sel.value]
-      ? workoutLibrary[+sel.value].name
-      : (document.getElementById('workoutCal').value + ' cal activity');
-    // Ask to save as preset
-    workoutLog.push({ name, cal: Math.round(calVal) });
-    saveWorkout(); renderWorkoutBody(); renderTotals(); toast('Logged ' + name);
-    document.getElementById('workoutCal').value = '';
-  });
-  document.getElementById('stepsInput').addEventListener('input', e => {
-    stepsToday = parseInt(e.target.value) || 0;
-    updateStepsCal(); saveWorkout(); renderTotals();
-  });
-  document.getElementById('clearWorkout').addEventListener('click', () => {
-    if (!workoutLog.length && !stepsToday) return;
-    if (confirm('Clear all workout data for today?')) {
-      workoutLog = []; stepsToday = 0;
-      document.getElementById('stepsInput').value = '';
-      saveWorkout(); renderWorkoutBody(); updateStepsCal(); renderTotals(); toast('Workout cleared');
-    }
-  });
-  document.getElementById('addWorkoutPresetBtn').addEventListener('click', () => {
-    const name = prompt('Preset name (e.g. Run 5km):');
-    if (!name) return;
-    const cal = parseInt(prompt('Calories burned:'));
-    if (isNaN(cal) || cal <= 0) return;
-    workoutLibrary.push({ name: name.trim(), cal });
-    saveWorkout(); renderWorkoutLibrary(); renderWorkoutSelect();
-    toast('Preset saved');
-  });
-
-  // Meal modal buttons
-  document.querySelectorAll('[data-meal]').forEach(btn => {
-    btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
-  });
-  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
-  document.getElementById('mealModal').addEventListener('click', e => {
-    if (e.target.id === 'mealModal') resolveMealPicker(null);
-  });
-
-  // Import file listener
-  document.getElementById('importFile').addEventListener('change', e => {
-    importBackup(e.target.files[0]);
-    e.target.value = ''; // reset so same file can be re-imported
-  });
-
-  // Qty input: step=1 for arrows, allow decimals by typing
-  document.getElementById('quickQty').addEventListener('keydown', e => {
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      const el = e.target;
-      const v = parseFloat(el.value) || 1;
-      el.value = e.key === 'ArrowUp' ? Math.floor(v) + 1 : Math.max(1, Math.ceil(v) - 1);
-    }
-  });
-
-  // Route
-  const hash = window.location.hash.replace('#','');
-  navigate(VALID_VIEWS.includes(hash) ? hash : 'home');
-  window.addEventListener('hashchange', () => {
-    const h = window.location.hash.replace('#','');
-    if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
-  });
-}
-
-init();
-</script>
-</body>
-</html>
+>
