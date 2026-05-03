@@ -1499,11 +1499,19 @@ function addRoutineItem() {
   const name = document.getElementById('routineFoodSelect').value;
   const qty = parseFloat(document.getElementById('routineFoodQty').value) || 1;
   if (!name) return;
-  const existing = routineItems.find(it => it.name === name);
-  if (existing) existing.qty = Math.round((existing.qty + qty)*10)/10;
-  else routineItems.push({ name, qty });
-  document.getElementById('routineFoodQty').value = 1;
-  renderRoutineItemList();
+  promptMealTag(null, name).then(mealInfo => {
+    const meal = mealInfo && typeof mealInfo === 'object' ? mealInfo.meal : mealInfo;
+    const snackTime = mealInfo && typeof mealInfo === 'object' ? mealInfo.snackTime : null;
+    const existing = routineItems.find(it => it.name === name);
+    if (existing) {
+      existing.qty = Math.round((existing.qty + qty)*10)/10;
+      if (meal !== undefined) { existing._meal = meal; existing._snackTime = snackTime || null; }
+    } else {
+      routineItems.push({ name, qty, _meal: meal || null, _snackTime: snackTime || null });
+    }
+    document.getElementById('routineFoodQty').value = 1;
+    renderRoutineItemList();
+  });
 }
 
 function removeRoutineItem(i) {
