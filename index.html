@@ -313,6 +313,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   </header>
 
   <div class="crumbs" id="crumbs"></div>
+  <div id="streakBanner" style="display:none;font-size:9px;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px;text-align:right;"></div>
 
   <!-- ═══════════════ HOME ═══════════════ -->
   <section class="view" id="view-home">
@@ -421,7 +422,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="ratio-carb" style="flex:1">—</div>
       </div>
       <div class="ratio-targets">
-        <span>Fat 70-80% / Pro 10-20% / Carb 5-10%</span>
+        <span id="ratioTargetHint">Fat —% / Pro —% / Carb —%</span>
         <span>Cost: <strong id="totalCost">$0.00</strong></span>
       </div>
     </section>
@@ -433,9 +434,11 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
       </div>
       <div class="quick-add">
         <div class="quick-add-row">
-          <div>
+          <div style="position:relative;">
             <span class="field-lbl">Food</span>
-            <select id="quickSelect"></select>
+            <input type="text" id="quickSearch" placeholder="Search foods..." autocomplete="off"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+            <div id="quickDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--green);border-top:none;max-height:200px;overflow-y:auto;z-index:60;"></div>
           </div>
           <div>
             <span class="field-lbl">Qty</span>
@@ -557,10 +560,31 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
           <h2>TDEE Calculator</h2>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="bmrAge" step="1" placeholder="e.g. 30" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <select id="bmrSex" style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;-webkit-appearance:none;">
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Height (cm)</label>
+            <input type="number" id="bmrHeight" step="1" placeholder="e.g. 178" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="bmrWeight" step="0.1" placeholder="e.g. 85" inputmode="decimal">
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
           <div class="field">
-            <label>BMR (cal)</label>
-            <input type="number" id="bmrInput" step="10" placeholder="e.g. 1800" inputmode="numeric">
+            <label>BMR (cal) — or enter manually</label>
+            <input type="number" id="bmrInput" step="10" placeholder="Auto-calculated" inputmode="numeric">
           </div>
           <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;justify-content:center;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Calculated TDEE</div>
@@ -658,7 +682,10 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
           <div class="s-label">Export Backup</div>
           <div class="s-sub">Download all data as a .json file</div>
         </div>
-        <button class="btn" onclick="exportBackup()">Export</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="exportBackup()">JSON</button>
+          <button class="btn ghost" onclick="exportCSV()">CSV</button>
+        </div>
       </div>
       <div class="settings-row">
         <div>
@@ -796,7 +823,7 @@ window.onerror = function(msg, src, line) {
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
-const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1 };
+const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1, history:[] };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','trends','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', settings:'Settings' };
@@ -824,7 +851,8 @@ function buildLibrary() {
 // ── STATE ──────────────────────────────────────────
 let library, log, targets, weights, settings, routines;
 let editingFoodIdx = null, editingRoutineIdx = null, currentView = 'home';
-let historyDate = null, historyEditing = false;
+let historyDate = null;
+let undoBuffer = null; // { dateKey, entry, index }
 let routineItems = []; // temp buffer while editing routine modal
 
 // ── DATE HELPERS ───────────────────────────────────
@@ -855,7 +883,7 @@ function navigate(view) {
   window.scrollTo({ top:0, behavior:'smooth' });
   renderCrumbs();
   switch (view) {
-    case 'home':     renderGlance(); break;
+    case 'home':     renderGlance(); renderStreak(); break;
     case 'tracker':  renderQuickSelect(); renderLog(); renderTotals(); break;
     case 'library':  renderRoutines(); renderLibraryTable(document.getElementById('librarySearch').value); break;
     case 'history':  initHistory(); break;
@@ -1011,7 +1039,6 @@ function buildMealSections(entries) {
 
 const MEAL_ORDER = ['B','L','D','S',null];
 const MEAL_LABELS = { B:'Breakfast', L:'Lunch', D:'Dinner', S:'Snack', null:'Other' };
-const MEAL_CYCLE = { B:'L', L:'D', D:'S', S:null, null:'B' };
 
 function renderLog() {
   const body = document.getElementById('logBody');
@@ -1072,8 +1099,10 @@ function renderLog() {
   body.querySelectorAll('.del-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       const i = +e.target.dataset.i;
+      pushUndo(todayKey(), entries[i], i);
       entries.splice(i, 1);
       persist(); renderLog(); renderTotals();
+      toast('Deleted · <span style="cursor:pointer;text-decoration:underline;" onclick="undoLastDelete()">Undo</span>');
     });
   });
 }
@@ -1129,6 +1158,8 @@ function renderTotals() {
       ribbon.innerHTML = '<div class="ratio-fat" style="flex:1">—</div><div class="ratio-pro" style="flex:1">—</div><div class="ratio-carb" style="flex:1">—</div>';
     }
   }
+  const ratioHint = document.getElementById('ratioTargetHint');
+  if (ratioHint) ratioHint.textContent = 'Fat ' + (targets.fpct||0) + '% / Pro ' + (targets.ppct||0) + '% / Carb ' + (targets.cpct||0) + '%';
   renderProjection(t);
   renderGlance();
 }
@@ -1204,39 +1235,22 @@ function renderProjection(t) {
   else setText('toLose','—');
 }
 
-function renderGlance() {
-  const t = totals();
-  const setHTML = (id,v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
-  setHTML('glanceCal', Math.round(t.cal) + '<span class="unit">cal</span>');
-  setHTML('glanceItems', getTodayLog().length);
-  setHTML('glanceCost', '$' + t.cost.toFixed(2));
-  setHTML('glanceLib', library.length);
-  setHTML('glanceWeight', weights.today != null ? weights.today + ' <span class="unit">kg</span>' : '— <span class="unit">kg</span>');
-}
+function renderGlance() { /* glance panel removed from home */ }
 
 // ── QUICK ADD ──────────────────────────────────────
-function renderQuickSelect() {
-  const sel = document.getElementById('quickSelect');
-  if (!sel) return;
-  const prev = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].dataset.name : null;
-  sel.innerHTML = library.slice().sort((a,b) => a.name.localeCompare(b.name)).map(f => {
-    const ri = library.indexOf(f);
-    return '<option value="'+ri+'" data-name="'+escapeHtml(f.name)+'">'+escapeHtml(f.name)+' — '+Math.round(f.cal)+'c</option>';
-  }).join('');
-  if (prev) for (const opt of sel.options) { if (opt.dataset.name === prev) { opt.selected = true; break; } }
-}
+function renderQuickSelect() { /* replaced by initQuickSearch */ }
 
 async function quickAdd() {
-  const sel = document.getElementById('quickSelect');
   const qty = parseFloat(document.getElementById('quickQty').value) || 1;
-  const idx = parseInt(sel.value);
-  if (isNaN(idx) || !library[idx]) return;
-  const food = library[idx];
+  const food = quickSelectedFood;
+  if (!food) { toast('Select a food first'); return; }
   const meal = await promptMealTag(todayKey(), food.name);
   addFoodToLog(todayKey(), food, qty, meal);
   renderLog(); renderTotals();
   toast('Added ' + food.name);
   document.getElementById('quickQty').value = 1;
+  document.getElementById('quickSearch').value = '';
+  quickSelectedFood = null;
 }
 
 function addFoodToLog(dateKey, food, qty, mealInfo) {
@@ -1720,10 +1734,10 @@ const TREND_METRICS = [
   { key:'fat',     label:'Fat',         color:'#eeeeee', fn: entries => entries.reduce((s,e)=>s+e.f*e.qty,0) },
   { key:'carbs',   label:'Carbs',       color:'#f0a500', fn: entries => entries.reduce((s,e)=>s+e.c*e.qty,0) },
   { key:'cost',    label:'Cost',        color:'#cc66ff', fn: entries => entries.reduce((s,e)=>s+e.price*e.qty,0) },
-  { key:'weight',  label:'Weight',      color:'#ff4444', fn: (entries, dateKey) => {
-    const w = loadJSON(SK.WEIGHTS, {});
-    // Weight stored per-day isn't tracked historically yet — show today's weight flat
-    return weights.today || null;
+  { key:'weight',  label:'Weight (kg)', color:'#ff4444', fn: (entries, dateKey) => {
+    if (!weights.history) return null;
+    const entry = weights.history.find(h => h.date === dateKey);
+    return entry ? entry.weight : null;
   }},
 ];
 
@@ -1970,6 +1984,156 @@ function updateBMRCalc() {
   }
 }
 
+// ── STREAK COUNTER ───────────────────────────────────────
+function calcStreak() {
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!log[key] || !log[key].length) break;
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderStreak() {
+  const el = document.getElementById('streakBanner');
+  if (!el) return;
+  const s = calcStreak();
+  if (s >= 2) {
+    el.style.display = 'block';
+    el.textContent = '🔥 ' + s + ' day logging streak';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── CSV EXPORT ────────────────────────────────────────────
+function exportCSV() {
+  const rows = ['Date,Food,Qty,Calories,Protein,Fat,Carbs,Cost,Meal,SnackTime'];
+  Object.keys(log).sort().forEach(date => {
+    (log[date] || []).forEach(e => {
+      rows.push([
+        date,
+        '"' + (e.name||'').replace(/"/g,'""') + '"',
+        e.qty,
+        (e.cal * e.qty).toFixed(1),
+        (e.p * e.qty).toFixed(1),
+        (e.f * e.qty).toFixed(1),
+        (e.c * e.qty).toFixed(1),
+        (e.price * e.qty).toFixed(2),
+        e._meal || '',
+        e._snackTime || ''
+      ].join(','));
+    });
+  });
+  const nl = String.fromCharCode(10);
+  const blob = new Blob([rows.join(nl)], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'food-tracker-' + todayKey() + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported');
+}
+
+// ── MIFFLIN-ST JEOR BMR ───────────────────────────────────
+function calcMifflinBMR() {
+  const age    = parseFloat(document.getElementById('bmrAge')?.value);
+  const height = parseFloat(document.getElementById('bmrHeight')?.value);
+  const weight = parseFloat(document.getElementById('bmrWeight')?.value);
+  const sex    = document.getElementById('bmrSex')?.value;
+  if (isNaN(age) || isNaN(height) || isNaN(weight)) return null;
+  // Mifflin-St Jeor: Male = 10W + 6.25H - 5A + 5 | Female = 10W + 6.25H - 5A - 161
+  const bmr = Math.round(10 * weight + 6.25 * height - 5 * age + (sex === 'm' ? 5 : -161));
+  return bmr;
+}
+
+function initMifflinListeners() {
+  ['bmrAge','bmrHeight','bmrWeight','bmrSex'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      const bmr = calcMifflinBMR();
+      if (bmr && bmr > 0) {
+        const bmrEl = document.getElementById('bmrInput');
+        if (bmrEl) bmrEl.value = bmr;
+        weights.bmr = bmr;
+        // Save mifflin inputs
+        weights.mifflin = {
+          age:    parseFloat(document.getElementById('bmrAge')?.value) || null,
+          height: parseFloat(document.getElementById('bmrHeight')?.value) || null,
+          weight: parseFloat(document.getElementById('bmrWeight')?.value) || null,
+          sex:    document.getElementById('bmrSex')?.value || 'm',
+        };
+        persist(); updateBMRCalc();
+      }
+    });
+  });
+  // Restore saved Mifflin values
+  if (weights.mifflin) {
+    const m = weights.mifflin;
+    if (m.age    && document.getElementById('bmrAge'))    document.getElementById('bmrAge').value    = m.age;
+    if (m.height && document.getElementById('bmrHeight')) document.getElementById('bmrHeight').value = m.height;
+    if (m.weight && document.getElementById('bmrWeight')) document.getElementById('bmrWeight').value = m.weight;
+    if (m.sex    && document.getElementById('bmrSex'))    document.getElementById('bmrSex').value    = m.sex;
+  }
+}
+
+// ── SEARCHABLE QUICK ADD ──────────────────────────────────
+let quickSelectedFood = null;
+
+function initQuickSearch() {
+  const input    = document.getElementById('quickSearch');
+  const dropdown = document.getElementById('quickDropdown');
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase().trim();
+    if (!q) { dropdown.style.display = 'none'; quickSelectedFood = null; return; }
+    const matches = library
+      .filter(f => f.name.toLowerCase().includes(q))
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .slice(0, 20);
+    if (!matches.length) { dropdown.style.display = 'none'; return; }
+    dropdown.innerHTML = matches.map((f,i) =>
+      '<div data-idx="'+library.indexOf(f)+'" style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;color:var(--text-bright);">' +
+        escapeHtml(f.name) +
+        '<span style="font-size:10px;color:var(--muted);margin-left:8px;">' + Math.round(f.cal) + 'cal</span>' +
+      '</div>'
+    ).join('');
+    dropdown.style.display = 'block';
+    dropdown.querySelectorAll('[data-idx]').forEach(row => {
+      row.addEventListener('click', () => {
+        const idx = +row.dataset.idx;
+        quickSelectedFood = library[idx];
+        input.value = quickSelectedFood.name;
+        dropdown.style.display = 'none';
+      });
+    });
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => { dropdown.style.display = 'none'; }, 150);
+  });
+}
+
+function persist() {function pushUndo(dateKey, entry, index) {
+  undoBuffer = { dateKey, entry: Object.assign({}, entry), index };
+}
+
+function undoLastDelete() {
+  if (!undoBuffer) { toast('Nothing to undo'); return; }
+  const { dateKey, entry, index } = undoBuffer;
+  const entries = getLog(dateKey);
+  entries.splice(index, 0, entry);
+  undoBuffer = null;
+  persist(); renderLog(); renderTotals();
+  toast('Restored: ' + entry.name);
+}
+
 function persist() {
   const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
   const currentNames = new Set(library.map(f => f.name));
@@ -1982,7 +2146,14 @@ function persist() {
     if (orig && JSON.stringify(orig) !== JSON.stringify(f)) edited[f.name] = f;
   }
   saveJSON('ft_edited_foods', edited);
-  saveJSON(SK.LOG, log);
+  // Strip internal _origIdx tags before saving
+  const cleanLog = {};
+  Object.keys(log).forEach(dk => {
+    cleanLog[dk] = log[dk].map(e => {
+      const c = Object.assign({}, e); delete c._origIdx; return c;
+    });
+  });
+  saveJSON(SK.LOG, cleanLog);
   saveJSON(SK.TARGETS, targets);
   saveJSON(SK.WEIGHTS, weights);
   saveJSON(SK.SETTINGS, settings);
@@ -1995,11 +2166,11 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 let toastTimer;
-function toast(msg) {
+function toast(msg, duration) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.innerHTML = msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  toastTimer = setTimeout(() => t.classList.remove('show'), duration || 2000);
 }
 
 // ── INIT ───────────────────────────────────────────
@@ -2300,6 +2471,13 @@ function init() {
   document.getElementById('todayWeight').addEventListener('change', e => {
     weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null;
     weights.weightDate = todayKey();
+    // Store in history array
+    if (weights.today != null) {
+      if (!weights.history) weights.history = [];
+      const existing = weights.history.find(h => h.date === todayKey());
+      if (existing) existing.weight = weights.today;
+      else weights.history.push({ date: todayKey(), weight: weights.today });
+    }
     persist(); renderTotals();
   });
   document.getElementById('yestWeight').addEventListener('change', e => {
@@ -2315,6 +2493,8 @@ function init() {
   });
 
   // Library
+  initQuickSearch();
+  initMifflinListeners();
   document.getElementById('librarySearch').addEventListener('input', e => renderLibraryTable(e.target.value));
   document.getElementById('quickAddBtn').addEventListener('click', quickAdd);
   document.getElementById('addFoodBtn').addEventListener('click', () => openFoodModal(null));
@@ -2400,6 +2580,8 @@ function init() {
     const h = window.location.hash.replace('#','');
     if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
   });
+}
+
 }
 
 init();
