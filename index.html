@@ -1437,9 +1437,13 @@ function renderRoutineItemList() {
   el.querySelectorAll('[data-rmeal]').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.rmeal;
-      promptMealTag(null, routineItems[i].name).then(meal => {
-        if (meal !== undefined) {
+      promptMealTag(null, routineItems[i].name).then(mealInfo => {
+        if (mealInfo !== undefined) {
+          const meal = mealInfo && typeof mealInfo === 'object' ? mealInfo.meal : mealInfo;
+          const snackTime = mealInfo && typeof mealInfo === 'object' ? mealInfo.snackTime : null;
           routineItems[i]._meal = meal;
+          if (snackTime) routineItems[i]._snackTime = snackTime;
+          else routineItems[i]._snackTime = null;
           renderRoutineItemList();
         }
       });
@@ -1510,7 +1514,11 @@ function removeRoutineItem(i) {
 function saveRoutine() {
   const name = document.getElementById('rName').value.trim();
   if (!name) { alert('Routine name required.'); return; }
-  const r = { name, items: routineItems.slice() };
+  const r = { name, items: routineItems.map(it => {
+    const clean = Object.assign({}, it);
+    delete clean._origIdx;
+    return clean;
+  }) };
   if (editingRoutineIdx === null) routines.push(r);
   else routines[editingRoutineIdx] = r;
   persist();
