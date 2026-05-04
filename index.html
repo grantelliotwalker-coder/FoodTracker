@@ -7,6 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Food/Tracker">
 <style>
 /* ── THEME VARIABLES ───────────────────────────────────── */
 :root {
@@ -313,7 +318,6 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   </header>
 
   <div class="crumbs" id="crumbs"></div>
-  <div id="streakBanner" style="display:none;font-size:9px;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px;text-align:right;"></div>
 
   <!-- ═══════════════ HOME ═══════════════ -->
   <section class="view" id="view-home">
@@ -559,7 +563,16 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
       <div class="targets-panel" style="margin-bottom:12px;">
         <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
           <h2>TDEE Calculator</h2>
+          <span class="meta" style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:var(--muted);" id="bmrModeLabel">Calculator</span>
+            <label class="toggle" style="width:36px;height:20px;">
+              <input type="checkbox" id="bmrManualToggle">
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:9px;color:var(--muted);">Manual</span>
+          </span>
         </div>
+        <div id="bmrCalcSection">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div class="field">
             <label>Age</label>
@@ -577,8 +590,9 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
             <input type="number" id="bmrHeight" step="1" placeholder="e.g. 178" inputmode="numeric">
           </div>
           <div class="field">
-            <label>Weight (kg)</label>
-            <input type="number" id="bmrWeight" step="0.1" placeholder="e.g. 85" inputmode="decimal">
+            <label>Weight (kg) — from today's weight</label>
+            <input type="number" id="bmrWeight" step="0.1" placeholder="e.g. 85" inputmode="decimal"
+              style="color:var(--muted);cursor:not-allowed;" readonly tabindex="-1">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
@@ -598,8 +612,16 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
           <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="activityDesc">Light exercise 1–3 days/week · ×1.375</div>
         </div>
       </div>
+        </div><!-- /bmrCalcSection -->
+      <div id="bmrManualSection" style="display:none;">
+        <div class="weight-card" style="margin-bottom:12px;">
+          <div class="lbl">BMR (cal) — enter manually</div>
+          <input type="number" id="bmrManualInput" step="10" placeholder="e.g. 1800" inputmode="numeric">
+          <div class="sub">Manually set your BMR, then use the activity slider below</div>
+        </div>
+      </div>
       <div class="weight-card" style="margin-bottom:12px;">
-        <div class="lbl">TDEE (cal) — or enter manually</div>
+        <div class="lbl">TDEE (cal)</div>
         <input type="number" id="tdeeInput" step="10" placeholder="e.g. 2726" inputmode="numeric">
         <div class="sub">Calories eaten - TDEE = calorie balance</div>
       </div>
@@ -724,11 +746,11 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 </footer>
 
 <!-- INFO MODAL -->
-<div class="modal-bg" id="infoModal">
+<div class="modal-bg" id="infoModal" role="dialog" aria-modal="true" aria-label="About">
   <div class="modal" style="max-width:420px;">
     <h3>About Food/Tracker</h3>
     <div style="font-size:11px;color:var(--text);line-height:1.8;margin-bottom:16px;">
-      <p style="margin-bottom:10px;">A personal food tracking app built for simplicity and speed. Log meals, track macros, monitor your weight projection and workout expenditure.</p>
+      <p style="margin-bottom:10px;">A personal food tracking app built for simplicity and speed. Log meals, track macros, monitor your weight and project your fat loss over time.</p>
       <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:var(--muted);">
           <span>Version</span><span style="color:var(--text);">1.0</span>
@@ -748,7 +770,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 </div>
 
 <!-- FOOD MODAL -->
-<div class="modal-bg" id="foodModal">
+<div class="modal-bg" id="foodModal" role="dialog" aria-modal="true" aria-label="Food editor">
   <div class="modal">
     <h3 id="modalTitle">New Food</h3>
     <div class="form-grid">
@@ -768,7 +790,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 </div>
 
 <!-- ROUTINE MODAL -->
-<div class="modal-bg" id="routineModal">
+<div class="modal-bg" id="routineModal" role="dialog" aria-modal="true" aria-label="Routine editor">
   <div class="modal">
     <h3 id="routineModalTitle">New Routine</h3>
     <div class="form-grid">
@@ -797,15 +819,15 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 <div class="toast" id="toast"></div>
 
 <!-- MEAL TAG PICKER -->
-<div class="modal-bg" id="mealModal">
+<div class="modal-bg" id="mealModal" role="dialog" aria-modal="true" aria-label="Meal time picker">
   <div class="modal" style="max-width:320px;text-align:center;">
     <h3>When did you eat this?</h3>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;" id="mealModalName"></div>
     <div id="mealModalGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;">Breakfast</button>
-      <button class="btn" data-meal="L" style="padding:14px;">Lunch</button>
-      <button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;">Dinner</button>
-      <button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;">Snack</button>
+      <button class="btn" data-meal="B" style="border-color:#4a9eff;color:#4a9eff;padding:14px;" aria-label="Breakfast">Breakfast</button>
+      <button class="btn" data-meal="L" style="padding:14px;" aria-label="Lunch">Lunch</button>
+      <button class="btn" data-meal="D" style="border-color:var(--amber);color:var(--amber);padding:14px;" aria-label="Dinner">Dinner</button>
+      <button class="btn" data-meal="S" style="border-color:#cc66ff;color:#cc66ff;padding:14px;" aria-label="Snack">Snack</button>
     </div>
     <button class="btn ghost" id="mealModalSkip" style="width:100%;">Skip</button>
   </div>
@@ -823,7 +845,7 @@ window.onerror = function(msg, src, line) {
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
-const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1, history:[] };
+const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1, history:[], bmrManual:false };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','trends','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', settings:'Settings' };
@@ -856,11 +878,18 @@ let undoBuffer = null; // { dateKey, entry, index }
 let routineItems = []; // temp buffer while editing routine modal
 
 // ── DATE HELPERS ───────────────────────────────────
+let _todayKeyCache = null, _todayKeyCacheTime = 0;
 function todayKey() {
-  const d = new Date();
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+  const now = Date.now();
+  // Invalidate cache every 30 seconds
+  if (!_todayKeyCache || now - _todayKeyCacheTime > 30000) {
+    const d = new Date();
+    _todayKeyCache = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+    _todayKeyCacheTime = now;
+  }
+  return _todayKeyCache;
 }
 function todayDisplay() {
   return new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }).toUpperCase();
@@ -881,14 +910,17 @@ function navigate(view) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
+  // Close quick-add dropdown if open
+  const qd = document.getElementById('quickDropdown');
+  if (qd) qd.style.display = 'none';
   renderCrumbs();
   switch (view) {
-    case 'home':     renderGlance(); renderStreak(); break;
-    case 'tracker':  renderQuickSelect(); renderLog(); renderTotals(); break;
-    case 'library':  renderRoutines(); renderLibraryTable(document.getElementById('librarySearch').value); break;
+    case 'home':     safeRender(renderGlance, 'glance'); break;
+    case 'tracker':  initQuickSearch(); safeRender(renderLog, 'log'); safeRender(renderTotals, 'totals'); break;
+    case 'library':  safeRender(renderRoutines, 'routines'); safeRender(() => renderLibraryTable(document.getElementById('librarySearch').value), 'library'); break;
     case 'history':  initHistory(); break;
-    case 'weight':   renderTotals(); break;
-    case 'trends':   renderTrends(); break;
+    case 'weight':   safeRender(renderTotals, 'totals'); break;
+    case 'trends':   safeRender(renderTrends, 'trends'); break;
     case 'settings': renderSettings(); break;
   }
   history.replaceState(null, '', '#' + view);
@@ -918,22 +950,26 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
     body.innerHTML = '<div class="empty-log">No entries.</div>';
     if (totalRowId) document.getElementById(totalRowId).style.display = 'none';
   } else {
-    body.innerHTML = entries.map((e, i) =>
-      '<div class="log-row">' +
-        '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
-        '<div class="log-qty-wrap">' +
-          '<span class="ql">Qty</span>' +
-          (isEditable
-            ? '<input type="number" step="1" value="' + e.qty + '" data-i="' + i + '" data-date="' + dateKey + '" class="qty-input" inputmode="decimal">'
-            : '<span style="font-size:12px;color:var(--text);">' + e.qty + '</span>') +
-        '</div>' +
-        '<div class="log-macros">' + fmt(e.cal*e.qty) + 'cal · P' + fmt(e.p*e.qty) + ' F' + fmt(e.f*e.qty) + ' C' + fmt(e.c*e.qty) + '</div>' +
-        '<div class="log-spacer"></div>' +
-        '<div class="log-spacer"></div>' +
-        '<div class="log-spacer"></div>' +
-        '<div class="log-cost">$' + (e.price * e.qty).toFixed(2) + '</div>' +
-        '<div>' + (isEditable ? '<button class="del-btn" data-i="' + i + '" data-date="' + dateKey + '">&times;</button>' : '') + '</div>' +
-      '</div>'
+    const histSections = buildMealSections(entries);
+    body.innerHTML = histSections.map(section =>
+      '<div class="meal-group-header">' + section.label + '</div>' +
+      section.entries.map(({e, i}) =>
+        '<div class="log-row">' +
+          '<div class="name" title="' + escapeHtml(e.name) + '">' + escapeHtml(e.name) + '</div>' +
+          '<div class="log-qty-wrap">' +
+            '<span class="ql">Qty</span>' +
+            (isEditable
+              ? '<input type="number" step="1" value="' + e.qty + '" data-i="' + i + '" data-date="' + dateKey + '" class="qty-input" inputmode="decimal">'
+              : '<span style="font-size:12px;color:var(--text);">' + e.qty + '</span>') +
+          '</div>' +
+          '<div class="log-macros">' + fmt(e.cal*e.qty) + 'cal · P' + fmt(e.p*e.qty) + ' F' + fmt(e.f*e.qty) + ' C' + fmt(e.c*e.qty) + '</div>' +
+          '<div class="log-spacer"></div>' +
+          '<div class="log-spacer"></div>' +
+          '<div class="log-spacer"></div>' +
+          '<div class="log-cost">$' + (e.price * e.qty).toFixed(2) + '</div>' +
+          '<div>' + (isEditable ? '<button class="del-btn" aria-label="Delete entry" data-i="' + i + '" data-date="' + dateKey + '">&times;</button>' : '') + '</div>' +
+        '</div>'
+      ).join('')
     ).join('');
 
     if (totalRowId) {
@@ -959,6 +995,7 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
         btn.addEventListener('click', e => {
           const i = +e.target.dataset.i;
           const dk = e.target.dataset.date;
+          pushUndo(dk, getLog(dk)[i], i);
           getLog(dk).splice(i, 1);
           persist();
           renderLogFor(dk, bodyId, totalRowId, isEditable);
@@ -988,7 +1025,7 @@ function buildLogRow(e, i) {
     '<div class="log-cost">$' + (e.price * e.qty).toFixed(2) + '</div>' +
     '<div style="display:flex;align-items:center;gap:4px;">' +
       '<button class="meal-tag ' + tagClass + '" data-meal-i="' + i + '">' + tagLabel + '</button>' +
-      '<button class="del-btn" data-i="' + i + '" data-date="' + todayKey() + '">&times;</button>' +
+      '<button class="del-btn" aria-label="Delete entry" data-i="' + i + '" data-date="' + todayKey() + '">&times;</button>' +
     '</div>' +
   '</div>';
 }
@@ -1002,7 +1039,6 @@ const SNACK_TIME_HOURS = {
 function buildMealSections(entries) {
   const sections = [];
   // Tag each entry with its original index so renderers can use it reliably
-  const tagged = entries.map((e, _origIdx) => Object.assign({}, e, { _origIdx }));
   const breakfast = tagged.filter(e => e._meal === 'B');
   const lunch     = tagged.filter(e => e._meal === 'L');
   const dinner    = tagged.filter(e => e._meal === 'D');
@@ -1011,10 +1047,10 @@ function buildMealSections(entries) {
 
   // Group snacks by time
   const snackGroups = {};
-  snacks.forEach(e => {
-    const t = e._snackTime || 'Snack';
+  snacks.forEach(x => {
+    const t = x.e._snackTime || 'Snack';
     if (!snackGroups[t]) snackGroups[t] = [];
-    snackGroups[t].push(e);
+    snackGroups[t].push(x);
   });
   const sortedSnackTimes = Object.keys(snackGroups).sort((a,b) =>
     (SNACK_TIME_HOURS[a] || 99) - (SNACK_TIME_HOURS[b] || 99)
@@ -1052,13 +1088,13 @@ function renderLog() {
     return;
   }
 
-  // Build ordered sections — entries tagged with _origIdx by buildMealSections
+  // Build ordered sections — each entry is {e, i} pair
   const sectionsRaw = buildMealSections(entries);
   let html = '';
   sectionsRaw.forEach(section => {
     html += '<div class="meal-group-header">' + section.label + '</div>';
-    section.entries.forEach(e => {
-      html += buildLogRow(e, e._origIdx);
+    section.entries.forEach(({e, i}) => {
+      html += buildLogRow(e, i);
     });
   });
   body.innerHTML = html;
@@ -1102,7 +1138,7 @@ function renderLog() {
       pushUndo(todayKey(), entries[i], i);
       entries.splice(i, 1);
       persist(); renderLog(); renderTotals();
-      toast('Deleted · <span style="cursor:pointer;text-decoration:underline;" onclick="undoLastDelete()">Undo</span>');
+      showUndoToast();
     });
   });
 }
@@ -1249,7 +1285,8 @@ async function quickAdd() {
   renderLog(); renderTotals();
   toast('Added ' + food.name);
   document.getElementById('quickQty').value = 1;
-  document.getElementById('quickSearch').value = '';
+  const qs = document.getElementById('quickSearch');
+  if (qs) qs.value = '';
   quickSelectedFood = null;
 }
 
@@ -1397,13 +1434,12 @@ function renderRoutineItemList() {
     return;
   }
 
-  // Build ordered sections — items tagged with _origIdx by buildMealSections
+  // Build ordered sections — each item is {e, i} pair
   const sections = buildMealSections(routineItems);
   let html = '';
   sections.forEach(section => {
     html += '<div style="font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);border-bottom:1px solid var(--border);">' + section.label + '</div>';
-    section.entries.forEach(it => {
-      const i = it._origIdx;
+    section.entries.forEach(({e: it, i}) => {
       if (i === undefined || i === -1) return;
       const food = library.find(f => f.name === it.name);
       const cal = food ? Math.round(food.cal * it.qty) : 0;
@@ -1536,11 +1572,7 @@ function removeRoutineItem(i) {
 function saveRoutine() {
   const name = document.getElementById('rName').value.trim();
   if (!name) { alert('Routine name required.'); return; }
-  const r = { name, items: routineItems.map(it => {
-    const clean = Object.assign({}, it);
-    delete clean._origIdx;
-    return clean;
-  }) };
+  const r = { name, items: routineItems.slice() };
   if (editingRoutineIdx === null) routines.push(r);
   else routines[editingRoutineIdx] = r;
   persist();
@@ -1624,7 +1656,10 @@ function copyHistoryToToday() {
   const entries = getLog(historyDate);
   if (!entries.length) return;
   if (!confirm('Add all ' + entries.length + ' items from ' + fmtDateKey(historyDate) + ' to today?')) return;
-  entries.forEach(e => addFoodToLog(todayKey(), Object.assign({}, e), e.qty));
+  entries.forEach(e => {
+    const copy = Object.assign({}, e);
+    addFoodToLog(todayKey(), copy, copy.qty, { meal: copy._meal || null, snackTime: copy._snackTime || null });
+  });
   persist(); renderTotals();
   toast('Copied to today');
 }
@@ -1676,8 +1711,21 @@ function saveFood() {
     p, f, c,
     price: parseFloat(document.getElementById('fPrice').value) || 0
   };
-  if (editingFoodIdx === null) { library.push(item); toast('Added to library'); }
-  else { library[editingFoodIdx] = item; toast('Food updated'); }
+  if (editingFoodIdx === null) {
+    library.push(item);
+    toast('Added to library');
+  } else {
+    const oldFood = library[editingFoodIdx];
+    const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
+    // If renaming a default food, remove old edited entry to avoid orphan
+    if (baseNames.has(oldFood.name) && oldFood.name !== item.name) {
+      const edited = loadJSON('ft_edited_foods', {});
+      delete edited[oldFood.name];
+      saveJSON('ft_edited_foods', edited);
+    }
+    library[editingFoodIdx] = item;
+    toast('Food updated');
+  }
   persist();
   renderLibraryTable(document.getElementById('librarySearch').value);
   renderQuickSelect();
@@ -1715,7 +1763,7 @@ function clearAllData() {
   if (!confirm('Clear ALL data? This cannot be undone.')) return;
   [SK.LOG, SK.TARGETS, SK.WEIGHTS, SK.ROUTINES, 'ft_local_library','ft_deleted_foods','ft_edited_foods'].forEach(k => localStorage.removeItem(k));
   log = {}; targets = Object.assign({}, DEFAULT_TARGETS);
-  weights = { today:null, yesterday:null, goal:null };
+  weights = Object.assign({}, DEFAULT_WEIGHTS);
   routines = [];
   renderTotals(); renderLog(); renderRoutines();
   toast('All data cleared');
@@ -1955,6 +2003,42 @@ function initBMRCalc() {
     weights.activityLevel = +slEl.value;
     persist(); updateBMRCalc();
   });
+
+  // BMR mode toggle
+  const toggleEl = document.getElementById('bmrManualToggle');
+  const calcSec  = document.getElementById('bmrCalcSection');
+  const manSec   = document.getElementById('bmrManualSection');
+  const manInput = document.getElementById('bmrManualInput');
+  if (toggleEl) {
+    // Restore saved mode
+    if (weights.bmrManual) toggleEl.checked = true;
+    applyBMRMode();
+    toggleEl.addEventListener('change', () => {
+      weights.bmrManual = toggleEl.checked;
+      const lbl = document.getElementById('bmrModeLabel');
+      if (lbl) lbl.textContent = toggleEl.checked ? 'Manual' : 'Calculator';
+      persist(); applyBMRMode();
+    });
+    if (manInput) {
+      if (weights.bmr) manInput.value = weights.bmr;
+      manInput.addEventListener('input', () => {
+        weights.bmr = parseFloat(manInput.value) || null;
+        // Sync to hidden bmrInput for updateBMRCalc
+        if (bmrEl) bmrEl.value = weights.bmr || '';
+        persist(); updateBMRCalc();
+      });
+    }
+  }
+}
+
+function applyBMRMode() {
+  const toggleEl = document.getElementById('bmrManualToggle');
+  const calcSec  = document.getElementById('bmrCalcSection');
+  const manSec   = document.getElementById('bmrManualSection');
+  if (!toggleEl || !calcSec || !manSec) return; // Weight view not yet rendered
+  const isManual = toggleEl.checked;
+  calcSec.style.display = isManual ? 'none' : 'block';
+  manSec.style.display  = isManual ? 'block' : 'none';
 }
 
 function updateBMRCalc() {
@@ -1984,30 +2068,16 @@ function updateBMRCalc() {
   }
 }
 
-// ── STREAK COUNTER ───────────────────────────────────────
-function calcStreak() {
-  let streak = 0;
-  const d = new Date();
-  while (true) {
-    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    if (!log[key] || !log[key].length) break;
-    streak++;
-    d.setDate(d.getDate() - 1);
+function updateBMRCalcFromMifflin() {
+  const bmr = calcMifflinBMR();
+  if (bmr && bmr > 0) {
+    const bmrEl = document.getElementById('bmrInput');
+    if (bmrEl) bmrEl.value = bmr;
+    weights.bmr = bmr;
+    updateBMRCalc();
   }
-  return streak;
 }
 
-function renderStreak() {
-  const el = document.getElementById('streakBanner');
-  if (!el) return;
-  const s = calcStreak();
-  if (s >= 2) {
-    el.style.display = 'block';
-    el.textContent = '🔥 ' + s + ' day logging streak';
-  } else {
-    el.style.display = 'none';
-  }
-}
 
 // ── CSV EXPORT ────────────────────────────────────────────
 function exportCSV() {
@@ -2028,6 +2098,14 @@ function exportCSV() {
       ].join(','));
     });
   });
+  // Add weight history
+  rows.push('');
+  rows.push('Date,Weight (kg)');
+  if (weights.history) {
+    weights.history.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(h => {
+      rows.push(h.date + ',' + h.weight);
+    });
+  }
   const nl = String.fromCharCode(10);
   const blob = new Blob([rows.join(nl)], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
@@ -2052,7 +2130,7 @@ function calcMifflinBMR() {
 }
 
 function initMifflinListeners() {
-  ['bmrAge','bmrHeight','bmrWeight','bmrSex'].forEach(id => {
+  ['bmrAge','bmrHeight','bmrSex'].forEach(id => {  // bmrWeight is readonly, synced from todayWeight
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => {
@@ -2062,12 +2140,10 @@ function initMifflinListeners() {
         if (bmrEl) bmrEl.value = bmr;
         weights.bmr = bmr;
         // Save mifflin inputs
-        weights.mifflin = {
-          age:    parseFloat(document.getElementById('bmrAge')?.value) || null,
-          height: parseFloat(document.getElementById('bmrHeight')?.value) || null,
-          weight: parseFloat(document.getElementById('bmrWeight')?.value) || null,
-          sex:    document.getElementById('bmrSex')?.value || 'm',
-        };
+        if (!weights.mifflin) weights.mifflin = {};
+        weights.mifflin.age    = parseFloat(document.getElementById('bmrAge')?.value) || null;
+        weights.mifflin.height = parseFloat(document.getElementById('bmrHeight')?.value) || null;
+        weights.mifflin.sex    = document.getElementById('bmrSex')?.value || 'm';
         persist(); updateBMRCalc();
       }
     });
@@ -2077,8 +2153,17 @@ function initMifflinListeners() {
     const m = weights.mifflin;
     if (m.age    && document.getElementById('bmrAge'))    document.getElementById('bmrAge').value    = m.age;
     if (m.height && document.getElementById('bmrHeight')) document.getElementById('bmrHeight').value = m.height;
-    if (m.weight && document.getElementById('bmrWeight')) document.getElementById('bmrWeight').value = m.weight;
     if (m.sex    && document.getElementById('bmrSex'))    document.getElementById('bmrSex').value    = m.sex;
+  }
+  // Always sync weight from todayWeight
+  const bmrW = document.getElementById('bmrWeight');
+  if (bmrW && weights.today != null) bmrW.value = weights.today;
+  // Restore manual BMR input and sync to bmrInput so slider works
+  const manInput = document.getElementById('bmrManualInput');
+  if (manInput && weights.bmr && weights.bmrManual) {
+    manInput.value = weights.bmr;
+    const bmrEl = document.getElementById('bmrInput');
+    if (bmrEl) bmrEl.value = weights.bmr;
   }
 }
 
@@ -2090,14 +2175,22 @@ function initQuickSearch() {
   const dropdown = document.getElementById('quickDropdown');
   if (!input || !dropdown) return;
 
-  input.addEventListener('input', () => {
-    const q = input.value.toLowerCase().trim();
+  // Remove old listeners by cloning the node
+  const newInput = input.cloneNode(true);
+  input.parentNode.replaceChild(newInput, input);
+  const inp = newInput;
+
+  inp.addEventListener('input', () => {
+    const q = inp.value.toLowerCase().trim();
     if (!q) { dropdown.style.display = 'none'; quickSelectedFood = null; return; }
     const matches = library
       .filter(f => f.name.toLowerCase().includes(q))
       .sort((a,b) => a.name.localeCompare(b.name))
       .slice(0, 20);
-    if (!matches.length) { dropdown.style.display = 'none'; return; }
+    if (!matches.length) {
+      dropdown.innerHTML = '<div style="padding:10px 12px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--border);">No foods match.</div>';
+      dropdown.style.display = 'block'; return;
+    }
     dropdown.innerHTML = matches.map((f,i) =>
       '<div data-idx="'+library.indexOf(f)+'" style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;color:var(--text-bright);">' +
         escapeHtml(f.name) +
@@ -2108,14 +2201,15 @@ function initQuickSearch() {
     dropdown.querySelectorAll('[data-idx]').forEach(row => {
       row.addEventListener('click', () => {
         const idx = +row.dataset.idx;
-        quickSelectedFood = library[idx];
-        input.value = quickSelectedFood.name;
+        // Copy at selection time to avoid stale reference
+        quickSelectedFood = Object.assign({}, library[idx]);
+        inp.value = library[idx].name;
         dropdown.style.display = 'none';
       });
     });
   });
 
-  input.addEventListener('blur', () => {
+  inp.addEventListener('blur', () => {
     setTimeout(() => { dropdown.style.display = 'none'; }, 150);
   });
 }
@@ -2146,14 +2240,7 @@ function persist() {
     if (orig && JSON.stringify(orig) !== JSON.stringify(f)) edited[f.name] = f;
   }
   saveJSON('ft_edited_foods', edited);
-  // Strip internal _origIdx tags before saving
-  const cleanLog = {};
-  Object.keys(log).forEach(dk => {
-    cleanLog[dk] = log[dk].map(e => {
-      const c = Object.assign({}, e); delete c._origIdx; return c;
-    });
-  });
-  saveJSON(SK.LOG, cleanLog);
+  saveJSON(SK.LOG, log);
   saveJSON(SK.TARGETS, targets);
   saveJSON(SK.WEIGHTS, weights);
   saveJSON(SK.SETTINGS, settings);
@@ -2168,9 +2255,22 @@ function escapeHtml(s) {
 let toastTimer;
 function toast(msg, duration) {
   const t = document.getElementById('toast');
-  t.innerHTML = msg; t.classList.add('show');
+  t.innerHTML = msg;
+  t.onclick = null;
+  t.style.cursor = 'default';
+  t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), duration || 2000);
+}
+
+function showUndoToast() {
+  const t = document.getElementById('toast');
+  t.innerHTML = 'Deleted — tap to undo';
+  t.style.cursor = 'pointer';
+  t.onclick = () => { undoLastDelete(); t.classList.remove('show'); t.onclick = null; t.style.cursor = 'default'; };
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); t.onclick = null; }, 4000);
 }
 
 // ── INIT ───────────────────────────────────────────
@@ -2203,7 +2303,7 @@ function exportBackup() {
     'ft_settings_v1','ft_routines_v1',
     'ft_local_library','ft_deleted_foods','ft_edited_foods'
   ];
-  const data = { _version: 1, _exported: new Date().toISOString() };
+  const data = { _version: 2, _exported: new Date().toISOString() };
   BACKUP_KEYS.forEach(k => {
     const v = localStorage.getItem(k);
     if (v) data[k] = JSON.parse(v);
@@ -2418,10 +2518,17 @@ function resetMealModal() {
     });
   }
   const skipBtn = document.getElementById('mealModalSkip');
-  if (skipBtn) skipBtn.onclick = () => resolveMealPicker(null);
+  if (skipBtn) skipBtn.onclick = () => resolveMealPicker('skip');
+}
+
+function safeRender(fn, label) {
+  try { fn(); } catch(err) {
+    console.error('Render error in ' + label + ':', err);
+  }
 }
 
 function init() {
+  try {
   localStorage.removeItem('ft_library_v1');
 
   library  = buildLibrary();
@@ -2471,6 +2578,12 @@ function init() {
   document.getElementById('todayWeight').addEventListener('change', e => {
     weights.today = e.target.value !== '' ? parseFloat(e.target.value) : null;
     weights.weightDate = todayKey();
+    // Sync to BMR weight field and recalculate
+    const bmrW = document.getElementById('bmrWeight');
+    if (bmrW && weights.today != null) {
+      bmrW.value = weights.today;
+      updateBMRCalcFromMifflin();
+    }
     // Store in history array
     if (weights.today != null) {
       if (!weights.history) weights.history = [];
@@ -2546,15 +2659,20 @@ function init() {
   // Escape closes modals
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); }
+    // Keyboard shortcuts for meal picker when open
+    if (document.getElementById('mealModal').classList.contains('open')) {
+      const map = { 'b':'B', 'l':'L', 'd':'D', 's':'S' };
+      if (map[e.key.toLowerCase()]) resolveMealPicker(map[e.key.toLowerCase()]);
+    }
   });
 
   // Meal modal buttons
   document.querySelectorAll('[data-meal]').forEach(btn => {
     btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
   });
-  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
+  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker('skip'));
   document.getElementById('mealModal').addEventListener('click', e => {
-    if (e.target.id === 'mealModal') resolveMealPicker(null);
+    if (e.target.id === 'mealModal') resolveMealPicker('skip');
   });
 
   // Import file listener
@@ -2580,9 +2698,19 @@ function init() {
     const h = window.location.hash.replace('#','');
     if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
   });
+  } catch(err) {
+    const el = document.getElementById('js-error');
+    if (el) { el.textContent = 'Startup error: ' + err.message; el.style.display = 'block'; }
+    console.error('Init error:', err);
+  }
 }
 
 init();
+
+// Register service worker for offline support
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
