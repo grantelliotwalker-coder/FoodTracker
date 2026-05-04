@@ -251,10 +251,9 @@ section { margin-bottom: 20px; }
 
 /* ── HISTORY ─────────────────────────────────────────────── */
 .history-date-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-.history-date-row input[type="date"] { background: var(--bg2); border: 1px solid var(--border); padding: 10px; font-family: inherit; font-size: 13px; color: var(--text); border-radius: 0; flex: 1; min-width: 140px; }
+.history-date-row input[type="date"] { background: linear-gradient(135deg, var(--bg2), var(--bg3)); border: 1px solid var(--green); padding: 10px; font-family: inherit; font-size: 13px; color: var(--text); border-radius: 0; flex: 1; min-width: 140px; animation: dateGlow 2s ease-in-out infinite alternate; }
 .history-date-row input[type="date"]:focus { outline: none; border-color: var(--green); }
-.history-date-row input[type="date"] { box-shadow: 0 0 0 1px var(--green), 0 0 12px rgba(57,211,83,0.15); animation: dateGlow 2s ease-in-out infinite alternate; }
-@keyframes dateGlow { from { box-shadow: 0 0 0 1px var(--green), 0 0 6px rgba(57,211,83,0.1); } to { box-shadow: 0 0 0 1px var(--green), 0 0 16px rgba(57,211,83,0.3); } }
+@keyframes dateGlow { from { box-shadow: 0 0 0 1px var(--green), 0 0 8px rgba(57,211,83,0.2); } to { box-shadow: 0 0 0 2px var(--green), 0 0 22px rgba(57,211,83,0.55); } }
 .history-summary { background: var(--bg2); border: 1px solid var(--border); padding: 14px; margin-bottom: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 @media (min-width: 480px) { .history-summary { grid-template-columns: repeat(4, 1fr); } }
 .history-summary .h-item .lbl { font-size: 8px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
@@ -304,6 +303,9 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 .accent-swatch:hover { transform: scale(1.15); }
 .accent-swatch.active { border-color: var(--text-bright); }
 
+.help-btn { position: fixed; bottom: 44px; right: max(16px, env(safe-area-inset-right)); width: 32px; height: 32px; background: var(--bg3); border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 13px; cursor: pointer; z-index: 49; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
+.help-btn:hover, .help-btn:active { border-color: var(--green); color: var(--green); }
+
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); color: var(--green); border: 1px solid var(--green); padding: 10px 16px; font-family: inherit; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transition: all 0.25s; z-index: 200; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -344,13 +346,18 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="nav-title">WEIGHT LOG</div>
         <div class="nav-desc">Track weight &amp; projection.</div>
       </button>
-      <button class="nav-card" onclick="navigate('trends')">
+      <button class="nav-card" onclick="navigate('goals')">
         <div class="nav-num">[ 05 ]</div>
+        <div class="nav-title">GOALS</div>
+        <div class="nav-desc">Set targets &amp; get recommendations.</div>
+      </button>
+      <button class="nav-card" onclick="navigate('trends')">
+        <div class="nav-num">[ 06 ]</div>
         <div class="nav-title">TRENDS</div>
         <div class="nav-desc">Visualise your progress.</div>
       </button>
       <button class="nav-card" onclick="navigate('settings')">
-        <div class="nav-num">[ 06 ]</div>
+        <div class="nav-num">[ 07 ]</div>
         <div class="nav-title">SETTINGS</div>
         <div class="nav-desc">Theme &amp; preferences.</div>
       </button>
@@ -565,13 +572,13 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
       <div class="targets-panel" style="margin-bottom:12px;">
         <div class="section-head" style="border:none;padding:0;margin-bottom:10px;">
           <h2>TDEE Calculator</h2>
-          <span class="meta" style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:9px;color:var(--muted);" id="bmrModeLabel">Calculator</span>
+          <span class="meta" style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:9px;font-weight:700;color:var(--green);" id="bmrLabelAuto">Auto</span>
             <label class="toggle" style="width:36px;height:20px;">
               <input type="checkbox" id="bmrManualToggle">
               <span class="toggle-slider"></span>
             </label>
-            <span style="font-size:9px;color:var(--muted);">Manual</span>
+            <span style="font-size:9px;color:var(--muted);" id="bmrLabelManual">Manual</span>
           </span>
         </div>
         <div id="bmrCalcSection">
@@ -607,14 +614,15 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
             <div style="font-size:13px;font-weight:700;color:var(--green);" id="tdeeCalcResult">Enter BMR to begin</div>
           </div>
         </div>
+      </div>
+        </div><!-- /bmrCalcSection -->
+        <!-- Activity slider always visible -->
         <input type="range" id="activitySlider" min="0" max="4" step="1" value="1"
-          style="width:100%;accent-color:var(--green);cursor:pointer;margin-bottom:8px;">
+          style="width:100%;accent-color:var(--green);cursor:pointer;margin:8px 0;">
         <div style="background:var(--bg3);border:1px solid var(--border);padding:10px;margin-bottom:10px;">
           <div style="font-size:11px;font-weight:700;color:var(--text-bright);" id="activityLabel">Lightly Active</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="activityDesc">Light exercise 1–3 days/week · ×1.375</div>
         </div>
-      </div>
-        </div><!-- /bmrCalcSection -->
       <div id="bmrManualSection" style="display:none;">
         <div class="weight-card" style="margin-bottom:12px;">
           <div class="lbl">BMR (cal) — enter manually</div>
@@ -627,9 +635,25 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <input type="number" id="tdeeInput" step="10" placeholder="e.g. 2726" inputmode="numeric">
         <div class="sub">Calories eaten - TDEE = calorie balance</div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted);font-family:inherit;">
-        <div style="font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Live Calculation</div>
-        <div id="projFormula" style="color:var(--text);letter-spacing:0.02em;">— cal eaten - (— TDEE + — workout) = —</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:12px;margin-bottom:12px;">
+        <div style="font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Live Calculation</div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:4px;align-items:end;text-align:center;">
+          <div>
+            <div style="font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Food</div>
+            <div id="formulaEaten" style="font-size:20px;font-weight:700;color:var(--text-bright);">—</div>
+          </div>
+          <div style="font-size:20px;color:var(--muted);padding-bottom:2px;">-</div>
+          <div>
+            <div style="font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">TDEE</div>
+            <div id="formulaTDEE" style="font-size:20px;font-weight:700;color:var(--text-bright);">—</div>
+          </div>
+          <div style="font-size:20px;color:var(--muted);padding-bottom:2px;">=</div>
+          <div>
+            <div style="font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;" id="formulaBalanceLabel">Balance</div>
+            <div id="formulaResult" style="font-size:20px;font-weight:700;">—</div>
+          </div>
+        </div>
+        <div id="formulaComment" style="font-size:9px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:0.05em;"></div>
       </div>
       <div class="projection">
         <div class="proj-item"><div class="lbl">Calorie Balance</div><div class="val" id="projBal">— <span class="unit">cal</span></div></div>
@@ -638,6 +662,69 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="proj-item"><div class="lbl">Days to Goal</div><div class="val" id="projDays">—</div></div>
       </div>
     </section>
+  </section>
+
+  <!-- ═══════════════ GOALS ═══════════════ -->
+  <section class="view" id="view-goals">
+    <div class="section-head">
+      <h2>Goals</h2>
+      <span class="meta" id="goalsMeta">Set your goal</span>
+    </div>
+
+    <!-- Goal selector -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <button id="goalFatLoss" class="btn ghost" onclick="setGoal('fat_loss')"
+        style="padding:20px 10px;font-size:11px;flex-direction:column;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:24px;">↓</span>
+        <span>Fat Loss</span>
+      </button>
+      <button id="goalMuscle" class="btn ghost" onclick="setGoal('muscle_gain')"
+        style="padding:20px 10px;font-size:11px;flex-direction:column;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:24px;">↑</span>
+        <span>Muscle Gain</span>
+      </button>
+    </div>
+
+    <!-- Recommendations panel -->
+    <div id="goalsPanel" style="display:none;">
+      <div class="section-head"><h2>Recommendations</h2></div>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;margin-bottom:12px;">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Based on your TDEE &amp; activity level</div>
+        <div id="goalsCalRec" style="font-size:22px;font-weight:700;color:var(--green);margin-bottom:4px;">—</div>
+        <div style="font-size:10px;color:var(--muted);" id="goalsCalDesc">—</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px;text-align:center;">
+          <div style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Protein</div>
+          <div id="goalsProt" style="font-size:18px;font-weight:700;color:var(--green);">—</div>
+          <div style="font-size:9px;color:var(--muted);">g/day</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px;text-align:center;">
+          <div style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Fat</div>
+          <div id="goalsFat" style="font-size:18px;font-weight:700;color:var(--text-bright);">—</div>
+          <div style="font-size:9px;color:var(--muted);">g/day</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:12px;text-align:center;">
+          <div style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Carbs</div>
+          <div id="goalsCarbs" style="font-size:18px;font-weight:700;color:var(--amber);">—</div>
+          <div style="font-size:9px;color:var(--muted);">g/day</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;margin-bottom:12px;">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Macro Split</div>
+        <div id="goalsSplit" style="font-size:12px;color:var(--text);">—</div>
+      </div>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;margin-bottom:12px;">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Rationale</div>
+        <div id="goalsRationale" style="font-size:11px;color:var(--text);line-height:1.7;">—</div>
+      </div>
+
+      <button class="btn" style="width:100%;" onclick="applyGoalTargets()">Apply to Daily Targets ↓</button>
+    </div>
   </section>
 
   <!-- ═══════════════ TRENDS ═══════════════ -->
@@ -741,6 +828,19 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   </section>
 
 </div><!-- /wrap -->
+
+<button class="help-btn" id="helpBtn" onclick="openHelpModal()" aria-label="Help">?</button>
+
+<!-- HELP MODAL -->
+<div class="modal-bg" id="helpModal" role="dialog" aria-modal="true" aria-label="Help">
+  <div class="modal" style="max-width:420px;">
+    <h3 id="helpModalTitle">Help</h3>
+    <div id="helpModalBody" style="font-size:11px;color:var(--text);line-height:1.8;margin-bottom:16px;"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeHelpModal()">Got it</button>
+    </div>
+  </div>
+</div>
 
 <footer id="appFooter" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;z-index:50;" onclick="openInfoModal()">
   <span style="font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);">FOOD/TRACKER</span>
@@ -849,8 +949,8 @@ const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', 
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
 const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1, history:[], bmrManual:false };
 const KJ_PER_KG_FAT = 37000;
-const VALID_VIEWS = ['home','tracker','library','history','weight','trends','settings'];
-const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', settings:'Settings' };
+const VALID_VIEWS = ['home','tracker','library','history','weight','trends','goals','settings'];
+const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', goals:'Goals', settings:'Settings' };
 
 function loadJSON(key, fallback) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
@@ -916,6 +1016,7 @@ function navigate(view) {
     case 'history':  initHistory(); break;
     case 'weight':   safeRender(renderTotals, 'totals'); break;
     case 'trends':   safeRender(renderTrends, 'trends'); break;
+    case 'goals':    safeRender(renderGoals, 'goals'); break;
     case 'settings': renderSettings(); break;
   }
   history.replaceState(null, '', '#' + view);
@@ -1222,16 +1323,36 @@ function renderProjection(t) {
   // Use TDEE for projection — meaningful even at 0 food logged
   const tdee = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
   const bal = t.cal - tdee;
-  // Live formula
-  const fEl = document.getElementById('projFormula');
-  if (fEl) {
-    const eaten = Math.round(t.cal);
-    const result = Math.round(bal);
-    const color = bal < 0 ? 'var(--green)' : 'var(--red)';
-    fEl.innerHTML = '<span style="color:var(--text-bright);">' + eaten + '</span> - ' + tdee + ' = <strong style="color:' + color + ';">' + (result >= 0 ? '+' : '') + result + '</strong>';
-  }
+  // Live formula — labelled grid
+  const setF  = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const setFH = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+  setF('formulaEaten', Math.round(t.cal));
+  setF('formulaTDEE', tdee);
+  const balResult = Math.round(bal);
+  const balColor  = bal < 0 ? 'var(--green)' : 'var(--red)';
+  const balLabel  = bal < 0 ? 'Deficit' : bal > 0 ? 'Surplus' : 'Balance';
+  setFH('formulaResult', '<span style="color:' + balColor + ';">' + (balResult >= 0 ? '+' : '') + balResult + '</span>');
+  setF('formulaBalanceLabel', balLabel);
+  // Colour balance based on goal
+  const goal = settings.goal;
+  let balGood = bal < 0; // default: deficit is good
+  if (goal === 'muscle_gain') balGood = bal > 0; // surplus is good for muscle
+  const balClass = balGood ? 'neg' : 'pos';
   setHTML('projBal', (bal>=0?'+':'') + Math.round(bal) + ' <span class="unit">cal</span>');
-  tog('projBal','neg',bal<0); tog('projBal','pos',bal>0);
+  tog('projBal','neg', balGood); tog('projBal','pos', !balGood && bal !== 0);
+  // Formula comment
+  const commentEl = document.getElementById('formulaComment');
+  if (commentEl) {
+    if (!goal) {
+      commentEl.textContent = '';
+    } else if (goal === 'fat_loss') {
+      commentEl.textContent = bal < -800 ? '⚠ Large deficit — consider eating more protein' : bal < 0 ? '✓ Good deficit for fat loss' : '✗ Surplus — not aligned with fat loss goal';
+      commentEl.style.color = bal < 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+      commentEl.textContent = bal > 500 ? '⚠ Large surplus — may gain excess fat' : bal > 0 ? '✓ Good surplus for muscle gain' : '✗ Deficit — not aligned with muscle gain goal';
+      commentEl.style.color = bal > 0 ? 'var(--green)' : 'var(--red)';
+    }
+  }
 
   const dailyFatG = (bal * 4.184 / KJ_PER_KG_FAT) * 1000;
   const weeklyKg = (dailyFatG * 7) / 1000;
@@ -2008,10 +2129,10 @@ function initBMRCalc() {
     // Restore saved mode
     if (weights.bmrManual) toggleEl.checked = true;
     applyBMRMode();
+    updateBMRModeLabels();
     toggleEl.addEventListener('change', () => {
       weights.bmrManual = toggleEl.checked;
-      const lbl = document.getElementById('bmrModeLabel');
-      if (lbl) lbl.textContent = toggleEl.checked ? 'Manual' : 'Calculator';
+      updateBMRModeLabels();
       persist(); applyBMRMode();
     });
     if (manInput) {
@@ -2024,6 +2145,16 @@ function initBMRCalc() {
       });
     }
   }
+}
+
+function updateBMRModeLabels() {
+  const toggleEl = document.getElementById('bmrManualToggle');
+  const autoLbl  = document.getElementById('bmrLabelAuto');
+  const manLbl   = document.getElementById('bmrLabelManual');
+  if (!toggleEl) return;
+  const isManual = toggleEl.checked;
+  if (autoLbl) { autoLbl.style.color = isManual ? 'var(--muted)' : 'var(--green)'; autoLbl.style.fontWeight = isManual ? '300' : '700'; }
+  if (manLbl)  { manLbl.style.color  = isManual ? 'var(--green)' : 'var(--muted)'; manLbl.style.fontWeight  = isManual ? '700' : '300'; }
 }
 
 function applyBMRMode() {
@@ -2062,6 +2193,16 @@ function updateBMRCalc() {
     weights._calcTDEE = null;
   }
 }
+
+function applyTDEEFromCalc() {
+  if (!weights._calcTDEE) { toast('Enter your BMR first'); return; }
+  const tdeeEl = document.getElementById('tdeeInput');
+  if (tdeeEl) tdeeEl.value = weights._calcTDEE;
+  weights.tdee = weights._calcTDEE;
+  persist(); renderTotals();
+  toast('TDEE set to ' + weights._calcTDEE + ' cal');
+}
+function applyTDEE() { applyTDEEFromCalc(); }
 
 function updateBMRCalcFromMifflin() {
   const bmr = calcMifflinBMR();
@@ -2221,6 +2362,158 @@ function undoLastDelete() {
   undoBuffer = null;
   persist(); renderLog(); renderTotals();
   toast('Restored: ' + entry.name);
+}
+
+// ── HELP ─────────────────────────────────────────────────
+const HELP_CONTENT = {
+  home: {
+    title: 'Home',
+    body: 'Your launch pad. Each card takes you to a different part of the app. Start by setting up your Daily Targets and Weight Log, then log food in the Daily Tracker each day.'
+  },
+  tracker: {
+    title: 'Daily Tracker',
+    body: 'Log everything you eat today. Set your calorie target and macro split at the top — the app calculates gram targets automatically.\n\nUse the food search to add items. Each entry gets a meal tag (B/L/D/S) to group your log.\n\nThe macro dials show progress toward your targets. Green = on track, amber = slightly over, red = way over.\n\nTap Report to copy a summary to share with a coach.'
+  },
+  library: {
+    title: 'Food Library',
+    body: 'Your food database. All foods you add here are available in the tracker search.\n\nRoutines let you save a group of foods you eat together regularly and log them all at once with one tap.\n\nEach food needs calories or kJ plus all three macros to be saved.'
+  },
+  history: {
+    title: 'History',
+    body: 'View and edit any past day. Tap the glowing date field to pick a date, then tap Show to see entries.\n\nYou can delete individual entries, or use Copy to Today to bring a past day into today — useful if you eat the same thing regularly.'
+  },
+  weight: {
+    title: 'Weight Log',
+    body: 'Log your wake-up weight each morning. Yesterday carries forward automatically.\n\nThe TDEE Calculator works out your Total Daily Energy Expenditure:\n1. Set BMR (auto via Mifflin calculator, or manual)\n2. Set activity level on the slider\n3. Tap Use to apply to projection\n\nLive Calculation shows: Food - TDEE = Deficit or Surplus in real time.'
+  },
+  goals: {
+    title: 'Goals',
+    body: 'Choose Fat Loss or Muscle Gain. The app recommends a calorie target and macro split based on your TDEE and activity level.\n\nFat Loss: moderate deficit with high protein to preserve muscle.\nMuscle Gain: modest surplus with high carbs to fuel training.\n\nTap Apply to push recommendations straight into your tracker targets.'
+  },
+  trends: {
+    title: 'Trends',
+    body: 'Visualise your data over time. Select up to 3 metrics to overlay — calories, protein, fat, carbs, cost, or weight.\n\nUse Week or Month to change the window, and arrows to scroll back.\n\nWeight history builds from your daily wake-up weight entries.'
+  },
+  settings: {
+    title: 'Settings',
+    body: 'Personalise the look with light/dark mode and accent colour.\n\nBackup: export all data as JSON to transfer devices. Import to restore.\n\nCSV Export: download logs and weight history as a spreadsheet.\n\nDanger Zone: reset library to defaults or clear all data.'
+  }
+};
+
+function openHelpModal() {
+  const content = HELP_CONTENT[currentView] || HELP_CONTENT.home;
+  const title = document.getElementById('helpModalTitle');
+  const body  = document.getElementById('helpModalBody');
+  if (title) title.textContent = content.title;
+  if (body)  body.innerHTML = content.body.replace(/\n/g, '<br><br>');
+  document.getElementById('helpModal').classList.add('open');
+}
+
+function closeHelpModal() {
+  document.getElementById('helpModal').classList.remove('open');
+}
+
+// ── GOALS ────────────────────────────────────────────────
+const GOAL_PRESETS = {
+  fat_loss: {
+    label: 'Fat Loss',
+    // Calorie deficit % by activity level
+    deficitPct: [0.15, 0.18, 0.20, 0.20, 0.20],
+    // Macro splits: [protein%, fat%, carb%]
+    macros: [0.35, 0.40, 0.25],
+    rationale: 'A moderate calorie deficit with high protein preserves muscle while losing fat. Protein at 35% supports muscle retention. Fat at 40% keeps hormones stable. Carbs at 25% fuel workouts without excess.'
+  },
+  muscle_gain: {
+    label: 'Muscle Gain',
+    // Calorie surplus %
+    surplusPct: [0.10, 0.10, 0.12, 0.12, 0.15],
+    macros: [0.30, 0.25, 0.45],
+    rationale: 'A lean bulk with a modest surplus minimises fat gain while supporting muscle growth. High carbs fuel training and recovery. Protein at 30% provides the building blocks for new muscle tissue.'
+  }
+};
+
+function setGoal(goal) {
+  settings.goal = goal;
+  persist();
+  renderGoals();
+}
+
+function renderGoals() {
+  const goal = settings.goal;
+  // Update button states
+  ['fat_loss','muscle_gain'].forEach(g => {
+    const btn = document.getElementById('goal' + (g === 'fat_loss' ? 'FatLoss' : 'Muscle'));
+    if (!btn) return;
+    btn.className = g === goal ? 'btn' : 'btn ghost';
+    btn.style.flexDirection = 'column';
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+    btn.style.padding = '20px 10px';
+    btn.style.fontSize = '11px';
+  });
+
+  const panel = document.getElementById('goalsPanel');
+  const meta  = document.getElementById('goalsMeta');
+  if (!goal) {
+    if (panel) panel.style.display = 'none';
+    if (meta)  meta.textContent = 'Select a goal above';
+    return;
+  }
+  if (panel) panel.style.display = 'block';
+
+  const preset  = GOAL_PRESETS[goal];
+  const tdee    = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
+  const actIdx  = weights.activityLevel || 1;
+
+  let targetCal, calDesc;
+  if (goal === 'fat_loss') {
+    const deficit = Math.round(tdee * preset.deficitPct[actIdx]);
+    targetCal = tdee - deficit;
+    calDesc   = deficit + ' cal deficit from TDEE of ' + tdee;
+  } else {
+    const surplus = Math.round(tdee * preset.surplusPct[actIdx]);
+    targetCal = tdee + surplus;
+    calDesc   = surplus + ' cal surplus above TDEE of ' + tdee;
+  }
+
+  const [pp, fp, cp] = preset.macros;
+  const protG  = Math.round((targetCal * pp) / 4);
+  const fatG   = Math.round((targetCal * fp) / 9);
+  const carbG  = Math.round((targetCal * cp) / 4);
+
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setText('goalsCalRec',   targetCal + ' cal/day');
+  setText('goalsCalDesc',  calDesc);
+  setText('goalsProt',     protG + 'g');
+  setText('goalsFat',      fatG  + 'g');
+  setText('goalsCarbs',    carbG + 'g');
+  setText('goalsSplit',    'Protein ' + Math.round(pp*100) + '% / Fat ' + Math.round(fp*100) + '% / Carbs ' + Math.round(cp*100) + '%');
+  setText('goalsRationale', preset.rationale);
+  if (meta) meta.textContent = preset.label + ' · ' + targetCal + ' cal/day';
+
+  // Store recommended values for apply
+  settings._goalRec = { cal: targetCal, p: protG, f: fatG, c: carbG,
+    ppct: Math.round(pp*100), fpct: Math.round(fp*100), cpct: Math.round(cp*100) };
+}
+
+function applyGoalTargets() {
+  if (!settings._goalRec) { toast('Select a goal first'); return; }
+  const r = settings._goalRec;
+  targets.burn = r.cal;
+  targets.ppct = r.ppct;
+  targets.fpct = r.fpct;
+  targets.cpct = r.cpct;
+  updateDerivedTargets();
+  persist(); renderTotals();
+  // Update inputs
+  ['targetBurn','targetPpct','targetFpct','targetCpct'].forEach(id => {
+    const el = document.getElementById(id);
+    const key = {targetBurn:'burn',targetPpct:'ppct',targetFpct:'fpct',targetCpct:'cpct'}[id];
+    if (el) el.value = targets[key];
+  });
+  toast('Targets applied — check Daily Tracker');
+  navigate('tracker');
 }
 
 function persist() {
@@ -2532,7 +2825,7 @@ function init() {
   log      = loadJSON(SK.LOG, {});
   targets  = loadJSON(SK.TARGETS, DEFAULT_TARGETS);
   weights  = Object.assign({}, DEFAULT_WEIGHTS, loadJSON(SK.WEIGHTS, {}));
-  settings = loadJSON(SK.SETTINGS, { lightMode: false });
+  settings = loadJSON(SK.SETTINGS, { lightMode: false, goal: null });
   routines = loadJSON(SK.ROUTINES, []);
 
   applyTheme();
@@ -2655,7 +2948,7 @@ function init() {
 
   // Escape closes modals
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); }
+    if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); closeHelpModal(); }
     // Keyboard shortcuts for meal picker when open
     if (document.getElementById('mealModal').classList.contains('open')) {
       const map = { 'b':'B', 'l':'L', 'd':'D', 's':'S' };
