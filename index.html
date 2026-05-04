@@ -1031,7 +1031,7 @@ const SNACK_TIME_HOURS = {
 // Build ordered sections: B, morning snacks, L, afternoon snacks, D, evening snacks, Other
 function buildMealSections(entries) {
   const sections = [];
-  // Tag each entry with its original index so renderers can use it reliably
+  const indexed = entries.map((e, i) => ({ e, i }));
   const breakfast = indexed.filter(x => x.e._meal === 'B');
   const lunch     = indexed.filter(x => x.e._meal === 'L');
   const dinner    = indexed.filter(x => x.e._meal === 'D');
@@ -2364,7 +2364,7 @@ function copyDailyReport() {
     sections.forEach(section => {
       r += section.label + nl;
       let gCal=0,gP=0,gF=0,gC=0;
-      section.entries.forEach(e => {
+      section.entries.forEach(({e}) => {
         r += '-' + e.name + (e.qty!==1?' x'+e.qty:'') + nl;
         r += '  -> ' + Math.round(e.cal*e.qty) + 'cal' + nl;
         gCal+=e.cal*e.qty; gP+=e.p*e.qty; gF+=e.f*e.qty; gC+=e.c*e.qty;
