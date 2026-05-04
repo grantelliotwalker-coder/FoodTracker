@@ -511,7 +511,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   <section class="view" id="view-history">
     <div class="section-head">
       <h2>History</h2>
-      <span class="meta">View &amp; edit past days</span>
+      <span class="meta" id="historyMeta">View &amp; edit past days</span>
     </div>
     <div class="history-date-row">
       <input type="date" id="historyDate">
@@ -1032,11 +1032,11 @@ const SNACK_TIME_HOURS = {
 function buildMealSections(entries) {
   const sections = [];
   // Tag each entry with its original index so renderers can use it reliably
-  const breakfast = tagged.filter(e => e._meal === 'B');
-  const lunch     = tagged.filter(e => e._meal === 'L');
-  const dinner    = tagged.filter(e => e._meal === 'D');
-  const snacks    = tagged.filter(e => e._meal === 'S');
-  const other     = tagged.filter(e => !e._meal);
+  const breakfast = indexed.filter(x => x.e._meal === 'B');
+  const lunch     = indexed.filter(x => x.e._meal === 'L');
+  const dinner    = indexed.filter(x => x.e._meal === 'D');
+  const snacks    = indexed.filter(x => x.e._meal === 'S');
+  const other     = indexed.filter(x => !x.e._meal);
 
   // Group snacks by time
   const snackGroups = {};
