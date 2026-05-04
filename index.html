@@ -878,18 +878,11 @@ let undoBuffer = null; // { dateKey, entry, index }
 let routineItems = []; // temp buffer while editing routine modal
 
 // ── DATE HELPERS ───────────────────────────────────
-let _todayKeyCache = null, _todayKeyCacheTime = 0;
 function todayKey() {
-  const now = Date.now();
-  // Invalidate cache every 30 seconds
-  if (!_todayKeyCache || now - _todayKeyCacheTime > 30000) {
-    const d = new Date();
-    _todayKeyCache = d.getFullYear() + '-' +
-      String(d.getMonth() + 1).padStart(2, '0') + '-' +
-      String(d.getDate()).padStart(2, '0');
-    _todayKeyCacheTime = now;
-  }
-  return _todayKeyCache;
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
 }
 function todayDisplay() {
   return new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }).toUpperCase();
@@ -2524,6 +2517,8 @@ function resetMealModal() {
 function safeRender(fn, label) {
   try { fn(); } catch(err) {
     console.error('Render error in ' + label + ':', err);
+    const el = document.getElementById('js-error');
+    if (el) { el.textContent = 'Render error (' + label + '): ' + err.message; el.style.display = 'block'; }
   }
 }
 
