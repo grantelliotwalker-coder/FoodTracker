@@ -319,6 +319,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
   <header class="masthead">
     <div class="logo" onclick="navigate('home')">FOOD<em>/</em>TRACKER<span class="cursor"></span></div>
     <div class="meta"><span id="todayDate">—</span><br>DAY <span id="dayNum">—</span></div>
+    <button id="refreshBtn" title="Refresh / new day" onclick="location.reload()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer;padding:4px 8px;line-height:1;transition:all 0.15s;flex-shrink:0;" aria-label="Refresh" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)';" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">↺</button>
   </header>
 
   <div class="crumbs" id="crumbs"></div>
@@ -443,9 +444,15 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <section>
       <div class="section-head">
         <h2>Add Food</h2>
-        <span class="meta"><a onclick="navigate('library')" style="cursor:pointer;color:var(--green);text-decoration:none;">Library →</a></span>
+        <span class="meta">
+          <button class="btn" id="addModeLibBtn" onclick="setAddMode('lib')" style="font-size:9px;padding:6px 10px;">Library</button>
+          <button class="btn ghost" id="addModeOneoffBtn" onclick="setAddMode('oneoff')" style="font-size:9px;padding:6px 10px;">One-off</button>
+          <a onclick="navigate('library')" style="cursor:pointer;color:var(--muted);text-decoration:none;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">Manage →</a>
+        </span>
       </div>
-      <div class="quick-add">
+
+      <!-- Library search mode -->
+      <div class="quick-add" id="addPanelLib">
         <div class="quick-add-row">
           <div style="position:relative;">
             <span class="field-lbl">Food</span>
@@ -458,6 +465,44 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
             <input type="number" id="quickQty" value="1" step="1" min="0.1" inputmode="decimal">
           </div>
           <button class="btn" id="quickAddBtn" style="align-self:end;">+ ADD</button>
+        </div>
+      </div>
+
+      <!-- One-off entry mode -->
+      <div class="quick-add" id="addPanelOneoff" style="display:none;">
+        <div style="margin-bottom:10px;">
+          <span class="field-lbl">Name (optional)</span>
+          <input type="text" id="oneoffName" placeholder="e.g. Restaurant meal" autocomplete="off"
+            style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div>
+            <span class="field-lbl">Calories <span style="color:var(--red);">*</span></span>
+            <input type="number" id="oneoffCal" placeholder="e.g. 450" step="1" inputmode="decimal"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+          </div>
+          <div>
+            <span class="field-lbl">Protein (g)</span>
+            <input type="number" id="oneoffP" placeholder="0" step="0.1" inputmode="decimal"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+          </div>
+          <div>
+            <span class="field-lbl">Fat (g)</span>
+            <input type="number" id="oneoffF" placeholder="0" step="0.1" inputmode="decimal"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+          </div>
+          <div>
+            <span class="field-lbl">Carbs (g)</span>
+            <input type="number" id="oneoffC" placeholder="0" step="0.1" inputmode="decimal"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);padding:10px;font-family:inherit;font-size:14px;color:var(--text);border-radius:0;">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" id="oneoffAddBtn" style="flex:1;">+ LOG ONE-OFF</button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">
+            <input type="checkbox" id="oneoffSaveLib" style="accent-color:var(--green);width:14px;height:14px;">
+            Save to library
+          </label>
         </div>
       </div>
     </section>
@@ -947,7 +992,7 @@ window.onerror = function(msg, src, line) {
 // ── STORAGE ────────────────────────────────────────
 const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', SETTINGS:'ft_settings_v1', ROUTINES:'ft_routines_v1' };
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
-const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, activityLevel:1, history:[], bmrManual:false };
+const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, bmrManualValue:null, activityLevel:1, history:[], bmrManual:false };
 const KJ_PER_KG_FAT = 37000;
 const VALID_VIEWS = ['home','tracker','library','history','weight','trends','goals','settings'];
 const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', goals:'Goals', settings:'Settings' };
@@ -1011,7 +1056,7 @@ function navigate(view) {
   renderCrumbs();
   switch (view) {
     case 'home':     safeRender(renderGlance, 'glance'); break;
-    case 'tracker':  initQuickSearch(); safeRender(renderLog, 'log'); safeRender(renderTotals, 'totals'); break;
+    case 'tracker':  initQuickSearch(); setAddMode(_addMode); safeRender(renderLog, 'log'); safeRender(renderTotals, 'totals'); break;
     case 'library':  safeRender(renderRoutines, 'routines'); safeRender(() => renderLibraryTable(document.getElementById('librarySearch').value), 'library'); break;
     case 'history':  initHistory(); break;
     case 'weight':   safeRender(renderTotals, 'totals'); break;
@@ -1078,9 +1123,10 @@ function renderLogFor(dateKey, bodyId, totalRowId, isEditable) {
         inp.addEventListener('change', e => {
           const i = +e.target.dataset.i;
           const dk = e.target.dataset.date;
-          const v = parseFloat(e.target.value);
-          if (!isNaN(v) && v > 0) {
+          const v = Math.max(0.1, parseFloat(e.target.value));
+          if (!isNaN(v)) {
             getLog(dk)[i].qty = v;
+            e.target.value = v;
             persist();
             renderLogFor(dk, bodyId, totalRowId, isEditable);
             if (dk === todayKey()) renderTotals();
@@ -1219,9 +1265,10 @@ function renderLog() {
   body.querySelectorAll('.qty-input').forEach(inp => {
     inp.addEventListener('change', e => {
       const i = +e.target.dataset.i;
-      const v = parseFloat(e.target.value);
-      if (!isNaN(v) && v > 0) {
+      const v = Math.max(0.1, parseFloat(e.target.value));
+      if (!isNaN(v)) {
         entries[i].qty = v;
+        e.target.value = v; // reflect clamped value back
         persist(); renderLog(); renderTotals();
       }
     });
@@ -1393,7 +1440,7 @@ function renderGlance() { /* glance panel removed from home */ }
 function renderQuickSelect() { /* replaced by initQuickSearch */ }
 
 async function quickAdd() {
-  const qty = parseFloat(document.getElementById('quickQty').value) || 1;
+  const qty = Math.max(0.1, parseFloat(document.getElementById('quickQty').value) || 1);
   const food = quickSelectedFood;
   if (!food) { toast('Select a food first'); return; }
   const meal = await promptMealTag(todayKey(), food.name);
@@ -1404,6 +1451,61 @@ async function quickAdd() {
   const qs = document.getElementById('quickSearch');
   if (qs) qs.value = '';
   quickSelectedFood = null;
+}
+
+// ── ADD MODE TOGGLE ────────────────────────────────
+let _addMode = 'lib';
+function setAddMode(mode) {
+  _addMode = mode;
+  const libPanel    = document.getElementById('addPanelLib');
+  const oneoffPanel = document.getElementById('addPanelOneoff');
+  const libBtn      = document.getElementById('addModeLibBtn');
+  const oneoffBtn   = document.getElementById('addModeOneoffBtn');
+  if (!libPanel || !oneoffPanel) return;
+  libPanel.style.display    = mode === 'lib'    ? 'block' : 'none';
+  oneoffPanel.style.display = mode === 'oneoff' ? 'block' : 'none';
+  if (libBtn)    { libBtn.className    = mode === 'lib'    ? 'btn'        : 'btn ghost'; }
+  if (oneoffBtn) { oneoffBtn.className = mode === 'oneoff' ? 'btn'        : 'btn ghost'; }
+  // Focus the first field of the newly active panel
+  if (mode === 'oneoff') setTimeout(() => document.getElementById('oneoffCal')?.focus(), 50);
+  else                   setTimeout(() => document.getElementById('quickSearch')?.focus(), 50);
+}
+
+async function oneoffAdd() {
+  const calRaw = parseFloat(document.getElementById('oneoffCal').value);
+  if (isNaN(calRaw) || calRaw <= 0) { toast('Calories required'); document.getElementById('oneoffCal').focus(); return; }
+  const cal   = calRaw;
+  const p     = parseFloat(document.getElementById('oneoffP').value)  || 0;
+  const f     = parseFloat(document.getElementById('oneoffF').value)  || 0;
+  const c     = parseFloat(document.getElementById('oneoffC').value)  || 0;
+  const kj    = +(cal * 4.184).toFixed(1);
+  const nameRaw = document.getElementById('oneoffName').value.trim();
+  const name  = nameRaw || ('One-off ' + Math.round(cal) + 'cal');
+  const saveToLib = document.getElementById('oneoffSaveLib').checked;
+
+  const food = { name, cal, kj, p, f, c, price: 0 };
+
+  if (saveToLib) {
+    // Add to library permanently (same as Food Library → New)
+    library.push(Object.assign({}, food));
+    persist();
+    renderQuickSelect();
+    toast('Logged & saved to library');
+  }
+
+  const meal = await promptMealTag(todayKey(), name);
+  addFoodToLog(todayKey(), food, 1, meal);
+  renderLog(); renderTotals();
+  if (!saveToLib) toast('Logged: ' + name);
+
+  // Clear fields for next entry
+  document.getElementById('oneoffName').value = '';
+  document.getElementById('oneoffCal').value  = '';
+  document.getElementById('oneoffP').value    = '';
+  document.getElementById('oneoffF').value    = '';
+  document.getElementById('oneoffC').value    = '';
+  document.getElementById('oneoffSaveLib').checked = false;
+  document.getElementById('oneoffCal').focus();
 }
 
 function addFoodToLog(dateKey, food, qty, mealInfo) {
@@ -1717,7 +1819,12 @@ function initHistory() {
   } else {
     inp.value = historyDate;
   }
-  hideHistory();
+  // Restore visible state if the user had already opened history this session
+  if (historyVisible) {
+    showHistory();
+  } else {
+    hideHistory();
+  }
   updateHistoryMeta();
   inp.onchange = e => {
     historyDate = e.target.value;
@@ -1771,7 +1878,12 @@ function copyHistoryToToday() {
   if (!historyDate) return;
   const entries = getLog(historyDate);
   if (!entries.length) return;
-  if (!confirm('Add all ' + entries.length + ' items from ' + fmtDateKey(historyDate) + ' to today?')) return;
+  const todayEntries = getTodayLog();
+  let confirmMsg = 'Add all ' + entries.length + ' items from ' + fmtDateKey(historyDate) + ' to today?';
+  if (todayEntries.length > 0) {
+    confirmMsg += '\n\nToday already has ' + todayEntries.length + ' item' + (todayEntries.length === 1 ? '' : 's') + ' — matching foods will be merged (quantities added).';
+  }
+  if (!confirm(confirmMsg)) return;
   entries.forEach(e => {
     const copy = Object.assign({}, e);
     addFoodToLog(todayKey(), copy, copy.qty, { meal: copy._meal || null, snackTime: copy._snackTime || null });
@@ -1907,7 +2019,7 @@ const TREND_METRICS = [
 
 let trendInterval = 'week';
 let trendOffset = 0;
-let trendSelected = ['cal','p','fat'];
+let trendSelected = ['weight'];  // single metric default
 
 function renderTrends() {
   renderMetricPicker();
@@ -1925,16 +2037,12 @@ function renderMetricPicker() {
   el.querySelectorAll('[data-metric]').forEach(btn => {
     btn.addEventListener('click', () => {
       const k = btn.dataset.metric;
-      if (trendSelected.includes(k)) {
-        trendSelected = trendSelected.filter(x => x !== k);
-      } else if (trendSelected.length < 3) {
-        trendSelected.push(k);
-      } else {
-        toast('Max 3 metrics');
-        return;
+      // Single-select: clicking a new metric switches to it; clicking the active one is a no-op
+      if (!trendSelected.includes(k)) {
+        trendSelected = [k];
+        renderMetricPicker();
+        drawTrendChart();
       }
-      renderMetricPicker();
-      drawTrendChart();
     });
   });
 }
@@ -2016,82 +2124,120 @@ function drawTrendChart() {
   if (emptyEl) emptyEl.style.display = 'none';
 
   const W = svg.parentElement.offsetWidth - 24;
-  const H = 180;
-  const PAD = { top:16, right:10, bottom:28, left:40 };
+  const H = 200;
+  const PAD = { top:20, right:14, bottom:28, left:46 };
   const chartW = W - PAD.left - PAD.right;
   const chartH = H - PAD.top - PAD.bottom;
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
   svg.style.height = H + 'px';
 
-  // Scale per series (independent y axis per metric)
   let svgHtml = '';
   const n = dates.length;
 
-  seriesData.forEach((s, si) => {
-    const vals = s.values.filter(v => v !== null);
-    if (!vals.length) return;
-    const min = Math.min(...vals);
-    const max = Math.max(...vals);
-    const range = max - min || 1;
+  // Single metric — compute a clean axis scale
+  const s = seriesData[0];
+  const metric = s.metric;
+  const validVals = s.values.filter(v => v !== null);
+  if (!validVals.length) {
+    svg.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
 
-    const points = s.values.map((v, i) => {
-      if (v === null) return null;
-      const x = PAD.left + (i / (n-1)) * chartW;
-      const y = PAD.top + chartH - ((v - min) / range) * chartH;
-      return { x, y, v };
-    });
+  const dataMin = Math.min(...validVals);
+  const dataMax = Math.max(...validVals);
 
-    // Draw line segments
-    let path = '';
-    let lastValid = null;
-    points.forEach((p, i) => {
-      if (!p) { lastValid = null; return; }
-      if (lastValid === null) path += 'M' + p.x.toFixed(1) + ',' + p.y.toFixed(1);
-      else path += ' L' + p.x.toFixed(1) + ',' + p.y.toFixed(1);
-      lastValid = p;
-    });
+  // For weight: tight range with padding so small changes are visible
+  // For everything else: always start at 0 so bars are honest
+  let yMin, yMax;
+  const isWeight = metric.key === 'weight';
+  if (isWeight) {
+    const spread = dataMax - dataMin || 1;
+    const pad = Math.max(spread * 0.3, 0.5); // at least 0.5 kg padding
+    yMin = Math.floor((dataMin - pad) * 2) / 2;  // round to 0.5 kg
+    yMax = Math.ceil((dataMax  + pad) * 2) / 2;
+  } else {
+    yMin = 0;
+    const niceCeil = v => {
+      if (v <= 0) return 10;
+      const mag = Math.pow(10, Math.floor(Math.log10(v)));
+      const steps = [1, 2, 2.5, 5, 10];
+      for (const s of steps) {
+        if (s * mag >= v) return s * mag;
+      }
+      return v;
+    };
+    yMax = niceCeil(dataMax * 1.1); // 10% headroom then round up nicely
+  }
+  const yRange = yMax - yMin || 1;
 
-    svgHtml += '<path d="' + path + '" fill="none" stroke="' + s.metric.color + '" stroke-width="2" stroke-linejoin="round" opacity="0.9"/>';
+  // Helper: data value → SVG y coordinate
+  const toY = v => PAD.top + chartH - ((v - yMin) / yRange) * chartH;
 
-    // Dots + values
-    points.forEach((p, i) => {
-      if (!p) return;
-      svgHtml += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3" fill="' + s.metric.color + '"/>';
-    });
+  // Grid lines + Y axis labels (5 ticks)
+  const GRID_TICKS = 5;
+  for (let i = 0; i <= GRID_TICKS; i++) {
+    const v = yMin + (i / GRID_TICKS) * yRange;
+    const y = toY(v);
+    svgHtml += '<line x1="' + PAD.left + '" y1="' + y.toFixed(1) + '" x2="' + (W - PAD.right) + '" y2="' + y.toFixed(1) + '" stroke="var(--border)" stroke-width="1"/>';
+    // Label: weight gets 1 decimal, others get integers
+    const label = isWeight ? v.toFixed(1) : Math.round(v);
+    svgHtml += '<text x="' + (PAD.left - 5) + '" y="' + y.toFixed(1) + '" text-anchor="end" font-size="8" fill="var(--muted)" dominant-baseline="middle">' + label + '</text>';
+  }
 
-    // Y axis label (first series only, on left)
-    if (si === 0) {
-      [min, max].forEach(v => {
-        const y = PAD.top + chartH - ((v - min) / range) * chartH;
-        svgHtml += '<text x="' + (PAD.left - 4) + '" y="' + y.toFixed(1) + '" text-anchor="end" font-size="8" fill="var(--muted)" dominant-baseline="middle">' + Math.round(v) + '</text>';
-      });
+  // Build points
+  const points = s.values.map((v, i) => {
+    if (v === null) return null;
+    const x = n > 1 ? PAD.left + (i / (n - 1)) * chartW : PAD.left + chartW / 2;
+    const y = toY(v);
+    return { x, y, v };
+  });
+
+  // Line path
+  let path = '';
+  let lastValid = null;
+  points.forEach(p => {
+    if (!p) { lastValid = null; return; }
+    path += lastValid === null
+      ? 'M' + p.x.toFixed(1) + ',' + p.y.toFixed(1)
+      : ' L' + p.x.toFixed(1) + ',' + p.y.toFixed(1);
+    lastValid = p;
+  });
+  svgHtml += '<path d="' + path + '" fill="none" stroke="' + metric.color + '" stroke-width="2" stroke-linejoin="round" opacity="0.9"/>';
+
+  // Dots — with value label on week view (7 points), skip on month to avoid clutter
+  points.forEach((p, i) => {
+    if (!p) return;
+    svgHtml += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="' + metric.color + '"/>';
+    if (n <= 7) {
+      const label = isWeight ? p.v.toFixed(1) : Math.round(p.v);
+      const labelY = (p.y - 9 < PAD.top) ? p.y + 14 : p.y - 9;
+      svgHtml += '<text x="' + p.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" font-size="8" fill="' + metric.color + '" opacity="0.9">' + label + '</text>';
     }
   });
 
   // X axis labels
   dates.forEach((d, i) => {
-    const x = PAD.left + (i / (n-1)) * chartW;
+    const x = n > 1
+      ? PAD.left + (i / (n - 1)) * chartW
+      : PAD.left + chartW / 2;
     const show = n <= 7 || i % Math.ceil(n/7) === 0 || i === n-1;
     if (show) {
       svgHtml += '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="8" fill="var(--muted)">' + d.label + '</text>';
     }
   });
 
-  // Grid lines
-  for (let i = 0; i <= 4; i++) {
-    const y = PAD.top + (i / 4) * chartH;
-    svgHtml += '<line x1="' + PAD.left + '" y1="' + y.toFixed(1) + '" x2="' + (W - PAD.right) + '" y2="' + y.toFixed(1) + '" stroke="var(--border)" stroke-width="1"/>';
-  }
-
   svg.innerHTML = svgHtml;
 
-  // Legend
+  // Legend — single metric, show unit hint
+  const unitHint = { cal:'kcal', p:'g protein', fat:'g fat', carbs:'g carbs', cost:'$', weight:'kg' };
   if (legendEl) {
-    legendEl.innerHTML = selectedMetrics.map(m =>
-      '<span style="display:flex;align-items:center;gap:4px;">' +
-      '<span style="display:inline-block;width:16px;height:2px;background:' + m.color + ';"></span>' +
-      m.label + '</span>'
-    ).join('');
+    legendEl.innerHTML =
+      '<span style="display:flex;align-items:center;gap:6px;">' +
+      '<span style="display:inline-block;width:20px;height:2px;background:' + metric.color + ';"></span>' +
+      '<span style="color:var(--text);">' + metric.label + '</span>' +
+      '<span style="color:var(--muted);font-size:9px;">(' + (unitHint[metric.key] || '') + ')</span>' +
+      '</span>';
   }
 }
 
@@ -2108,10 +2254,13 @@ function initBMRCalc() {
   const bmrEl = document.getElementById('bmrInput');
   const slEl  = document.getElementById('activitySlider');
   if (!bmrEl || !slEl) return;
-  if (weights.bmr)              bmrEl.value = weights.bmr;
+  // In auto mode, restore the auto-calculated BMR (weights.bmr = Mifflin result)
+  // In manual mode, restore the manually-entered value (weights.bmrManualValue)
+  if (!weights.bmrManual && weights.bmr)         bmrEl.value = weights.bmr;
   if (weights.activityLevel != null) slEl.value = weights.activityLevel;
   updateBMRCalc();
   bmrEl.addEventListener('input', () => {
+    // This field is only active in auto mode; treat it as manual override of auto BMR
     weights.bmr = parseFloat(bmrEl.value) || null;
     persist(); updateBMRCalc();
   });
@@ -2122,11 +2271,8 @@ function initBMRCalc() {
 
   // BMR mode toggle
   const toggleEl = document.getElementById('bmrManualToggle');
-  const calcSec  = document.getElementById('bmrCalcSection');
-  const manSec   = document.getElementById('bmrManualSection');
   const manInput = document.getElementById('bmrManualInput');
   if (toggleEl) {
-    // Restore saved mode
     if (weights.bmrManual) toggleEl.checked = true;
     applyBMRMode();
     updateBMRModeLabels();
@@ -2134,13 +2280,16 @@ function initBMRCalc() {
       weights.bmrManual = toggleEl.checked;
       updateBMRModeLabels();
       persist(); applyBMRMode();
+      // Re-run calc so TDEE updates immediately after mode switch
+      updateBMRCalc();
     });
     if (manInput) {
-      if (weights.bmr) manInput.value = weights.bmr;
+      // Restore manual-specific value
+      if (weights.bmrManualValue) manInput.value = weights.bmrManualValue;
       manInput.addEventListener('input', () => {
-        weights.bmr = parseFloat(manInput.value) || null;
-        // Sync to hidden bmrInput for updateBMRCalc
-        if (bmrEl) bmrEl.value = weights.bmr || '';
+        weights.bmrManualValue = parseFloat(manInput.value) || null;
+        // Sync to hidden bmrInput so updateBMRCalc() can use it
+        if (bmrEl) bmrEl.value = weights.bmrManualValue || '';
         persist(); updateBMRCalc();
       });
     }
@@ -2178,16 +2327,27 @@ function updateBMRCalc() {
   const level = ACTIVITY_LEVELS[idx];
   if (labelEl) labelEl.textContent = level.label;
   if (descEl)  descEl.textContent  = level.desc;
-  const bmr = parseFloat(bmrEl ? bmrEl.value : 0);
+
+  // In manual mode, use the dedicated manual value; in auto mode use bmrInput
+  const isManual = weights.bmrManual;
+  const bmr = isManual
+    ? (weights.bmrManualValue || 0)
+    : parseFloat(bmrEl ? bmrEl.value : 0);
+
   if (bmr > 0) {
     const tdee = Math.round(bmr * level.mult);
     if (resultEl) { resultEl.textContent = tdee + ' cal'; resultEl.style.fontSize = '18px'; }
     weights._calcTDEE = tdee;
-    // Auto-apply to TDEE field and projection
-    weights.tdee = tdee;
-    const tdeeEl = document.getElementById('tdeeInput');
-    if (tdeeEl) tdeeEl.value = tdee;
-    persist(); renderTotals();
+    // Only auto-apply TDEE if user hasn't manually typed their own value into the TDEE field
+    if (!weights._tdeeManualOverride) {
+      weights.tdee = tdee;
+      const tdeeEl = document.getElementById('tdeeInput');
+      if (tdeeEl) tdeeEl.value = tdee;
+      persist(); renderTotals();
+    } else {
+      // Still update the displayed calculated result but don't push to TDEE field
+      persist();
+    }
   } else {
     if (resultEl) { resultEl.textContent = 'Enter BMR to begin'; resultEl.style.fontSize = '13px'; }
     weights._calcTDEE = null;
@@ -2199,12 +2359,15 @@ function applyTDEEFromCalc() {
   const tdeeEl = document.getElementById('tdeeInput');
   if (tdeeEl) tdeeEl.value = weights._calcTDEE;
   weights.tdee = weights._calcTDEE;
+  weights._tdeeManualOverride = false; // user explicitly accepted the calculated value
   persist(); renderTotals();
   toast('TDEE set to ' + weights._calcTDEE + ' cal');
 }
 function applyTDEE() { applyTDEEFromCalc(); }
 
 function updateBMRCalcFromMifflin() {
+  // Only auto-update when in auto mode — never overwrite a manual BMR
+  if (weights.bmrManual) return;
   const bmr = calcMifflinBMR();
   if (bmr && bmr > 0) {
     const bmrEl = document.getElementById('bmrInput');
@@ -2270,6 +2433,8 @@ function initMifflinListeners() {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => {
+      // Only auto-update BMR when in auto mode — never clobber a manual entry
+      if (weights.bmrManual) return;
       const bmr = calcMifflinBMR();
       if (bmr && bmr > 0) {
         const bmrEl = document.getElementById('bmrInput');
@@ -2294,12 +2459,15 @@ function initMifflinListeners() {
   // Always sync weight from todayWeight
   const bmrW = document.getElementById('bmrWeight');
   if (bmrW && weights.today != null) bmrW.value = weights.today;
-  // Restore manual BMR input and sync to bmrInput so slider works
+  // Restore manual BMR input separately — never sync auto value into manual field
   const manInput = document.getElementById('bmrManualInput');
-  if (manInput && weights.bmr && weights.bmrManual) {
-    manInput.value = weights.bmr;
-    const bmrEl = document.getElementById('bmrInput');
-    if (bmrEl) bmrEl.value = weights.bmr;
+  if (manInput && weights.bmrManualValue) {
+    manInput.value = weights.bmrManualValue;
+    // Only sync to bmrInput if we're actually in manual mode
+    if (weights.bmrManual) {
+      const bmrEl = document.getElementById('bmrInput');
+      if (bmrEl) bmrEl.value = weights.bmrManualValue;
+    }
   }
 }
 
@@ -2392,7 +2560,7 @@ const HELP_CONTENT = {
   },
   trends: {
     title: 'Trends',
-    body: 'Visualise your data over time. Select up to 3 metrics to overlay — calories, protein, fat, carbs, cost, or weight.\n\nUse Week or Month to change the window, and arrows to scroll back.\n\nWeight history builds from your daily wake-up weight entries.'
+    body: 'Visualise one metric at a time over time. Tap any metric button to switch — calories, protein, fat, carbs, cost, or weight.\n\nUse Week or Month to change the window, and arrows to scroll back in time.\n\nIn week view, values are shown on each data point. Weight history builds from your daily wake-up weight entries.'
   },
   settings: {
     title: 'Settings',
@@ -2748,7 +2916,12 @@ function resolveMealPicker(tag) {
   closeMealModal();
   if (!mealPickerQueue.length) return;
   const item = mealPickerQueue[0];
-  if (tag === 'S') {
+  // null means no meal tag (skip was pressed, backdrop tapped, or Escape)
+  if (tag === null || tag === 'skip') {
+    mealPickerQueue.shift();
+    item.resolve({ meal: null, snackTime: null });
+    if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
+  } else if (tag === 'S') {
     // Prompt for snack time
     showSnackTimePicker(item, tag);
   } else {
@@ -2787,8 +2960,7 @@ function showSnackTimePicker(item, tag) {
     mealPickerQueue.shift();
     item.resolve({ meal: tag, snackTime: null });
     if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
-  };
-}
+  };}
 
 function resetMealModal() {
   const nameEl = document.getElementById('mealModalName');
@@ -2806,7 +2978,7 @@ function resetMealModal() {
     });
   }
   const skipBtn = document.getElementById('mealModalSkip');
-  if (skipBtn) skipBtn.onclick = () => resolveMealPicker('skip');
+  if (skipBtn) skipBtn.onclick = () => resolveMealPicker(null);
 }
 
 function safeRender(fn, label) {
@@ -2892,6 +3064,8 @@ function init() {
   document.getElementById('tdeeInput').addEventListener('input', e => {
     const v = parseFloat(e.target.value);
     weights.tdee = !isNaN(v) ? v : null;
+    // Mark as manually overridden so the activity slider won't silently clobber it
+    weights._tdeeManualOverride = true;
     persist(); renderTotals();
   });
 
@@ -2900,6 +3074,13 @@ function init() {
   initMifflinListeners();
   document.getElementById('librarySearch').addEventListener('input', e => renderLibraryTable(e.target.value));
   document.getElementById('quickAddBtn').addEventListener('click', quickAdd);
+  document.getElementById('oneoffAddBtn').addEventListener('click', oneoffAdd);
+  // Enter on any one-off field submits
+  ['oneoffName','oneoffCal','oneoffP','oneoffF','oneoffC'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); oneoffAdd(); }
+    });
+  });
   document.getElementById('addFoodBtn').addEventListener('click', () => openFoodModal(null));
   document.getElementById('cancelFood').addEventListener('click', closeFoodModal);
   document.getElementById('saveFood').addEventListener('click', saveFood);
@@ -2948,7 +3129,15 @@ function init() {
 
   // Escape closes modals
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeFoodModal(); closeRoutineModal(); closeMealModal(); closeInfoModal(); closeHelpModal(); }
+    if (e.key === 'Escape') {
+      closeFoodModal(); closeRoutineModal();
+      // Escape resolves meal picker with null (no meal) rather than silently closing,
+      // which would leave the queue stuck
+      if (document.getElementById('mealModal').classList.contains('open')) {
+        resolveMealPicker(null);
+      }
+      closeInfoModal(); closeHelpModal();
+    }
     // Keyboard shortcuts for meal picker when open
     if (document.getElementById('mealModal').classList.contains('open')) {
       const map = { 'b':'B', 'l':'L', 'd':'D', 's':'S' };
@@ -2960,9 +3149,9 @@ function init() {
   document.querySelectorAll('[data-meal]').forEach(btn => {
     btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
   });
-  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker('skip'));
+  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
   document.getElementById('mealModal').addEventListener('click', e => {
-    if (e.target.id === 'mealModal') resolveMealPicker('skip');
+    if (e.target.id === 'mealModal') resolveMealPicker(null);
   });
 
   // Import file listener
@@ -2988,6 +3177,25 @@ function init() {
     const h = window.location.hash.replace('#','');
     if (VALID_VIEWS.includes(h) && h !== currentView) navigate(h);
   });
+
+  // ── DAY ROLLOVER ──────────────────────────────────────
+  // Track what date the app was initialised on so we can detect midnight crossings
+  let _initDateKey = todayKey();
+
+  function checkDayRollover() {
+    const newKey = todayKey();
+    if (newKey === _initDateKey) return; // same day, nothing to do
+    // Date has changed — reload for a clean state (carry-forward, header date, etc.)
+    location.reload();
+  }
+
+  // Check whenever the app comes back from background (iOS PWA common case)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkDayRollover();
+  });
+
+  // Also poll every minute in case visibilitychange is unreliable
+  setInterval(checkDayRollover, 60 * 1000);
   } catch(err) {
     const el = document.getElementById('js-error');
     if (el) { el.textContent = 'Startup error: ' + err.message; el.style.display = 'block'; }
