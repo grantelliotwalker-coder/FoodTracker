@@ -40,8 +40,9 @@ html, body {
 input, select, button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 /* ── LAYOUT ─────────────────────────────────────────────── */
-.wrap { padding: 16px 16px 80px; max-width: 900px; margin: 0 auto; width: 100%; }
+.wrap { padding: 16px 16px 80px; margin: 0 auto; width: 100%; }
 @media (min-width: 600px) { .wrap { padding: 28px 28px 80px; } }
+@media (min-width: 1100px) { .wrap { padding: 32px 40px 80px; } }
 
 /* ── MASTHEAD ────────────────────────────────────────────── */
 .masthead {
@@ -70,6 +71,7 @@ input, select, button { -webkit-tap-highlight-color: transparent; touch-action: 
 .nav-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 .nav-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: calc(50% - 5px); }
 @media (min-width: 600px) { .nav-cards { grid-template-columns: repeat(3, 1fr); } .nav-card:last-child:nth-child(odd) { grid-column: auto; max-width: none; } }
+@media (min-width: 1100px) { .nav-cards { grid-template-columns: repeat(4, 1fr); } }
 .nav-card {
   background: var(--bg2); border: 1px solid var(--border);
   padding: 14px 12px; cursor: pointer; transition: all 0.15s;
@@ -329,6 +331,11 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 .plan-day-head > div:first-child { color: var(--muted); }
 .plan-days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 @media (min-width: 600px) { .plan-days { grid-template-columns: repeat(7, 1fr); } }
+/* Wide screens: planner details form in 4 columns instead of 2 */
+@media (min-width: 900px) {
+  #view-planner .form-grid { grid-template-columns: repeat(4, 1fr); }
+  #view-planner .form-grid .full { grid-column: span 2; }
+}
 .plan-day-btn { background: var(--bg2); border: 1px solid var(--border); padding: 10px 6px; font-family: inherit; color: var(--text-bright); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.15s; min-width: 0; }
 .plan-day-btn:hover, .plan-day-btn:active { border-color: var(--green); background: var(--bg3); }
 .pd-name { font-size: 11px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -402,7 +409,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <h2>Daily Targets</h2>
         <span class="meta">Calorie &amp; macro split</span>
       </div>
-      <div class="targets-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="targets-grid" style="gap:10px;margin-bottom:10px;">
         <div class="field">
           <label>Calorie Target</label>
           <input type="number" id="targetBurn" step="10" inputmode="numeric">
