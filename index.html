@@ -331,6 +331,27 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 .plan-day-head > div:first-child { color: var(--muted); }
 .plan-days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 @media (min-width: 600px) { .plan-days { grid-template-columns: repeat(7, 1fr); } }
+.field-lbl-row { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin: 4px 0; }
+.seg { display: flex; border: 1px solid var(--border); margin-bottom: 10px; }
+.seg button { flex: 1; background: transparent; border: none; border-right: 1px solid var(--border); padding: 10px 6px; font-family: inherit; font-size: 11px; color: var(--muted); cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; }
+.seg button:last-child { border-right: none; }
+.seg button:hover { color: var(--green); }
+.seg button.on { background: var(--green); color: var(--bg); font-weight: 700; }
+.seg-sub { display: block; font-size: 9px; font-weight: 400; opacity: 0.85; margin-top: 3px; }
+.plan-numbers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 6px 0 10px; }
+@media (min-width: 700px) { .plan-numbers { grid-template-columns: repeat(4, 1fr); } }
+.plan-num { background: var(--bg3); padding: 10px 12px; min-width: 0; }
+.plan-num .lbl { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.plan-num .val { font-size: 16px; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; }
+.plan-num .val.hi { color: var(--green); }
+.plan-num .val .u { font-size: 9px; color: var(--muted); font-weight: 300; margin-left: 3px; }
+.plan-num .sub { font-size: 9px; color: var(--muted); margin-top: 3px; }
+.plan-notes { font-size: 10px; color: var(--amber); line-height: 1.7; margin-bottom: 10px; }
+.plan-chart-wrap { border: 1px solid var(--border); background: var(--bg2); padding: 8px; }
+.plan-chart-cap { font-size: 9px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.plan-adjust { margin-top: 12px; border: 1px solid var(--border); padding: 10px 12px; }
+.plan-adjust summary { cursor: pointer; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
 /* Wide screens: planner details form in 4 columns instead of 2 */
 @media (min-width: 900px) {
   #view-planner .form-grid { grid-template-columns: repeat(4, 1fr); }
@@ -340,6 +361,45 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 .plan-day-btn:hover, .plan-day-btn:active { border-color: var(--green); background: var(--bg3); }
 .pd-name { font-size: 11px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pd-cal { font-size: 9px; color: var(--muted); }
+
+/* ── PRINT REPORT (Save as PDF) ──────────────────────────── */
+#printReport { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; min-height: 0; }
+  body > *:not(#printReport) { display: none !important; }
+  #printReport { display: block !important; }
+}
+.rp { font-family: 'JetBrains Mono', monospace; color: #111; font-size: 9.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rp-head { border-bottom: 2px solid #1a7a32; padding-bottom: 8px; margin-bottom: 12px; }
+.rp-brand { color: #1a7a32; font-weight: 700; letter-spacing: 0.05em; font-size: 9pt; }
+.rp h1 { font-size: 16pt; margin: 2px 0; }
+.rp-sub { color: #666; font-size: 8.5pt; }
+.rp h2 { font-size: 10.5pt; color: #1a7a32; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; display: flex; justify-content: space-between; }
+.rp h2 .rp-h2sub { color: #555; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 9pt; }
+.rp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.rp-stat { border: 1px solid #ccc; padding: 6px 8px; }
+.rp-stat .l { font-size: 7pt; color: #666; text-transform: uppercase; letter-spacing: 0.1em; }
+.rp-stat .v { font-size: 12pt; font-weight: 700; }
+.rp-stat .s { font-size: 7.5pt; color: #666; }
+.rp-chart { border: 1px solid #ccc; padding: 6px; }
+.rp-note { font-size: 7.5pt; color: #666; margin-top: 4px; }
+.rp-day { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px; }
+.rp-day h3 { font-size: 10.5pt; margin: 0 0 4px; display: flex; justify-content: space-between; gap: 8px; }
+.rp-day h3 span { font-weight: 400; color: #555; font-size: 8.5pt; }
+.rp table { width: 100%; border-collapse: collapse; }
+.rp td, .rp th { padding: 3px 5px; border-bottom: 1px solid #e3e3e3; text-align: right; font-size: 8.5pt; }
+.rp td:first-child, .rp th:first-child { text-align: left; }
+.rp th { font-size: 7pt; color: #666; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 400; }
+.rp tr.rp-meal td { background: #f1f1ec; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.12em; color: #555; text-align: left; }
+.rp-break { break-before: page; page-break-before: always; }
+.rp-shop { columns: 2; column-gap: 18px; }
+.rp-aisle { break-inside: avoid; page-break-inside: avoid; margin-bottom: 10px; }
+.rp-aisle h4 { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px; color: #1a7a32; }
+.rp-item { display: flex; gap: 6px; font-size: 9pt; padding: 2px 0; border-bottom: 1px dotted #ddd; }
+.rp-box { width: 9px; height: 9px; border: 1px solid #333; flex-shrink: 0; margin-top: 3px; }
+.rp-item .q { margin-left: auto; color: #444; white-space: nowrap; }
+.rp-foot { margin-top: 14px; font-size: 7.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 6px; }
 
 /* ── JS ERROR ────────────────────────────────────────────── */
 #js-error { display: none; position: fixed; top: 0; left: 0; right: 0; background: #b8391a; color: #f4ede0; padding: 10px 14px; z-index: 9999; font-family: monospace; font-size: 11px; white-space: pre-wrap; }
@@ -481,7 +541,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <section id="planDaysSection" style="display:none;">
       <div class="section-head">
         <h2>Meal Plan</h2>
-        <span class="meta"><span id="planDaysMeta"></span><a onclick="navigate('planner')" style="cursor:pointer;color:var(--muted);text-decoration:none;white-space:nowrap;">New plan →</a></span>
+        <span class="meta"><span id="planDaysMeta"></span><a onclick="printPlanReport()" style="cursor:pointer;color:var(--muted);text-decoration:none;white-space:nowrap;">PDF</a><a onclick="navigate('planner')" style="cursor:pointer;color:var(--muted);text-decoration:none;white-space:nowrap;">New plan →</a></span>
       </div>
       <div class="plan-days" id="planDaysRow"></div>
     </section>
@@ -854,23 +914,51 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
       <span class="meta">Prompt → AI → paste back</span>
     </div>
 
-    <div class="plan-step"><span class="plan-step-num">1</span>Your details</div>
+    <div class="plan-step"><span class="plan-step-num">1</span>About you</div>
+    <div class="targets-panel">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="field"><label>Age</label><input type="number" id="plAge" step="1" inputmode="numeric" placeholder="e.g. 45"></div>
+        <div class="field"><label>Sex</label>
+          <select id="plSex"><option value="m">Male</option><option value="f">Female</option></select>
+        </div>
+        <div class="field"><label>Height (cm)</label><input type="number" id="plHeight" step="1" inputmode="numeric" placeholder="e.g. 175"></div>
+        <div class="field"><label>Activity</label><select id="plActivity"></select></div>
+        <div class="field"><label>Current weight (kg)</label><input type="number" id="plWeight" step="0.1" inputmode="decimal" placeholder="e.g. 95"></div>
+        <div class="field"><label>Goal weight (kg)</label><input type="number" id="plGoalWeight" step="0.1" inputmode="decimal" placeholder="e.g. 85"></div>
+      </div>
+      <input type="hidden" id="plGoal"><input type="hidden" id="plPace">
+      <div class="field-lbl-row">Goal</div>
+      <div class="seg" id="plGoalSeg">
+        <button data-v="lose">Lose weight</button>
+        <button data-v="maintain">Maintain</button>
+        <button data-v="gain">Gain muscle</button>
+      </div>
+      <div id="plPaceWrap">
+        <div class="field-lbl-row">Pace</div>
+        <div class="seg" id="plPaceSeg">
+          <button data-v="steady">Steady<span class="seg-sub"></span></button>
+          <button data-v="moderate">Moderate<span class="seg-sub"></span></button>
+          <button data-v="faster">Faster<span class="seg-sub"></span></button>
+        </div>
+      </div>
+      <div id="plNumbers"></div>
+      <div class="plan-chart-wrap" id="plChartWrap" style="display:none;"></div>
+      <details class="plan-adjust">
+        <summary>Adjust numbers</summary>
+        <div class="form-grid" style="margin:10px 0 0;">
+          <div class="field"><label>Calories / day</label><input type="number" id="plCal" step="10" inputmode="numeric"></div>
+          <div class="field"><label>Protein (g)</label><input type="number" id="plP" step="1" inputmode="numeric"></div>
+          <div class="field"><label>Fat (g)</label><input type="number" id="plF" step="1" inputmode="numeric"></div>
+          <div class="field"><label>Carbs (g)</label><input type="number" id="plC" step="1" inputmode="numeric"></div>
+        </div>
+        <div class="plan-hint" style="margin-bottom:0;">Leave blank to use the calculated values.</div>
+      </details>
+      <button class="btn ghost" style="width:100%;margin-top:12px;" onclick="applyPlannerTargets()">Apply to my Daily Targets</button>
+    </div>
+
+    <div class="plan-step"><span class="plan-step-num">2</span>Food preferences</div>
     <div class="targets-panel">
       <div class="form-grid" style="margin-bottom:0;">
-        <div class="field"><label>Goal</label>
-          <select id="plGoal">
-            <option value="fat_loss">Fat loss</option>
-            <option value="muscle_gain">Muscle gain</option>
-            <option value="maintain">Maintain</option>
-          </select>
-        </div>
-        <div class="field"><label>Plan name</label><input type="text" id="plName" placeholder="Plan A"></div>
-        <div class="field"><label>Current weight (kg)</label><input type="number" id="plWeight" step="0.1" inputmode="decimal"></div>
-        <div class="field"><label>Goal weight (kg)</label><input type="number" id="plGoalWeight" step="0.1" inputmode="decimal"></div>
-        <div class="field"><label>Calories / day</label><input type="number" id="plCal" step="10" inputmode="numeric"></div>
-        <div class="field"><label>Protein (g)</label><input type="number" id="plP" step="1" inputmode="numeric"></div>
-        <div class="field"><label>Fat (g)</label><input type="number" id="plF" step="1" inputmode="numeric"></div>
-        <div class="field"><label>Carbs (g)</label><input type="number" id="plC" step="1" inputmode="numeric"></div>
         <div class="field full"><label>Foods you can eat / diet style</label>
           <textarea id="plAllowed" rows="3" placeholder="e.g. high protein, chicken, eggs, rice, Greek yoghurt, frozen veg"></textarea>
         </div>
@@ -900,7 +988,8 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
             <option value="high">Different every day</option>
           </select>
         </div>
-        <div class="field full"><label>Country (foods, brands &amp; prices)</label><input type="text" id="plCountry" placeholder="Australia"></div>
+        <div class="field"><label>Plan name</label><input type="text" id="plName" placeholder="Plan A"></div>
+        <div class="field"><label>Country (foods &amp; prices)</label><input type="text" id="plCountry" placeholder="Australia"></div>
       </div>
       <label class="plan-check"><input type="checkbox" id="plIncludeLib">Reuse foods from my library where they fit</label>
     </div>
@@ -908,13 +997,26 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <textarea class="plan-textarea" id="plPromptOut" rows="8" readonly style="display:none;margin-top:8px;font-size:11px;"></textarea>
     <div class="plan-hint">Paste the prompt into ChatGPT, Claude, Gemini or similar, then copy the AI's whole reply.</div>
 
-    <div class="plan-step"><span class="plan-step-num">2</span>Paste the AI's reply</div>
+    <div class="plan-step"><span class="plan-step-num">3</span>Paste the AI's reply</div>
     <textarea class="plan-textarea" id="plImportText" rows="6" placeholder="Paste the AI's full reply here..."></textarea>
     <div style="display:flex;gap:8px;margin:8px 0 14px;">
       <button class="btn" style="flex:1;" onclick="checkPlanImport()">Check Plan</button>
       <button class="btn ghost" onclick="clearPlanImport()">Clear</button>
     </div>
     <div id="plPreview"></div>
+
+    <div id="plCurrent" style="display:none;margin-top:18px;">
+      <div class="plan-step"><span class="plan-step-num">4</span>Your plan</div>
+      <div class="targets-panel" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:13px;color:var(--text-bright);" id="plCurrentName"></div>
+          <div class="plan-hint" style="margin:2px 0 0;" id="plCurrentSub"></div>
+        </div>
+        <button class="btn" onclick="printPlanReport()">Save as PDF</button>
+        <button class="btn ghost" onclick="navigate('tracker')">Open Tracker</button>
+      </div>
+      <div class="plan-hint">The report has your numbers, goal chart, all 7 days and a shopping list. In the print window, choose "Save as PDF".</div>
+    </div>
   </section>
 
   <!-- ═══════════════ SETTINGS ═══════════════ -->
@@ -1094,6 +1196,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <button class="btn ghost" id="mealModalSkip" style="width:100%;">Skip</button>
   </div>
 </div>
+<div id="printReport"></div>
 <div id="js-error"></div>
 
 <script src="food-library.js"></script>
@@ -2065,6 +2168,8 @@ function saveFood() {
     toast('Added to library');
   } else {
     const oldFood = library[editingFoodIdx];
+    // Keep shopping-list details from an AI plan when the food is edited
+    ['amount','unit','aisle'].forEach(k => { if (oldFood[k] != null) item[k] = oldFood[k]; });
     const baseNames = new Set(DEFAULT_LIBRARY.map(f => f.name));
     // If renaming a default food, remove old edited entry to avoid orphan
     if (baseNames.has(oldFood.name) && oldFood.name !== item.name) {
@@ -2696,7 +2801,7 @@ const HELP_CONTENT = {
   },
   planner: {
     title: 'AI Meal Plan',
-    body: 'Use any AI chatbot as your meal planner.\n\n1. Check your details. Goal, weight and targets are filled in from the rest of the app. Add the foods you can eat, allergies and preferences.\n\n2. Tap Copy Prompt and paste it into ChatGPT, Claude, Gemini or similar.\n\n3. Copy the AI\'s whole reply, paste it in step 2 and tap Check Plan. You\'ll see each day\'s totals against your target, plus any warnings.\n\n4. Tap Import. The foods go into your Food Library and the 7 days are saved as routines. Load a day with one tap from the Meal Plan row on the Daily Tracker.\n\nAI nutrition values and prices are estimates. Edit any food in the Food Library.'
+    body: 'Use any AI chatbot as your meal planner.\n\n1. About you: enter your age, height, weight, goal weight and activity, then pick a goal and pace. The app works out how much you burn, how much to eat, and roughly when you\'d reach your goal. Tap Apply to use these numbers in your Daily Targets.\n\n2. Add the foods you can eat, allergies and preferences, then tap Copy Prompt and paste it into ChatGPT, Claude, Gemini or similar.\n\n3. Copy the AI\'s whole reply, paste it in and tap Check Plan. You\'ll see each day\'s totals against your target, plus any warnings. Then tap Import.\n\n4. Save as PDF gives you a report with your numbers, goal chart, all 7 days and a shopping list. Load a day with one tap from the Meal Plan row on the Daily Tracker.\n\nCalories, prices and the goal date are estimates. Talk to your GP before big changes.'
   },
   settings: {
     title: 'Settings',
@@ -2824,8 +2929,19 @@ function applyGoalTargets() {
 // ── AI MEAL PLAN ─────────────────────────────────────────
 const PLAN_FORMAT = 'FOODTRACKER_PLAN_V1';
 const SNACK_TIMES = Object.keys(SNACK_TIME_HOURS);
-const PLAN_PREF_FIELDS = ['plGoal','plName','plAllowed','plAllergies','plDislikes','plMeals','plBudget','plEffort','plVariety','plCountry','plIncludeLib'];
-const PLAN_GOAL_TEXT    = { fat_loss:'Fat loss', muscle_gain:'Muscle gain', maintain:'Maintain weight' };
+const KCAL_PER_KG = KJ_PER_KG_FAT / 4.184;   // same fat-energy figure the rest of the app uses
+const PLAN_AISLES = ['Produce','Meat & Seafood','Dairy & Eggs','Bakery','Pantry','Frozen','Drinks','Other'];
+const PLAN_PREF_FIELDS = [
+  'plAge','plSex','plHeight','plActivity','plWeight','plGoalWeight','plGoal','plPace',
+  'plCal','plP','plF','plC',
+  'plName','plAllowed','plAllergies','plDislikes','plMeals','plBudget','plEffort','plVariety','plCountry','plIncludeLib'
+];
+// Deficit / surplus as a share of TDEE for each pace
+const PLAN_PACES = {
+  lose: { steady: 0.15, moderate: 0.20, faster: 0.25 },
+  gain: { steady: 0.05, moderate: 0.10, faster: 0.15 }
+};
+const PLAN_GOAL_TEXT    = { lose:'Lose weight', maintain:'Maintain weight', gain:'Gain muscle' };
 const PLAN_MEALS_TEXT   = {
   '3':   'Breakfast, lunch and dinner (no snacks)',
   '3+1': 'Breakfast, lunch, dinner + 1 snack',
@@ -2846,31 +2962,186 @@ const PLAN_VARIETY_TEXT = {
 let pendingPlan = null;
 let plannerBound = false;
 
+// ── Calculations ──
+function mifflin(kg, cm, age, sex) { return 10 * kg + 6.25 * cm - 5 * age + (sex === 'f' ? -161 : 5); }
+function dateAfterWeeks(w) { return new Date(Date.now() + w * 7 * 86400000); }
+function fmtDate(d) { return d.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }); }
+
+function planInputs() {
+  const n = id => parseFloat(document.getElementById(id).value);
+  return {
+    age: n('plAge'), height: n('plHeight'), weight: n('plWeight'), goalW: n('plGoalWeight'),
+    sex:  document.getElementById('plSex').value || 'm',
+    act:  +document.getElementById('plActivity').value || 0,
+    goal: document.getElementById('plGoal').value || 'lose',
+    pace: document.getElementById('plPace').value || 'moderate',
+    calO: n('plCal'), pO: n('plP'), fO: n('plF'), cO: n('plC')
+  };
+}
+
+// opts.pace: try a different pace; opts.auto: ignore the "Adjust numbers" overrides
+function planCalc(opts) {
+  opts = opts || {};
+  const I = planInputs();
+  if (opts.pace) I.pace = opts.pace;
+  if (!(I.age > 0 && I.height > 0 && I.weight > 0)) return null;
+  const level = ACTIVITY_LEVELS[I.act] || ACTIVITY_LEVELS[1];
+  const bmr  = Math.round(mifflin(I.weight, I.height, I.age, I.sex));
+  const tdee = Math.round(bmr * level.mult);
+  const floor = I.sex === 'f' ? 1200 : 1500;
+  const notes = [];
+
+  let target = tdee;
+  if (I.goal === 'lose') {
+    target = tdee * (1 - (PLAN_PACES.lose[I.pace] || 0.20));
+    const maxDeficit = I.weight * 0.01 * KCAL_PER_KG / 7;   // ~1% of body weight per week
+    if (tdee - target > maxDeficit) { target = tdee - maxDeficit; notes.push('Limited to about 1% of body weight per week.'); }
+    if (target < floor) { target = floor; notes.push('Raised to the ' + floor.toLocaleString() + ' cal/day minimum for safety.'); }
+  } else if (I.goal === 'gain') {
+    target = tdee * (1 + (PLAN_PACES.gain[I.pace] || 0.10));
+  }
+  target = Math.round(target / 10) * 10;
+  const auto = target;
+  let custom = false;
+  if (!opts.auto && I.calO > 0) {
+    target = Math.round(I.calO);
+    custom = true;
+    if (target < floor) notes.push('Below the usual ' + floor.toLocaleString() + ' cal/day minimum. Check with your GP first.');
+  }
+
+  // Macros: protein by body weight (goal weight when losing), fat 30%, carbs the rest
+  const refW = (I.goal === 'lose' && I.goalW > 0 && I.goalW < I.weight) ? I.goalW : I.weight;
+  let p = Math.min((I.goal === 'gain' ? 1.8 : 1.6) * refW, target * 0.35 / 4);
+  let f = target * 0.30 / 9;
+  if (!opts.auto) { if (I.pO > 0) p = I.pO; if (I.fO > 0) f = I.fO; }
+  let c = Math.max(0, (target - p * 4 - f * 9) / 4);
+  if (!opts.auto && I.cO > 0) c = I.cO;
+  p = Math.round(p); f = Math.round(f); c = Math.round(c);
+
+  const bmi = I.weight / Math.pow(I.height / 100, 2);
+  if (I.goal === 'lose' && (I.age >= 65 || bmi >= 40 || (I.goalW > 0 && (I.weight - I.goalW) / I.weight > 0.15)))
+    notes.push('For a big weight-loss goal, it\'s worth a check-in with your GP before you start.');
+  if (I.goalW > 0 && ((I.goal === 'lose' && I.goalW >= I.weight) || (I.goal === 'gain' && I.goalW <= I.weight)))
+    notes.push('Your goal weight doesn\'t match the goal you picked.');
+
+  const weekly = (target - tdee) * 7 / KCAL_PER_KG;
+  return Object.assign({}, I, { bmr, tdee, target, auto, custom, p, f, c, floor, notes, weekly, level });
+}
+
+// Week-by-week projection. TDEE is recalculated as weight changes,
+// so progress slows realistically instead of following a straight line.
+function projectPlan(C) {
+  const hasGoal = C.goalW > 0 && ((C.goal === 'lose' && C.goalW < C.weight) || (C.goal === 'gain' && C.goalW > C.weight));
+  const pts = [{ wk: 0, kg: C.weight }];
+  let kg = C.weight, reached = null, plateau = null;
+  const maxWk = hasGoal ? 260 : 26;
+  for (let wk = 1; wk <= maxWk; wk++) {
+    const tdeeNow = mifflin(kg, C.height, C.age, C.sex) * C.level.mult;
+    const delta = (C.target - tdeeNow) * 7 / KCAL_PER_KG;
+    const prev = kg;
+    kg += delta;
+    if (hasGoal && ((C.goal === 'lose' && kg <= C.goalW) || (C.goal === 'gain' && kg >= C.goalW))) {
+      reached = wk - 1 + (prev - C.goalW) / (prev - kg);
+      pts.push({ wk: reached, kg: C.goalW });
+      break;
+    }
+    pts.push({ wk, kg });
+    if (hasGoal && Math.abs(delta) < 0.01) { plateau = kg; break; }
+  }
+  if (hasGoal && reached === null && plateau === null) plateau = kg;
+  return { pts, reached, plateau, hasGoal };
+}
+
+function projectionSVG(proj, C, W, pal) {
+  const H = 200, P = { t: 22, r: 18, b: 26, l: 40 };
+  const cw = W - P.l - P.r, ch = H - P.t - P.b;
+  const pts = proj.pts;
+  const last = pts[pts.length - 1];
+  const maxWk = Math.max(last.wk, 4);
+  const kgs = pts.map(p => p.kg).concat(proj.hasGoal ? [C.goalW] : []);
+  const yMin = Math.floor(Math.min(...kgs) - 1), yMax = Math.ceil(Math.max(...kgs) + 1);
+  const X = wk => P.l + (wk / maxWk) * cw;
+  const Y = kg => P.t + ch - ((kg - yMin) / (yMax - yMin)) * ch;
+  const font = 'font-family="JetBrains Mono, monospace"';
+  let s = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + (yMax - yMin) * i / 4, y = Y(v).toFixed(1);
+    s += '<line x1="' + P.l + '" y1="' + y + '" x2="' + (W - P.r) + '" y2="' + y + '" stroke="' + pal.grid + '" stroke-width="1"/>';
+    s += '<text x="' + (P.l - 6) + '" y="' + y + '" text-anchor="end" dominant-baseline="middle" font-size="9" fill="' + pal.text + '" ' + font + '>' + Math.round(v) + '</text>';
+  }
+  for (let i = 0; i <= 4; i++) {
+    const wk = maxWk * i / 4;
+    const lbl = i === 0 ? 'Today' : dateAfterWeeks(wk).toLocaleDateString('en-AU', { month: 'short', year: '2-digit' });
+    s += '<text x="' + X(wk).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? 'start' : i === 4 ? 'end' : 'middle') + '" font-size="9" fill="' + pal.text + '" ' + font + '>' + lbl + '</text>';
+  }
+  if (proj.hasGoal) {
+    const gy = Y(C.goalW).toFixed(1);
+    s += '<line x1="' + P.l + '" y1="' + gy + '" x2="' + (W - P.r) + '" y2="' + gy + '" stroke="' + pal.goal + '" stroke-width="1.5" stroke-dasharray="5 4"/>';
+    s += '<text x="' + (P.l + 6) + '" y="' + (+gy + (C.goal === 'lose' ? 13 : -6)) + '" font-size="9" fill="' + pal.goal + '" ' + font + '>Goal ' + C.goalW + ' kg</text>';
+  }
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + X(p.wk).toFixed(1) + ',' + Y(p.kg).toFixed(1)).join(' ');
+  s += '<path d="' + d + ' L' + X(last.wk).toFixed(1) + ',' + (P.t + ch) + ' L' + P.l + ',' + (P.t + ch) + ' Z" fill="' + pal.line + '" opacity="0.10"/>';
+  s += '<path d="' + d + '" fill="none" stroke="' + pal.line + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<circle cx="' + X(0) + '" cy="' + Y(C.weight).toFixed(1) + '" r="4" fill="' + pal.line + '"/>';
+  s += '<text x="' + (X(0) + 8) + '" y="' + (Y(C.weight) - 8).toFixed(1) + '" font-size="10" font-weight="700" fill="' + pal.strong + '" ' + font + '>' + C.weight + ' kg</text>';
+  s += '<circle cx="' + X(last.wk).toFixed(1) + '" cy="' + Y(last.kg).toFixed(1) + '" r="4.5" fill="' + (proj.reached != null ? pal.goal : pal.line) + '"/>';
+  const endLbl = proj.reached != null ? fmtDate(dateAfterWeeks(proj.reached)) : '~' + Math.round(last.kg) + ' kg';
+  const endY = C.goal === 'lose' ? Y(last.kg) - 9 : Y(last.kg) + 15;
+  s += '<text x="' + (X(last.wk) - 6).toFixed(1) + '" y="' + endY.toFixed(1) + '" text-anchor="end" font-size="10" font-weight="700" fill="' + pal.strong + '" ' + font + '>' + endLbl + '</text>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;max-height:' + H + 'px;" xmlns="http://www.w3.org/2000/svg">' + s + '</svg>';
+}
+
+// ── Planner view ──
 function initPlanner() {
+  const actSel = document.getElementById('plActivity');
+  if (!actSel.options.length) {
+    actSel.innerHTML = ACTIVITY_LEVELS.map((l, i) => '<option value="' + i + '">' + l.label + '</option>').join('');
+  }
   const saved = settings.planner || {};
+  const m = weights.mifflin || {};
   const set = (id, v) => {
     const el = document.getElementById(id);
     if (!el || v === undefined || v === null) return;
     if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
   };
+  const fill = (id, v) => { const el = document.getElementById(id); if (el && el.value === '' && v != null && v !== '') el.value = v; };
   PLAN_PREF_FIELDS.forEach(id => set(id, saved[id]));
-  if (!saved.plGoal) set('plGoal', settings.goal || 'fat_loss');
-  // Numbers always come fresh from the rest of the app
-  set('plWeight',     weights.today ?? '');
-  set('plGoalWeight', weights.goal ?? '');
-  set('plCal', targets.burn || '');
-  set('plP',   targets.p || '');
-  set('plF',   targets.f || '');
-  set('plC',   targets.c || '');
+  // Fall back to what the rest of the app already knows
+  fill('plAge', m.age); fill('plHeight', m.height);
+  if (!saved.plSex && m.sex) set('plSex', m.sex);
+  if (weights.today != null) set('plWeight', weights.today);
+  fill('plGoalWeight', weights.goal);
+  if (saved.plActivity == null || saved.plActivity === '') set('plActivity', weights.activityLevel ?? 1);
+  let g = { fat_loss: 'lose', muscle_gain: 'gain' }[saved.plGoal] || saved.plGoal;
+  if (!['lose','maintain','gain'].includes(g)) g = settings.goal === 'muscle_gain' ? 'gain' : 'lose';
+  set('plGoal', g);
+  if (!PLAN_PACES.lose[document.getElementById('plPace').value]) set('plPace', 'moderate');
   if (!document.getElementById('plCountry').value) document.getElementById('plCountry').value = 'Australia';
   if (!document.getElementById('plName').value)    document.getElementById('plName').value = 'Plan A';
+
   if (!plannerBound) {
     plannerBound = true;
     PLAN_PREF_FIELDS.forEach(id => {
       const el = document.getElementById(id);
-      el.addEventListener((el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'input', savePlannerPrefs);
+      if (el.type === 'hidden') return;
+      el.addEventListener((el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'input', () => { savePlannerPrefs(); renderPlannerCalc(); });
+    });
+    [['plGoalSeg','plGoal'], ['plPaceSeg','plPace']].forEach(([segId, inputId]) => {
+      document.querySelectorAll('#' + segId + ' button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById(inputId).value = btn.dataset.v;
+          savePlannerPrefs(); renderPlannerCalc();
+        });
+      });
+    });
+    let rt;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => { if (currentView === 'planner') renderPlannerCalc(); }, 150);
     });
   }
+  renderPlannerCalc();
+  renderPlanCurrent();
 }
 
 function savePlannerPrefs() {
@@ -2883,11 +3154,115 @@ function savePlannerPrefs() {
   persist();
 }
 
+function renderPlannerCalc() {
+  const goal = document.getElementById('plGoal').value || 'lose';
+  const pace = document.getElementById('plPace').value || 'moderate';
+  document.querySelectorAll('#plGoalSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === goal));
+  document.querySelectorAll('#plPaceSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === pace));
+  document.getElementById('plPaceWrap').style.display = goal === 'maintain' ? 'none' : 'block';
+
+  const box  = document.getElementById('plNumbers');
+  const wrap = document.getElementById('plChartWrap');
+  const C    = planCalc();
+  const auto = C && planCalc({ auto: true });
+
+  // Show the starting weekly change under each pace button
+  document.querySelectorAll('#plPaceSeg button').forEach(b => {
+    const pc = C && planCalc({ pace: b.dataset.v, auto: true });
+    b.querySelector('.seg-sub').textContent = pc ? ((pc.weekly >= 0 ? '+' : '−') + Math.abs(pc.weekly).toFixed(2) + ' kg/wk') : '';
+  });
+  // "Adjust numbers" placeholders show the calculated values
+  document.getElementById('plCal').placeholder = auto ? String(auto.target) : '';
+  document.getElementById('plP').placeholder   = C ? String(C.p) : '';
+  document.getElementById('plF').placeholder   = C ? String(C.f) : '';
+  document.getElementById('plC').placeholder   = C ? String(C.c) : '';
+
+  if (!C) {
+    box.innerHTML = '<div class="plan-hint" style="margin:12px 0 0;">Enter your age, height and current weight to see your daily calories and when you could reach your goal.</div>';
+    wrap.style.display = 'none';
+    return;
+  }
+
+  const proj = C.goal === 'maintain' ? null : projectPlan(C);
+  let goalVal = '—', goalSub = '';
+  if (C.goal === 'maintain')          { goalVal = 'Maintain'; goalSub = 'Hold around ' + C.weight + ' kg'; }
+  else if (proj && proj.reached != null) { goalVal = fmtDate(dateAfterWeeks(proj.reached)); goalSub = 'About ' + Math.round(proj.reached) + ' weeks'; }
+  else if (proj && proj.hasGoal)      { goalVal = 'Not at this target'; goalSub = 'Levels off near ' + Math.round(proj.plateau) + ' kg'; }
+  else                                { goalVal = 'Add a goal weight'; goalSub = 'to get a date'; }
+
+  const num = (lbl, val, sub, hi) =>
+    '<div class="plan-num"><div class="lbl">' + lbl + '</div><div class="val' + (hi ? ' hi' : '') + '">' + val + '</div><div class="sub">' + sub + '</div></div>';
+  const eatSub = C.goal === 'maintain' && !C.custom ? 'Maintenance'
+    : (C.weekly >= 0 ? '+' : '−') + Math.abs(C.weekly).toFixed(2) + ' kg/week to start' + (C.custom ? ' (custom)' : '');
+  box.innerHTML =
+    '<div class="plan-numbers">' +
+      num('Your body burns', C.tdee.toLocaleString() + '<span class="u">cal/day</span>', 'BMR ' + C.bmr.toLocaleString() + ' × ' + C.level.mult + ' activity') +
+      num('Eat', C.target.toLocaleString() + '<span class="u">cal/day</span>', eatSub, true) +
+      num('Daily macros', 'P' + C.p + ' F' + C.f + ' C' + C.c, 'grams protein / fat / carbs') +
+      num('Goal date', goalVal, goalSub, proj && proj.reached != null) +
+    '</div>' +
+    (C.notes.length ? '<div class="plan-notes">' + C.notes.map(n => '⚠ ' + escapeHtml(n)).join('<br>') + '</div>' : '');
+
+  if (proj) {
+    wrap.style.display = 'block';
+    const W = Math.max(280, wrap.clientWidth - 16);
+    const pal = { line: 'var(--green)', goal: 'var(--amber)', grid: 'var(--border)', text: 'var(--muted)', strong: 'var(--text-bright)' };
+    wrap.innerHTML = projectionSVG(proj, C, W, pal) +
+      '<div class="plan-chart-cap">Estimate if you eat about ' + C.target.toLocaleString() + ' cal/day. Real progress wobbles week to week, and slows as your weight changes.</div>';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function applyPlannerTargets() {
+  const C = planCalc();
+  if (!C) { toast('Fill in age, height and weight first'); return; }
+  // Daily targets: calories + macro split as percentages
+  const ppct = Math.round(C.p * 4 / C.target * 100);
+  const fpct = Math.round(C.f * 9 / C.target * 100);
+  targets.burn = C.target;
+  targets.ppct = ppct;
+  targets.fpct = fpct;
+  targets.cpct = Math.max(0, 100 - ppct - fpct);
+  updateDerivedTargets();
+  // Weight Log: TDEE calculator inputs, goal weight, today's weight if not logged yet
+  weights.mifflin = { age: C.age, height: C.height, sex: C.sex };
+  weights.activityLevel = C.act;
+  if (C.goalW > 0) weights.goal = C.goalW;
+  if (weights.today == null) {
+    weights.today = C.weight;
+    weights.weightDate = todayKey();
+    if (!weights.history) weights.history = [];
+    if (!weights.history.some(h => h.date === todayKey())) weights.history.push({ date: todayKey(), weight: C.weight });
+  }
+  weights.tdee = C.tdee;
+  if (!weights.bmrManual) { weights.bmr = C.bmr; weights._tdeeManualOverride = false; }
+  else weights._tdeeManualOverride = true;
+  if (C.goal === 'lose') settings.goal = 'fat_loss';
+  else if (C.goal === 'gain') settings.goal = 'muscle_gain';
+  persist();
+
+  // Refresh the inputs on other views
+  const setv = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+  setv('targetBurn', targets.burn); setv('targetPpct', targets.ppct); setv('targetFpct', targets.fpct); setv('targetCpct', targets.cpct);
+  setv('bmrAge', C.age); setv('bmrHeight', C.height); setv('bmrSex', C.sex);
+  setv('todayWeight', weights.today); setv('bmrWeight', weights.today); setv('goalWeight', weights.goal);
+  setv('activitySlider', C.act); setv('tdeeInput', weights.tdee);
+  if (!weights.bmrManual) setv('bmrInput', C.bmr);
+  const lv = ACTIVITY_LEVELS[C.act];
+  const lab = document.getElementById('activityLabel'), desc = document.getElementById('activityDesc'), res = document.getElementById('tdeeCalcResult');
+  if (lab) lab.textContent = lv.label;
+  if (desc) desc.textContent = lv.desc;
+  if (res && !weights.bmrManual) { res.textContent = C.tdee + ' cal'; res.style.fontSize = '18px'; }
+  renderTotals();
+  toast('Applied: ' + C.target + ' cal/day + TDEE ' + C.tdee, 2500);
+}
+
+// ── Prompt ──
 function buildPlanPrompt() {
   const v = id => (document.getElementById(id).value || '').trim();
-  const cal = parseFloat(v('plCal'));
-  if (!(cal > 0)) { toast('Set a calorie target first'); return null; }
-  const p = parseFloat(v('plP')), f = parseFloat(v('plF')), c = parseFloat(v('plC'));
+  const C = planCalc();
+  if (!C) { toast('Fill in age, height and weight first'); return null; }
   const name = v('plName') || 'Plan A';
   const country = v('plCountry') || 'Australia';
   const L = [];
@@ -2895,13 +3270,9 @@ function buildPlanPrompt() {
   L.push('You are a nutrition planner. Build me a 7-day meal plan and return it in the exact JSON format at the end, so I can paste it straight into my food tracker app.');
   L.push('');
   L.push('MY DETAILS');
-  L.push('- Goal: ' + (PLAN_GOAL_TEXT[v('plGoal')] || 'Fat loss'));
-  if (v('plWeight')) L.push('- Current weight: ' + v('plWeight') + ' kg' + (v('plGoalWeight') ? ' | Goal weight: ' + v('plGoalWeight') + ' kg' : ''));
-  const macros = [];
-  if (p > 0) macros.push('protein ' + Math.round(p) + ' g');
-  if (f > 0) macros.push('fat ' + Math.round(f) + ' g');
-  if (c > 0) macros.push('carbs ' + Math.round(c) + ' g');
-  L.push('- Daily targets: ' + Math.round(cal) + ' kcal' + (macros.length ? ' | ' + macros.join(' | ') : ''));
+  L.push('- About me: ' + C.age + '-year-old ' + (C.sex === 'f' ? 'female' : 'male') + ', ' + C.height + ' cm, ' + C.weight + ' kg, ' + C.level.label.toLowerCase());
+  L.push('- Goal: ' + PLAN_GOAL_TEXT[C.goal] + (C.goal !== 'maintain' ? ' (' + C.pace + ' pace)' : '') + (C.goalW > 0 ? ', goal weight ' + C.goalW + ' kg' : ''));
+  L.push('- Daily targets: ' + C.target + ' kcal | protein ' + C.p + ' g | fat ' + C.f + ' g | carbs ' + C.c + ' g');
   L.push('- Country: ' + country + ' (use foods, brands, serving sizes and prices typical there, in local currency)');
   L.push('- Foods I can eat / diet style: ' + (v('plAllowed') || 'No restrictions'));
   if (v('plAllergies')) L.push('- Allergies (STRICT: never include, not even as an ingredient): ' + v('plAllergies'));
@@ -2923,27 +3294,28 @@ function buildPlanPrompt() {
   L.push('');
   L.push('RULES');
   L.push('1. Exactly 7 days, named "Day 1" to "Day 7".');
-  L.push('2. Each day must total within ±5% of ' + Math.round(cal) + ' kcal' +
-         (p > 0 ? ' and within ±10% of ' + Math.round(p) + ' g protein' : '') +
-         '. Keep fat and carbs close to their targets.');
+  L.push('2. Each day must total within ±5% of ' + C.target + ' kcal and within ±10% of ' + C.p + ' g protein. Keep fat and carbs close to their targets.');
   L.push('3. Each food is ONE serving, with the serving size in its name, e.g. "Chicken breast (150 g raw)" or "Greek yoghurt (170 g tub)". Quantities in "days" are multiples of that serving (e.g. 0.5, 1, 2).');
   L.push('4. Food values are per serving: "cal" = kcal, "p" / "f" / "c" = grams of protein / fat / carbs, "price" = estimated cost per serving in local currency. Use nutrition-label or standard food-database values, and make sure cal ≈ 4×p + 4×c + 9×f.');
-  L.push('5. Every "food" in "days" must match a name in "foods" EXACTLY (same spelling, case and punctuation). List each food once in "foods", even if it is used on several days.');
-  L.push('6. "meal" is "B" (breakfast), "L" (lunch), "D" (dinner) or "S" (snack). Snacks also need "snackTime", one of: ' + SNACK_TIMES.join(', ') + '. For other meals, "snackTime" is null.');
-  L.push('7. Before answering, add up each day and adjust quantities until rule 2 is met.');
-  L.push('8. Reply with ONLY one JSON code block in exactly this shape, with no text before or after it:');
+  L.push('5. For my shopping list, also give each food "amount" and "unit" for ONE serving ("unit" is "g", "ml" or "each", e.g. "Eggs (2 large)" → 2, "each"), and "aisle", one of: ' + PLAN_AISLES.join(', ') + '.');
+  L.push('6. Every "food" in "days" must match a name in "foods" EXACTLY (same spelling, case and punctuation). List each food once in "foods", even if it is used on several days.');
+  L.push('7. "meal" is "B" (breakfast), "L" (lunch), "D" (dinner) or "S" (snack). Snacks also need "snackTime", one of: ' + SNACK_TIMES.join(', ') + '. For other meals, "snackTime" is null.');
+  L.push('8. Before answering, add up each day and adjust quantities until rule 2 is met.');
+  L.push('9. Reply with ONLY one JSON code block in exactly this shape, with no text before or after it:');
   L.push('');
   L.push('```json');
   L.push('{');
   L.push('  "format": "' + PLAN_FORMAT + '",');
   L.push('  "plan": ' + JSON.stringify(name) + ',');
   L.push('  "foods": [');
-  L.push('    { "name": "Rolled oats (50 g)", "cal": 185, "p": 6.5, "f": 3.5, "c": 30, "price": 0.25 },');
-  L.push('    { "name": "Chicken breast (150 g raw)", "cal": 170, "p": 34, "f": 3.5, "c": 0, "price": 2.40 }');
+  L.push('    { "name": "Rolled oats (50 g)", "cal": 185, "p": 6.5, "f": 3.5, "c": 30, "price": 0.25, "amount": 50, "unit": "g", "aisle": "Pantry" },');
+  L.push('    { "name": "Eggs (2 large)", "cal": 150, "p": 13, "f": 10, "c": 1, "price": 0.80, "amount": 2, "unit": "each", "aisle": "Dairy & Eggs" },');
+  L.push('    { "name": "Chicken breast (150 g raw)", "cal": 170, "p": 34, "f": 3.5, "c": 0, "price": 2.40, "amount": 150, "unit": "g", "aisle": "Meat & Seafood" }');
   L.push('  ],');
   L.push('  "days": [');
   L.push('    { "name": "Day 1", "items": [');
   L.push('      { "food": "Rolled oats (50 g)", "qty": 1, "meal": "B", "snackTime": null },');
+  L.push('      { "food": "Eggs (2 large)", "qty": 1, "meal": "B", "snackTime": null },');
   L.push('      { "food": "Chicken breast (150 g raw)", "qty": 1, "meal": "L", "snackTime": null }');
   L.push('    ]}');
   L.push('  ]');
@@ -2965,6 +3337,7 @@ function copyPlanPrompt() {
   } else fallback();
 }
 
+// ── Import ──
 // Pull the JSON out of an AI reply, tolerating code fences, chatter around it,
 // smart quotes and trailing commas
 function extractPlanJSON(text) {
@@ -3013,6 +3386,12 @@ function validatePlan(data) {
     let price = planNum(rf.price);
     if (isNaN(price) || price < 0) price = 0;
     const food = { name, cal: r1(cal), p: r1(p), f: r1(f), c: r1(c), price: Math.round(price * 100) / 100 };
+    // Shopping-list details (optional)
+    const unitRaw = String(rf.unit || '').trim().toLowerCase();
+    const unit = { g:'g', gram:'g', grams:'g', ml:'ml', each:'each', item:'each', items:'each' }[unitRaw] || null;
+    const amount = planNum(rf.amount);
+    if (unit && amount > 0) { food.amount = r1(amount); food.unit = unit; }
+    food.aisle = PLAN_AISLES.find(a => a.toLowerCase() === String(rf.aisle || '').trim().toLowerCase()) || 'Other';
     foods.push(food);
     byKey[key] = food;
   });
@@ -3087,8 +3466,9 @@ function clearPlanImport() {
 
 function renderPlanPreview(P) {
   const box = document.getElementById('plPreview');
-  const tgtCal = parseFloat(document.getElementById('plCal').value) || targets.burn || 0;
-  const tgtP   = parseFloat(document.getElementById('plP').value)   || targets.p || 0;
+  const C = planCalc();
+  const tgtCal = C ? C.target : (targets.burn || 0);
+  const tgtP   = C ? C.p : (targets.p || 0);
   let h = '';
 
   if (P.errors.length) {
@@ -3153,6 +3533,8 @@ function importPlan() {
     const key = f.name.toLowerCase();
     const idx = library.findIndex(l => l.name.toLowerCase() === key);
     const item = { name: f.name, cal: f.cal, kj: +(f.cal * 4.184).toFixed(1), p: f.p, f: f.f, c: f.c, price: f.price };
+    if (f.amount) { item.amount = f.amount; item.unit = f.unit; }
+    item.aisle = f.aisle;
     if (idx < 0) {
       library.push(item); added++; finalName[key] = item.name;
     } else if (clash === 'overwrite') {
@@ -3162,7 +3544,11 @@ function importPlan() {
       while (library.some(l => l.name.toLowerCase() === n.toLowerCase())) n = f.name + ' [' + planName + ' ' + (k++) + ']';
       item.name = n; library.push(item); added++; finalName[key] = n;
     } else {
-      kept++; finalName[key] = library[idx].name;
+      // Keep the user's values, but fill in shopping details if they're missing
+      const lib = library[idx];
+      if (f.amount && !lib.amount) library[idx] = Object.assign({}, lib, { amount: f.amount, unit: f.unit });
+      if (!library[idx].aisle) library[idx] = Object.assign({}, library[idx], { aisle: f.aisle });
+      kept++; finalName[key] = lib.name;
     }
   });
   const nameFor = key => finalName[key] || (library.find(l => l.name.toLowerCase() === key) || {}).name;
@@ -3183,12 +3569,25 @@ function importPlan() {
   document.getElementById('plPreview').innerHTML =
     '<div class="plan-msg ok">✓ Imported "' + escapeHtml(planName) + '": ' + added + ' foods added' +
     (updated ? ', ' + updated + ' updated' : '') + (kept ? ', ' + kept + ' kept as yours' : '') +
-    ', ' + P.days.length + ' days saved.<br>' +
-    '<a onclick="navigate(\'tracker\')" style="cursor:pointer;text-decoration:underline;">Go to the Daily Tracker</a> to load a day.</div>';
+    ', ' + P.days.length + ' days saved. Save the report as a PDF below, or load a day from the Daily Tracker.</div>';
+  renderPlanCurrent();
   toast('Plan imported');
 }
 
-// One-tap day buttons on the Daily Tracker for the active plan
+// ── Current plan, tracker day buttons ──
+function planDayRoutines(plan) { return plan ? routines.filter(r => r.plan === plan) : []; }
+function planDayLabel(r, plan) { const pre = plan + ' · '; return r.name.indexOf(pre) === 0 ? r.name.slice(pre.length) : r.name; }
+
+function renderPlanCurrent() {
+  const box = document.getElementById('plCurrent');
+  if (!box) return;
+  const days = planDayRoutines(settings.activePlan);
+  if (!days.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('plCurrentName').textContent = settings.activePlan;
+  document.getElementById('plCurrentSub').textContent = days.length + ' days saved · load a day from the Daily Tracker';
+}
+
 function renderPlanDays() {
   const sec = document.getElementById('planDaysSection');
   const row = document.getElementById('planDaysRow');
@@ -3198,12 +3597,10 @@ function renderPlanDays() {
   if (!days.length) { sec.style.display = 'none'; return; }
   sec.style.display = 'block';
   document.getElementById('planDaysMeta').textContent = plan;
-  const prefix = plan + ' · ';
   row.innerHTML = days.map(({ r, i }) => {
     const cal = Math.round(r.items.reduce((s, it) => s + (library.find(f => f.name === it.name) || { cal: 0 }).cal * it.qty, 0));
-    const label = r.name.indexOf(prefix) === 0 ? r.name.slice(prefix.length) : r.name;
     return '<button class="plan-day-btn" data-ri="' + i + '" title="' + escapeHtml(r.name) + '">' +
-      '<span class="pd-name">' + escapeHtml(label) + '</span>' +
+      '<span class="pd-name">' + escapeHtml(planDayLabel(r, plan)) + '</span>' +
       '<span class="pd-cal">' + cal + ' cal</span>' +
     '</button>';
   }).join('');
@@ -3220,6 +3617,106 @@ function renderPlanDays() {
       toast('Logged: ' + r.name);
     });
   });
+}
+
+// ── Report (print → Save as PDF) ──
+function fmtQty(n) { return String(Math.round(n * 100) / 100); }
+function fmtAmount(total, unit) {
+  const trim = s => s.replace(/\.?0+$/, '');
+  if (unit === 'g')  return total >= 1000 ? trim((total / 1000).toFixed(2)) + ' kg' : Math.round(total) + ' g';
+  if (unit === 'ml') return total >= 1000 ? trim((total / 1000).toFixed(2)) + ' L'  : Math.round(total) + ' ml';
+  return '× ' + Math.ceil(total - 1e-9);
+}
+
+function buildShoppingList(days) {
+  const map = {};
+  days.forEach(r => r.items.forEach(it => {
+    const fd = library.find(f => f.name === it.name);
+    if (!fd) return;
+    const base = fd.name.replace(/\s*\[[^\]]*\]\s*$/, '').replace(/\s*\([^)]*\)\s*$/, '').trim() || fd.name;
+    const hasAmt = fd.amount > 0 && fd.unit;
+    const key = hasAmt ? base.toLowerCase() + '|' + fd.unit : 'srv|' + fd.name.toLowerCase();
+    if (!map[key]) map[key] = { name: hasAmt ? base : fd.name, unit: hasAmt ? fd.unit : null, total: 0, servings: 0, cost: 0,
+      aisle: PLAN_AISLES.includes(fd.aisle) ? fd.aisle : 'Other' };
+    const e = map[key];
+    e.servings += it.qty;
+    e.cost += (fd.price || 0) * it.qty;
+    if (hasAmt) e.total += fd.amount * it.qty;
+  }));
+  const groups = {};
+  Object.values(map).forEach(e => { (groups[e.aisle] = groups[e.aisle] || []).push(e); });
+  return PLAN_AISLES.filter(a => groups[a]).map(a => ({ aisle: a, items: groups[a].sort((x, y) => x.name.localeCompare(y.name)) }));
+}
+
+function printPlanReport() {
+  const plan = settings.activePlan;
+  const days = planDayRoutines(plan);
+  if (!days.length) { toast('Import a plan first'); return; }
+  initPlanner();   // make sure the planner inputs are filled so the numbers are available
+  const C = planCalc();
+  const esc = escapeHtml;
+  const pal = { line: '#1a7a32', goal: '#b07800', grid: '#e2e2e2', text: '#666', strong: '#111' };
+  const stat = (l, v, s) => '<div class="rp-stat"><div class="l">' + l + '</div><div class="v">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>';
+
+  let h = '<div class="rp">';
+  h += '<div class="rp-head"><div class="rp-brand">FOOD/TRACKER</div><h1>' + days.length + '-Day Meal Plan · ' + esc(plan) + '</h1>' +
+       '<div class="rp-sub">Created ' + fmtDate(new Date()) + '</div></div>';
+
+  const tgt = C ? C.target : targets.burn;
+  const proj = C && C.goal !== 'maintain' ? projectPlan(C) : null;
+  h += '<div class="rp-stats">';
+  if (C) {
+    h += stat('Starting weight', C.weight + ' kg', C.age + ' yrs · ' + C.height + ' cm');
+    h += stat('Goal', C.goalW > 0 ? C.goalW + ' kg' : PLAN_GOAL_TEXT[C.goal], PLAN_GOAL_TEXT[C.goal] + (C.goal !== 'maintain' ? ' · ' + C.pace + ' pace' : ''));
+    let gd = '—', gs = '';
+    if (proj && proj.reached != null) { gd = fmtDate(dateAfterWeeks(proj.reached)); gs = 'about ' + Math.round(proj.reached) + ' weeks'; }
+    else if (proj && proj.hasGoal) { gd = 'Not at this target'; gs = 'levels off near ' + Math.round(proj.plateau) + ' kg'; }
+    h += stat('Estimated goal date', gd, gs);
+    h += stat('Your body burns', C.tdee.toLocaleString() + ' cal/day', C.level.label);
+  }
+  h += stat('Eat', (tgt || 0).toLocaleString() + ' cal/day', C ? ((C.weekly >= 0 ? '+' : '−') + Math.abs(C.weekly).toFixed(2) + ' kg/week to start') : '');
+  h += stat('Daily macros', 'P' + (C ? C.p : targets.p) + ' F' + (C ? C.f : targets.f) + ' C' + (C ? C.c : targets.c), 'grams protein / fat / carbs');
+  h += '</div>';
+
+  if (proj) {
+    h += '<div class="rp-chart">' + projectionSVG(proj, C, 680, pal) + '</div>';
+    h += '<div class="rp-note">Projection if you eat about ' + tgt.toLocaleString() + ' cal/day. Real progress wobbles week to week and slows as your weight changes.</div>';
+  }
+
+  h += '<h2>Daily plan</h2>';
+  days.forEach(r => {
+    const entries = r.items.map(it => {
+      const fd = library.find(f => f.name === it.name) || { name: it.name, cal: 0, p: 0, f: 0, c: 0, price: 0 };
+      return Object.assign({}, fd, { qty: it.qty, _meal: it._meal, _snackTime: it._snackTime });
+    });
+    const t = entrySums(entries);
+    h += '<div class="rp-day"><h3>' + esc(planDayLabel(r, plan)) + '<span>' + Math.round(t.cal) + ' cal · P' + Math.round(t.p) + ' F' + Math.round(t.f) + ' C' + Math.round(t.c) + ' · $' + t.cost.toFixed(2) + '</span></h3>';
+    h += '<table><tr><th>Food</th><th>Qty</th><th>Cal</th><th>P</th><th>F</th><th>C</th></tr>';
+    buildMealSections(entries).forEach(sec => {
+      h += '<tr class="rp-meal"><td colspan="6">' + esc(sec.label) + '</td></tr>';
+      sec.entries.forEach(({ e }) => {
+        h += '<tr><td>' + esc(e.name) + '</td><td>' + (e.qty === 1 ? '1' : '×' + fmtQty(e.qty)) + '</td><td>' + Math.round(e.cal * e.qty) +
+             '</td><td>' + Math.round(e.p * e.qty) + '</td><td>' + Math.round(e.f * e.qty) + '</td><td>' + Math.round(e.c * e.qty) + '</td></tr>';
+      });
+    });
+    h += '</table></div>';
+  });
+
+  const shop = buildShoppingList(days);
+  const shopCost = shop.reduce((s, g) => s + g.items.reduce((s2, e) => s2 + e.cost, 0), 0);
+  h += '<h2 class="rp-break">Shopping list · ' + days.length + ' days<span class="rp-h2sub">about $' + shopCost.toFixed(2) + '</span></h2>';
+  h += '<div class="rp-shop">' + shop.map(g =>
+    '<div class="rp-aisle"><h4>' + esc(g.aisle) + '</h4>' + g.items.map(e =>
+      '<div class="rp-item"><span class="rp-box"></span><span>' + esc(e.name) + '</span><span class="q">' +
+      (e.unit ? fmtAmount(e.total, e.unit) : fmtQty(e.servings) + ' serving' + (e.servings === 1 ? '' : 's')) + '</span></div>'
+    ).join('') + '</div>'
+  ).join('') + '</div>';
+  h += '<div class="rp-foot">Nutrition values, prices and the goal date are estimates. Amounts are for the whole plan, so check what you already have. ' +
+       'This isn\'t medical advice. Talk to your GP before big changes to your diet.</div>';
+  h += '</div>';
+
+  document.getElementById('printReport').innerHTML = h;
+  setTimeout(() => window.print(), 60);
 }
 
 function persist() {
