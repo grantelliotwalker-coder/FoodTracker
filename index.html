@@ -104,7 +104,7 @@ section { margin-bottom: 20px; }
 .dial .value .unit { font-size: 10px; color: var(--muted); font-weight: 300; margin-left: 2px; }
 .dial .target { font-size: 9px; color: var(--muted); margin-top: 4px; }
 .bar { height: 2px; background: var(--border); margin-top: 10px; }
-.bar .fill { height: 100%; background: #39d353; transition: width 0.4s; }
+.bar .fill { height: 100%; background: var(--green); transition: width 0.4s; }
 .dial.over .value { color: var(--amber); }
 .dial.over-red .value { color: var(--red); }
 
@@ -112,7 +112,7 @@ section { margin-bottom: 20px; }
 .ratio-ribbon { display: flex; border: 1px solid var(--border); height: 24px; margin-bottom: 6px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; overflow: hidden; }
 .ratio-ribbon > div { display: flex; align-items: center; justify-content: center; color: var(--bg); transition: flex 0.4s ease; white-space: nowrap; overflow: hidden; padding: 0 4px; }
 .ratio-fat { background: var(--text-bright); }
-.ratio-pro { background: #39d353; }
+.ratio-pro { background: var(--green); }
 .ratio-carb { background: var(--amber); }
 .ratio-targets { font-size: 9px; color: var(--muted); letter-spacing: 0.04em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
 
@@ -253,7 +253,7 @@ section { margin-bottom: 20px; }
 .history-date-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
 .history-date-row input[type="date"] { background: linear-gradient(135deg, var(--bg2), var(--bg3)); border: 1px solid var(--green); padding: 10px; font-family: inherit; font-size: 13px; color: var(--text); border-radius: 0; flex: 1; min-width: 140px; animation: dateGlow 2s ease-in-out infinite alternate; }
 .history-date-row input[type="date"]:focus { outline: none; border-color: var(--green); }
-@keyframes dateGlow { from { box-shadow: 0 0 0 1px var(--green), 0 0 8px rgba(57,211,83,0.2); } to { box-shadow: 0 0 0 2px var(--green), 0 0 22px rgba(57,211,83,0.55); } }
+@keyframes dateGlow { from { box-shadow: 0 0 0 1px var(--green), 0 0 8px color-mix(in srgb, var(--green) 20%, transparent); } to { box-shadow: 0 0 0 2px var(--green), 0 0 22px color-mix(in srgb, var(--green) 55%, transparent); } }
 .history-summary { background: var(--bg2); border: 1px solid var(--border); padding: 14px; margin-bottom: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 @media (min-width: 480px) { .history-summary { grid-template-columns: repeat(4, 1fr); } }
 .history-summary .h-item .lbl { font-size: 8px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
@@ -309,6 +309,31 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); color: var(--green); border: 1px solid var(--green); padding: 10px 16px; font-family: inherit; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transition: all 0.25s; z-index: 200; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── AI PLANNER ──────────────────────────────────────────── */
+.plan-step { display: flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-bright); margin: 6px 0 10px; }
+.plan-step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid var(--green); color: var(--green); font-size: 10px; }
+.field textarea, .plan-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); padding: 10px; font-family: inherit; font-size: 14px; color: var(--text); border-radius: 0; resize: vertical; -webkit-appearance: none; }
+.field textarea:focus, .plan-textarea:focus { outline: none; border-color: var(--green); }
+.plan-hint { font-size: 10px; color: var(--muted); line-height: 1.6; margin: 6px 0 14px; }
+.plan-check { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--muted); letter-spacing: 0.05em; margin: 10px 0; cursor: pointer; }
+.plan-check input { accent-color: var(--green); width: 14px; height: 14px; }
+.plan-msg { font-size: 11px; padding: 10px 12px; border: 1px solid var(--border); margin-bottom: 10px; line-height: 1.6; }
+.plan-msg.err { border-color: var(--red); color: var(--red); }
+.plan-msg.ok { border-color: var(--green); color: var(--green); }
+.plan-summary { font-size: 12px; color: var(--text-bright); margin-bottom: 8px; }
+.plan-warn-box { border: 1px solid var(--amber); padding: 8px 12px; margin-bottom: 10px; font-size: 10px; color: var(--amber); line-height: 1.7; max-height: 180px; overflow-y: auto; }
+.plan-day-row { display: grid; grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; text-align: right; color: var(--text); }
+.plan-day-row > div:first-child { text-align: left; color: var(--text-bright); }
+.plan-day-row:last-child { border-bottom: none; }
+.plan-day-head { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.plan-day-head > div:first-child { color: var(--muted); }
+.plan-days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+@media (min-width: 600px) { .plan-days { grid-template-columns: repeat(7, 1fr); } }
+.plan-day-btn { background: var(--bg2); border: 1px solid var(--border); padding: 10px 6px; font-family: inherit; color: var(--text-bright); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.15s; min-width: 0; }
+.plan-day-btn:hover, .plan-day-btn:active { border-color: var(--green); background: var(--bg3); }
+.pd-name { font-size: 11px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-cal { font-size: 9px; color: var(--muted); }
+
 /* ── JS ERROR ────────────────────────────────────────────── */
 #js-error { display: none; position: fixed; top: 0; left: 0; right: 0; background: #b8391a; color: #f4ede0; padding: 10px 14px; z-index: 9999; font-family: monospace; font-size: 11px; white-space: pre-wrap; }
 </style>
@@ -357,8 +382,13 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <div class="nav-title">TRENDS</div>
         <div class="nav-desc">Visualise your progress.</div>
       </button>
-      <button class="nav-card" onclick="navigate('settings')">
+      <button class="nav-card" onclick="navigate('planner')">
         <div class="nav-num">[ 07 ]</div>
+        <div class="nav-title">AI MEAL PLAN</div>
+        <div class="nav-desc">Get a 7-day plan from any AI.</div>
+      </button>
+      <button class="nav-card" onclick="navigate('settings')">
+        <div class="nav-num">[ 08 ]</div>
         <div class="nav-title">SETTINGS</div>
         <div class="nav-desc">Theme &amp; preferences.</div>
       </button>
@@ -439,6 +469,14 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         <span id="ratioTargetHint">Fat —% / Pro —% / Carb —%</span>
         <span>Cost: <strong id="totalCost">$0.00</strong></span>
       </div>
+    </section>
+
+    <section id="planDaysSection" style="display:none;">
+      <div class="section-head">
+        <h2>Meal Plan</h2>
+        <span class="meta"><span id="planDaysMeta"></span><a onclick="navigate('planner')" style="cursor:pointer;color:var(--muted);text-decoration:none;white-space:nowrap;">New plan →</a></span>
+      </div>
+      <div class="plan-days" id="planDaysRow"></div>
     </section>
 
     <section>
@@ -802,6 +840,76 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
     <div id="trendLegend" style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--muted);"></div>
   </section>
 
+  <!-- ═══════════════ AI MEAL PLAN ═══════════════ -->
+  <section class="view" id="view-planner">
+    <div class="section-head">
+      <h2>AI Meal Plan</h2>
+      <span class="meta">Prompt → AI → paste back</span>
+    </div>
+
+    <div class="plan-step"><span class="plan-step-num">1</span>Your details</div>
+    <div class="targets-panel">
+      <div class="form-grid" style="margin-bottom:0;">
+        <div class="field"><label>Goal</label>
+          <select id="plGoal">
+            <option value="fat_loss">Fat loss</option>
+            <option value="muscle_gain">Muscle gain</option>
+            <option value="maintain">Maintain</option>
+          </select>
+        </div>
+        <div class="field"><label>Plan name</label><input type="text" id="plName" placeholder="Plan A"></div>
+        <div class="field"><label>Current weight (kg)</label><input type="number" id="plWeight" step="0.1" inputmode="decimal"></div>
+        <div class="field"><label>Goal weight (kg)</label><input type="number" id="plGoalWeight" step="0.1" inputmode="decimal"></div>
+        <div class="field"><label>Calories / day</label><input type="number" id="plCal" step="10" inputmode="numeric"></div>
+        <div class="field"><label>Protein (g)</label><input type="number" id="plP" step="1" inputmode="numeric"></div>
+        <div class="field"><label>Fat (g)</label><input type="number" id="plF" step="1" inputmode="numeric"></div>
+        <div class="field"><label>Carbs (g)</label><input type="number" id="plC" step="1" inputmode="numeric"></div>
+        <div class="field full"><label>Foods you can eat / diet style</label>
+          <textarea id="plAllowed" rows="3" placeholder="e.g. high protein, chicken, eggs, rice, Greek yoghurt, frozen veg"></textarea>
+        </div>
+        <div class="field"><label>Allergies (strict)</label><input type="text" id="plAllergies" placeholder="e.g. peanuts"></div>
+        <div class="field"><label>Dislikes</label><input type="text" id="plDislikes" placeholder="e.g. mushrooms"></div>
+        <div class="field"><label>Meals per day</label>
+          <select id="plMeals">
+            <option value="3">3 meals</option>
+            <option value="3+1" selected>3 meals + 1 snack</option>
+            <option value="3+2">3 meals + 2 snacks</option>
+            <option value="2+1">Lunch, dinner + snack</option>
+          </select>
+        </div>
+        <div class="field"><label>Budget ($/day)</label><input type="number" id="plBudget" step="1" inputmode="decimal" placeholder="Optional"></div>
+        <div class="field"><label>Cooking</label>
+          <select id="plEffort">
+            <option value="minimal">Minimal</option>
+            <option value="moderate" selected>Simple cooking</option>
+            <option value="happy">Happy to cook</option>
+            <option value="mealprep">Batch meal prep</option>
+          </select>
+        </div>
+        <div class="field"><label>Variety</label>
+          <select id="plVariety">
+            <option value="low">Same meals most days</option>
+            <option value="medium" selected>Some variety</option>
+            <option value="high">Different every day</option>
+          </select>
+        </div>
+        <div class="field full"><label>Country (foods, brands &amp; prices)</label><input type="text" id="plCountry" placeholder="Australia"></div>
+      </div>
+      <label class="plan-check"><input type="checkbox" id="plIncludeLib">Reuse foods from my library where they fit</label>
+    </div>
+    <button class="btn" style="width:100%;" onclick="copyPlanPrompt()">Copy Prompt</button>
+    <textarea class="plan-textarea" id="plPromptOut" rows="8" readonly style="display:none;margin-top:8px;font-size:11px;"></textarea>
+    <div class="plan-hint">Paste the prompt into ChatGPT, Claude, Gemini or similar, then copy the AI's whole reply.</div>
+
+    <div class="plan-step"><span class="plan-step-num">2</span>Paste the AI's reply</div>
+    <textarea class="plan-textarea" id="plImportText" rows="6" placeholder="Paste the AI's full reply here..."></textarea>
+    <div style="display:flex;gap:8px;margin:8px 0 14px;">
+      <button class="btn" style="flex:1;" onclick="checkPlanImport()">Check Plan</button>
+      <button class="btn ghost" onclick="clearPlanImport()">Clear</button>
+    </div>
+    <div id="plPreview"></div>
+  </section>
+
   <!-- ═══════════════ SETTINGS ═══════════════ -->
   <section class="view" id="view-settings">
     <div class="section-head"><h2>Settings</h2></div>
@@ -907,7 +1015,7 @@ button.btn.danger:hover { background: var(--red); color: var(--bg); }
         </div>
       </div>
       <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px;font-size:10px;color:var(--muted);">
-        <strong style="color:var(--green);">Calorie formula:</strong> Fat loss estimated at 37,000 kJ per kg of fat. Steps burn ~0.04 cal/step.
+        <strong style="color:var(--green);">Calorie formula:</strong> Fat loss estimated at 37,000 kJ per kg of fat.
       </div>
     </div>
     <div class="modal-actions">
@@ -994,8 +1102,8 @@ const SK = { LOG:'ft_log_v1', TARGETS:'ft_targets_v1', WEIGHTS:'ft_weights_v1', 
 const DEFAULT_TARGETS = { burn:2726, ppct:20, fpct:70, cpct:10 };
 const DEFAULT_WEIGHTS = { today:null, yesterday:null, goal:null, tdee:2726, weightDate:null, bmr:null, bmrManualValue:null, activityLevel:1, history:[], bmrManual:false };
 const KJ_PER_KG_FAT = 37000;
-const VALID_VIEWS = ['home','tracker','library','history','weight','trends','goals','settings'];
-const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', goals:'Goals', settings:'Settings' };
+const VALID_VIEWS = ['home','tracker','library','history','weight','trends','goals','planner','settings'];
+const VIEW_TITLES = { home:'Home', tracker:'Daily Tracker', library:'Food Library', history:'History', weight:'Weight Log', trends:'Trends', goals:'Goals', planner:'AI Meal Plan', settings:'Settings' };
 
 function loadJSON(key, fallback) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
@@ -1025,12 +1133,12 @@ let undoBuffer = null; // { dateKey, entry, index }
 let routineItems = []; // temp buffer while editing routine modal
 
 // ── DATE HELPERS ───────────────────────────────────
-function todayKey() {
-  const d = new Date();
+function localDateKey(d) {
   return d.getFullYear() + '-' +
     String(d.getMonth() + 1).padStart(2, '0') + '-' +
     String(d.getDate()).padStart(2, '0');
 }
+function todayKey() { return localDateKey(new Date()); }
 function todayDisplay() {
   return new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }).toUpperCase();
 }
@@ -1056,12 +1164,13 @@ function navigate(view) {
   renderCrumbs();
   switch (view) {
     case 'home':     safeRender(renderGlance, 'glance'); break;
-    case 'tracker':  initQuickSearch(); setAddMode(_addMode); safeRender(renderLog, 'log'); safeRender(renderTotals, 'totals'); break;
+    case 'tracker':  initQuickSearch(); setAddMode(_addMode); safeRender(renderPlanDays, 'plan days'); safeRender(renderLog, 'log'); safeRender(renderTotals, 'totals'); break;
     case 'library':  safeRender(renderRoutines, 'routines'); safeRender(() => renderLibraryTable(document.getElementById('librarySearch').value), 'library'); break;
     case 'history':  initHistory(); break;
     case 'weight':   safeRender(renderTotals, 'totals'); break;
     case 'trends':   safeRender(renderTrends, 'trends'); break;
     case 'goals':    safeRender(renderGoals, 'goals'); break;
+    case 'planner':  safeRender(initPlanner, 'planner'); break;
     case 'settings': renderSettings(); break;
   }
   history.replaceState(null, '', '#' + view);
@@ -1251,9 +1360,10 @@ function renderLog() {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.mealI;
       const food = entries[i];
-      promptMealTag(todayKey(), food.name).then(meal => {
-        if (meal !== undefined) {
-          entries[i]._meal = meal;
+      promptMealTag(todayKey(), food.name).then(mealInfo => {
+        if (mealInfo !== undefined) {
+          entries[i]._meal = mealInfo && typeof mealInfo === 'object' ? mealInfo.meal : mealInfo;
+          entries[i]._snackTime = mealInfo && typeof mealInfo === 'object' ? (mealInfo.snackTime || null) : null;
           persist();
           renderLog();
         }
@@ -1350,15 +1460,14 @@ function setBar(barId, dialId, val, tgt) {
   const pct = (val / tgt) * 100;
   bar.style.width = Math.min(100, pct) + '%';
   dial.classList.remove('over','over-red','under');
-  bar.style.background = '';
   if (pct > 120) {
     dial.classList.add('over-red');
-    bar.style.background = '#ff4444';
+    bar.style.background = 'var(--red)';
   } else if (pct > 100) {
     dial.classList.add('over');
-    bar.style.background = '#f0a500';
+    bar.style.background = 'var(--amber)';
   } else {
-    bar.style.background = '#39d353';
+    bar.style.background = 'var(--green)';
   }
 }
 
@@ -1384,7 +1493,6 @@ function renderProjection(t) {
   const goal = settings.goal;
   let balGood = bal < 0; // default: deficit is good
   if (goal === 'muscle_gain') balGood = bal > 0; // surplus is good for muscle
-  const balClass = balGood ? 'neg' : 'pos';
   setHTML('projBal', (bal>=0?'+':'') + Math.round(bal) + ' <span class="unit">cal</span>');
   tog('projBal','neg', balGood); tog('projBal','pos', !balGood && bal !== 0);
   // Formula comment
@@ -1606,11 +1714,7 @@ function renderRoutines() {
     btn.addEventListener('click', () => {
       const i = +btn.dataset.i;
       if (btn.dataset.act === 'log') {
-        // Log all items with their stored meal tags
-        routines[i].items.forEach(it => {
-          const food = library.find(f => f.name === it.name);
-          if (food) addFoodToLog(todayKey(), food, it.qty, { meal: it._meal || null, snackTime: it._snackTime || null });
-        });
+        logRoutine(i);
         renderTotals();
         toast('Logged: ' + routines[i].name);
       }
@@ -1623,6 +1727,14 @@ function renderRoutines() {
         }
       }
     });
+  });
+}
+
+// Log every item in a routine to today, keeping its meal tags
+function logRoutine(i) {
+  routines[i].items.forEach(it => {
+    const food = library.find(f => f.name === it.name);
+    if (food) addFoodToLog(todayKey(), food, it.qty, { meal: it._meal || null, snackTime: it._snackTime || null });
   });
 }
 
@@ -1791,6 +1903,8 @@ function saveRoutine() {
   const name = document.getElementById('rName').value.trim();
   if (!name) { alert('Routine name required.'); return; }
   const r = { name, items: routineItems.slice() };
+  // Keep a plan day linked to its plan after editing
+  if (editingRoutineIdx !== null && routines[editingRoutineIdx].plan) r.plan = routines[editingRoutineIdx].plan;
   if (editingRoutineIdx === null) routines.push(r);
   else routines[editingRoutineIdx] = r;
   persist();
@@ -1811,7 +1925,7 @@ let historyVisible = false;
 function initHistory() {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yk = yesterday.toISOString().split('T')[0];
+  const yk = localDateKey(yesterday); // local date, not UTC
   const inp = document.getElementById('historyDate');
   if (!historyDate) {
     inp.value = yk;
@@ -1966,10 +2080,23 @@ function renderSettings() {
 }
 
 const ACCENT_VAR = '--green';
+// Darker versions of each accent for light mode, so text stays readable
+// on the pale background (white becomes near-black).
+const ACCENT_LIGHT = {
+  '#39d353': '#1a7a32',
+  '#4a9eff': '#1f63c4',
+  '#cc66ff': '#8a2fc2',
+  '#f0a500': '#b07800',
+  '#eeeeee': '#222222'
+};
 function applyTheme() {
-  document.body.classList.toggle('light', settings.lightMode || false);
+  const light = settings.lightMode || false;
+  document.body.classList.toggle('light', light);
   const accent = settings.accent || '#39d353';
-  document.documentElement.style.setProperty('--green', accent);
+  const value = light ? (ACCENT_LIGHT[accent] || accent) : accent;
+  // Set on <body> (not <html>) so it wins over body.light's own --green
+  document.documentElement.style.removeProperty('--green');
+  document.body.style.setProperty('--green', value);
   // Update active swatch
   document.querySelectorAll('.accent-swatch').forEach(sw => {
     sw.classList.toggle('active', sw.dataset.accent === accent);
@@ -1996,8 +2123,6 @@ function clearAllData() {
   renderTotals(); renderLog(); renderRoutines();
   toast('All data cleared');
 }
-
-// ── PERSIST ────────────────────────────────────────
 
 // ── INFO MODAL ───────────────────────────────────────────
 function openInfoModal() { document.getElementById('infoModal').classList.add('open'); }
@@ -2067,7 +2192,7 @@ function getTrendDates() {
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(end);
     d.setDate(d.getDate() - i);
-    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const key = localDateKey(d);
     dates.push({ key, label: trendInterval === 'week'
       ? d.toLocaleDateString('en-US',{weekday:'short'})
       : String(d.getDate()) });
@@ -2562,6 +2687,10 @@ const HELP_CONTENT = {
     title: 'Trends',
     body: 'Visualise one metric at a time over time. Tap any metric button to switch — calories, protein, fat, carbs, cost, or weight.\n\nUse Week or Month to change the window, and arrows to scroll back in time.\n\nIn week view, values are shown on each data point. Weight history builds from your daily wake-up weight entries.'
   },
+  planner: {
+    title: 'AI Meal Plan',
+    body: 'Use any AI chatbot as your meal planner.\n\n1. Check your details. Goal, weight and targets are filled in from the rest of the app. Add the foods you can eat, allergies and preferences.\n\n2. Tap Copy Prompt and paste it into ChatGPT, Claude, Gemini or similar.\n\n3. Copy the AI\'s whole reply, paste it in step 2 and tap Check Plan. You\'ll see each day\'s totals against your target, plus any warnings.\n\n4. Tap Import. The foods go into your Food Library and the 7 days are saved as routines. Load a day with one tap from the Meal Plan row on the Daily Tracker.\n\nAI nutrition values and prices are estimates. Edit any food in the Food Library.'
+  },
   settings: {
     title: 'Settings',
     body: 'Personalise the look with light/dark mode and accent colour.\n\nBackup: export all data as JSON to transfer devices. Import to restore.\n\nCSV Export: download logs and weight history as a spreadsheet.\n\nDanger Zone: reset library to defaults or clear all data.'
@@ -2632,7 +2761,7 @@ function renderGoals() {
 
   const preset  = GOAL_PRESETS[goal];
   const tdee    = (weights.tdee != null) ? weights.tdee : (targets.burn || 2726);
-  const actIdx  = weights.activityLevel || 1;
+  const actIdx  = weights.activityLevel ?? 1; // ?? keeps Sedentary (0)
 
   let targetCal, calDesc;
   if (goal === 'fat_loss') {
@@ -2682,6 +2811,408 @@ function applyGoalTargets() {
   });
   toast('Targets applied — check Daily Tracker');
   navigate('tracker');
+}
+
+// ── PERSIST ────────────────────────────────────────
+// ── AI MEAL PLAN ─────────────────────────────────────────
+const PLAN_FORMAT = 'FOODTRACKER_PLAN_V1';
+const SNACK_TIMES = Object.keys(SNACK_TIME_HOURS);
+const PLAN_PREF_FIELDS = ['plGoal','plName','plAllowed','plAllergies','plDislikes','plMeals','plBudget','plEffort','plVariety','plCountry','plIncludeLib'];
+const PLAN_GOAL_TEXT    = { fat_loss:'Fat loss', muscle_gain:'Muscle gain', maintain:'Maintain weight' };
+const PLAN_MEALS_TEXT   = {
+  '3':   'Breakfast, lunch and dinner (no snacks)',
+  '3+1': 'Breakfast, lunch, dinner + 1 snack',
+  '3+2': 'Breakfast, lunch, dinner + 2 snacks',
+  '2+1': 'Lunch, dinner + 1 snack (no breakfast)'
+};
+const PLAN_EFFORT_TEXT  = {
+  minimal:  'Minimal: little or no cooking, quick assembly',
+  moderate: 'Simple cooking, about 20 minutes or less',
+  happy:    'Happy to cook: more involved recipes are fine',
+  mealprep: 'Batch meal prep: cook a few things in bulk and reuse them across days'
+};
+const PLAN_VARIETY_TEXT = {
+  low:    'Low: repeat the same meals most days to keep shopping simple',
+  medium: 'Some variety: rotate a few options',
+  high:   'High: different meals every day'
+};
+let pendingPlan = null;
+let plannerBound = false;
+
+function initPlanner() {
+  const saved = settings.planner || {};
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el || v === undefined || v === null) return;
+    if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+  };
+  PLAN_PREF_FIELDS.forEach(id => set(id, saved[id]));
+  if (!saved.plGoal) set('plGoal', settings.goal || 'fat_loss');
+  // Numbers always come fresh from the rest of the app
+  set('plWeight',     weights.today ?? '');
+  set('plGoalWeight', weights.goal ?? '');
+  set('plCal', targets.burn || '');
+  set('plP',   targets.p || '');
+  set('plF',   targets.f || '');
+  set('plC',   targets.c || '');
+  if (!document.getElementById('plCountry').value) document.getElementById('plCountry').value = 'Australia';
+  if (!document.getElementById('plName').value)    document.getElementById('plName').value = 'Plan A';
+  if (!plannerBound) {
+    plannerBound = true;
+    PLAN_PREF_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener((el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'input', savePlannerPrefs);
+    });
+  }
+}
+
+function savePlannerPrefs() {
+  const p = {};
+  PLAN_PREF_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    p[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  settings.planner = p;
+  persist();
+}
+
+function buildPlanPrompt() {
+  const v = id => (document.getElementById(id).value || '').trim();
+  const cal = parseFloat(v('plCal'));
+  if (!(cal > 0)) { toast('Set a calorie target first'); return null; }
+  const p = parseFloat(v('plP')), f = parseFloat(v('plF')), c = parseFloat(v('plC'));
+  const name = v('plName') || 'Plan A';
+  const country = v('plCountry') || 'Australia';
+  const L = [];
+
+  L.push('You are a nutrition planner. Build me a 7-day meal plan and return it in the exact JSON format at the end, so I can paste it straight into my food tracker app.');
+  L.push('');
+  L.push('MY DETAILS');
+  L.push('- Goal: ' + (PLAN_GOAL_TEXT[v('plGoal')] || 'Fat loss'));
+  if (v('plWeight')) L.push('- Current weight: ' + v('plWeight') + ' kg' + (v('plGoalWeight') ? ' | Goal weight: ' + v('plGoalWeight') + ' kg' : ''));
+  const macros = [];
+  if (p > 0) macros.push('protein ' + Math.round(p) + ' g');
+  if (f > 0) macros.push('fat ' + Math.round(f) + ' g');
+  if (c > 0) macros.push('carbs ' + Math.round(c) + ' g');
+  L.push('- Daily targets: ' + Math.round(cal) + ' kcal' + (macros.length ? ' | ' + macros.join(' | ') : ''));
+  L.push('- Country: ' + country + ' (use foods, brands, serving sizes and prices typical there, in local currency)');
+  L.push('- Foods I can eat / diet style: ' + (v('plAllowed') || 'No restrictions'));
+  if (v('plAllergies')) L.push('- Allergies (STRICT: never include, not even as an ingredient): ' + v('plAllergies'));
+  if (v('plDislikes'))  L.push('- Dislikes (avoid): ' + v('plDislikes'));
+  L.push('- Meals per day: ' + (PLAN_MEALS_TEXT[v('plMeals')] || PLAN_MEALS_TEXT['3+1']));
+  if (parseFloat(v('plBudget')) > 0) L.push('- Budget: about ' + v('plBudget') + ' per day (local currency)');
+  L.push('- Cooking: ' + (PLAN_EFFORT_TEXT[v('plEffort')] || PLAN_EFFORT_TEXT.moderate));
+  L.push('- Variety: ' + (PLAN_VARIETY_TEXT[v('plVariety')] || PLAN_VARIETY_TEXT.medium));
+
+  if (document.getElementById('plIncludeLib').checked && library.length) {
+    L.push('');
+    L.push('FOODS ALREADY IN MY LIBRARY (per serving: kcal | protein g | fat g | carbs g | price)');
+    L.push('Reuse these where they fit, with these exact names and values, and include any you use in "foods".');
+    library.slice().sort((a,b) => a.name.localeCompare(b.name)).slice(0, 150).forEach(fd => {
+      L.push('- ' + fd.name + ' | ' + Math.round(fd.cal) + ' | ' + fd.p + ' | ' + fd.f + ' | ' + fd.c + ' | ' + (fd.price || 0).toFixed(2));
+    });
+  }
+
+  L.push('');
+  L.push('RULES');
+  L.push('1. Exactly 7 days, named "Day 1" to "Day 7".');
+  L.push('2. Each day must total within ±5% of ' + Math.round(cal) + ' kcal' +
+         (p > 0 ? ' and within ±10% of ' + Math.round(p) + ' g protein' : '') +
+         '. Keep fat and carbs close to their targets.');
+  L.push('3. Each food is ONE serving, with the serving size in its name, e.g. "Chicken breast (150 g raw)" or "Greek yoghurt (170 g tub)". Quantities in "days" are multiples of that serving (e.g. 0.5, 1, 2).');
+  L.push('4. Food values are per serving: "cal" = kcal, "p" / "f" / "c" = grams of protein / fat / carbs, "price" = estimated cost per serving in local currency. Use nutrition-label or standard food-database values, and make sure cal ≈ 4×p + 4×c + 9×f.');
+  L.push('5. Every "food" in "days" must match a name in "foods" EXACTLY (same spelling, case and punctuation). List each food once in "foods", even if it is used on several days.');
+  L.push('6. "meal" is "B" (breakfast), "L" (lunch), "D" (dinner) or "S" (snack). Snacks also need "snackTime", one of: ' + SNACK_TIMES.join(', ') + '. For other meals, "snackTime" is null.');
+  L.push('7. Before answering, add up each day and adjust quantities until rule 2 is met.');
+  L.push('8. Reply with ONLY one JSON code block in exactly this shape, with no text before or after it:');
+  L.push('');
+  L.push('```json');
+  L.push('{');
+  L.push('  "format": "' + PLAN_FORMAT + '",');
+  L.push('  "plan": ' + JSON.stringify(name) + ',');
+  L.push('  "foods": [');
+  L.push('    { "name": "Rolled oats (50 g)", "cal": 185, "p": 6.5, "f": 3.5, "c": 30, "price": 0.25 },');
+  L.push('    { "name": "Chicken breast (150 g raw)", "cal": 170, "p": 34, "f": 3.5, "c": 0, "price": 2.40 }');
+  L.push('  ],');
+  L.push('  "days": [');
+  L.push('    { "name": "Day 1", "items": [');
+  L.push('      { "food": "Rolled oats (50 g)", "qty": 1, "meal": "B", "snackTime": null },');
+  L.push('      { "food": "Chicken breast (150 g raw)", "qty": 1, "meal": "L", "snackTime": null }');
+  L.push('    ]}');
+  L.push('  ]');
+  L.push('}');
+  L.push('```');
+  return L.join('\n');
+}
+
+function copyPlanPrompt() {
+  savePlannerPrefs();
+  const prompt = buildPlanPrompt();
+  if (!prompt) return;
+  const out = document.getElementById('plPromptOut');
+  out.value = prompt;
+  out.style.display = 'block';
+  const fallback = () => { out.focus(); out.select(); toast('Select all &amp; copy the prompt below', 3000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(prompt).then(() => toast('Prompt copied — paste it into your AI', 2500)).catch(fallback);
+  } else fallback();
+}
+
+// Pull the JSON out of an AI reply, tolerating code fences, chatter around it,
+// smart quotes and trailing commas
+function extractPlanJSON(text) {
+  let t = String(text || '').trim();
+  if (!t) throw new Error('Paste the AI\'s reply first.');
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) t = fence[1];
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0 || b <= a) throw new Error('No plan data found. Copy the AI\'s whole reply, including the code block.');
+  t = t.slice(a, b + 1);
+  try { return JSON.parse(t); }
+  catch (e) {
+    const cleaned = t.replace(/[“”]/g, '"').replace(/,\s*([}\]])/g, '$1');
+    try { return JSON.parse(cleaned); }
+    catch (e2) { throw new Error('Couldn\'t read the plan (' + e2.message + '). The reply may be cut off. Ask the AI to resend the full JSON.'); }
+  }
+}
+
+function planNum(v) { const n = parseFloat(v); return isFinite(n) ? n : NaN; }
+const r1 = n => Math.round(n * 10) / 10;
+
+function validatePlan(data) {
+  const errors = [], warnings = [];
+  if (!data || typeof data !== 'object') { errors.push('That doesn\'t look like a plan.'); return { errors, warnings }; }
+  const rawFoods = Array.isArray(data.foods) ? data.foods : [];
+  const rawDays  = Array.isArray(data.days)  ? data.days  : [];
+  if (!rawDays.length) errors.push('No "days" found in the plan.');
+
+  // Foods
+  const foods = [], byKey = {};
+  rawFoods.forEach((rf, n) => {
+    const name = String((rf && (rf.name || rf.food)) || '').trim();
+    if (!name) { warnings.push('Food #' + (n + 1) + ' has no name, skipped.'); return; }
+    const key = name.toLowerCase();
+    if (byKey[key]) { warnings.push('"' + name + '" is listed twice, kept the first.'); return; }
+    const p = planNum(rf.p ?? rf.protein), f = planNum(rf.f ?? rf.fat), c = planNum(rf.c ?? rf.carbs);
+    if ([p, f, c].some(x => isNaN(x) || x < 0)) { warnings.push('"' + name + '" is missing protein, fat or carbs, skipped.'); return; }
+    const est = 4 * p + 4 * c + 9 * f;
+    let cal = planNum(rf.cal ?? rf.calories ?? rf.kcal);
+    if (isNaN(cal) || cal < 0) {
+      cal = est;
+      warnings.push('"' + name + '": calories missing, estimated from macros.');
+    } else if (cal > 0 && est > 0 && Math.abs(est - cal) / cal > 0.15) {
+      warnings.push('"' + name + '": ' + Math.round(cal) + ' cal, but its macros add up to about ' + Math.round(est) + '. Check the label.');
+    }
+    let price = planNum(rf.price);
+    if (isNaN(price) || price < 0) price = 0;
+    const food = { name, cal: r1(cal), p: r1(p), f: r1(f), c: r1(c), price: Math.round(price * 100) / 100 };
+    foods.push(food);
+    byKey[key] = food;
+  });
+
+  // Days
+  const libByKey = {};
+  library.forEach(fd => { libByKey[fd.name.toLowerCase()] = fd; });
+  const missing = new Set();
+  const days = [];
+  rawDays.forEach((rd, n) => {
+    const dname = String((rd && rd.name) || '').trim() || ('Day ' + (n + 1));
+    const rawItems = Array.isArray(rd && rd.items) ? rd.items : [];
+    const items = [];
+    rawItems.forEach(ri => {
+      const fname = String((ri && (ri.food || ri.name)) || '').trim();
+      const key = fname.toLowerCase();
+      const src = byKey[key] ? 'plan' : (libByKey[key] ? 'lib' : null);
+      if (!src) { missing.add(fname || '(blank)'); return; }
+      let qty = planNum(ri.qty ?? ri.quantity ?? 1);
+      if (!(qty > 0)) qty = 1;
+      qty = Math.round(qty * 100) / 100;
+      let meal = String(ri.meal || '').trim().toUpperCase().charAt(0);  // "Breakfast" → "B"
+      if (!meal || !'BLDS'.includes(meal)) meal = null;
+      let snackTime = null;
+      if (meal === 'S') {
+        const st = String(ri.snackTime || '').toLowerCase().replace(/\s/g, '');
+        if (SNACK_TIMES.includes(st)) snackTime = st;
+      }
+      items.push({ key, src, qty, meal, snackTime });
+    });
+    if (!items.length) { warnings.push(dname + ' has no usable foods, skipped.'); return; }
+    const tot = { cal: 0, p: 0, f: 0, c: 0, cost: 0 };
+    items.forEach(it => {
+      const fd = it.src === 'plan' ? byKey[it.key] : libByKey[it.key];
+      tot.cal += fd.cal * it.qty; tot.p += fd.p * it.qty; tot.f += fd.f * it.qty;
+      tot.c += fd.c * it.qty;     tot.cost += (fd.price || 0) * it.qty;
+    });
+    days.push({ name: dname, items, tot });
+  });
+
+  if (missing.size) {
+    const list = [...missing];
+    warnings.push('Used in a day but not in the food list, so left out: ' +
+      list.slice(0, 6).map(x => '"' + x + '"').join(', ') + (list.length > 6 ? ' and ' + (list.length - 6) + ' more' : '') + '.');
+  }
+  if (days.length && days.length !== 7) warnings.push('Expected 7 days but got ' + days.length + '.');
+  if (!days.length && !errors.length) errors.push('No usable days in the plan.');
+
+  return { errors, warnings, foods, days, planName: String(data.plan || '').trim() };
+}
+
+function checkPlanImport() {
+  const box = document.getElementById('plPreview');
+  let data;
+  try { data = extractPlanJSON(document.getElementById('plImportText').value); }
+  catch (err) {
+    pendingPlan = null;
+    box.innerHTML = '<div class="plan-msg err">✗ ' + escapeHtml(err.message) + '</div>';
+    return;
+  }
+  const P = validatePlan(data);
+  if (data && data.format && data.format !== PLAN_FORMAT) P.warnings.unshift('Unrecognised format "' + data.format + '", reading it anyway.');
+  pendingPlan = P.errors.length ? null : P;
+  renderPlanPreview(P);
+}
+
+function clearPlanImport() {
+  pendingPlan = null;
+  document.getElementById('plImportText').value = '';
+  document.getElementById('plPreview').innerHTML = '';
+}
+
+function renderPlanPreview(P) {
+  const box = document.getElementById('plPreview');
+  const tgtCal = parseFloat(document.getElementById('plCal').value) || targets.burn || 0;
+  const tgtP   = parseFloat(document.getElementById('plP').value)   || targets.p || 0;
+  let h = '';
+
+  if (P.errors.length) {
+    h += P.errors.map(e => '<div class="plan-msg err">✗ ' + escapeHtml(e) + '</div>').join('');
+  } else {
+    const libKeys = new Set(library.map(f => f.name.toLowerCase()));
+    const clashes = P.foods.filter(f => libKeys.has(f.name.toLowerCase()));
+    P._clashCount = clashes.length;
+    h += '<div class="plan-summary">' + P.foods.length + ' foods (' + (P.foods.length - clashes.length) + ' new) · ' + P.days.length + ' days</div>';
+    h += '<div class="log-wrap" style="margin-bottom:6px;">';
+    h += '<div class="plan-day-row plan-day-head"><div>Day</div><div>Cal</div><div>P</div><div>F</div><div>C</div><div>$</div></div>';
+    P.days.forEach(d => {
+      const off = tgtCal ? Math.abs(d.tot.cal - tgtCal) / tgtCal : 0;
+      const col = !tgtCal ? 'var(--text-bright)' : off <= 0.05 ? 'var(--green)' : off <= 0.10 ? 'var(--amber)' : 'var(--red)';
+      h += '<div class="plan-day-row">' +
+        '<div>' + escapeHtml(d.name) + '</div>' +
+        '<div style="color:' + col + ';font-weight:700;">' + Math.round(d.tot.cal) + '</div>' +
+        '<div>' + Math.round(d.tot.p) + '</div>' +
+        '<div>' + Math.round(d.tot.f) + '</div>' +
+        '<div>' + Math.round(d.tot.c) + '</div>' +
+        '<div>' + d.tot.cost.toFixed(2) + '</div>' +
+      '</div>';
+    });
+    h += '</div>';
+    if (tgtCal) h += '<div class="plan-hint" style="margin-top:0;">Target ' + Math.round(tgtCal) + ' cal' + (tgtP ? ' · ' + Math.round(tgtP) + ' g protein' : '') + '. Green = within 5%, amber = within 10%.</div>';
+  }
+
+  if (P.warnings.length) {
+    h += '<div class="plan-warn-box">' + P.warnings.map(w => '⚠ ' + escapeHtml(w)).join('<br>') + '</div>';
+  }
+
+  if (!P.errors.length) {
+    const nameDefault = P.planName || document.getElementById('plName').value.trim() || 'Plan A';
+    h += '<div class="form-grid" style="margin-top:10px;margin-bottom:0;">';
+    h += '<div class="field' + (P._clashCount ? '' : ' full') + '"><label>Save days as</label><input type="text" id="plImportName" value="' + escapeHtml(nameDefault) + '"></div>';
+    if (P._clashCount) {
+      h += '<div class="field"><label>' + P._clashCount + ' already in library</label><select id="plClash">' +
+        '<option value="keep">Keep my versions</option>' +
+        '<option value="overwrite">Use plan values</option>' +
+        '<option value="copy">Add as copies</option>' +
+      '</select></div>';
+    }
+    h += '</div>';
+    h += '<label class="plan-check"><input type="checkbox" id="plReplace" checked>Replace earlier days saved under this plan name</label>';
+    h += '<button class="btn" style="width:100%;" onclick="importPlan()">Import ' + P.foods.length + ' foods &amp; ' + P.days.length + ' days</button>';
+    h += '<div class="plan-hint">AI nutrition values and prices are estimates. Check packaged foods against their labels and edit them in the Food Library.</div>';
+  }
+  box.innerHTML = h;
+}
+
+function importPlan() {
+  const P = pendingPlan;
+  if (!P) { toast('Check the plan first'); return; }
+  const planName = (document.getElementById('plImportName')?.value || '').trim() || 'Plan A';
+  const clash    = document.getElementById('plClash')?.value || 'keep';
+  const replace  = !!document.getElementById('plReplace')?.checked;
+
+  // Add foods to the library, resolving name clashes
+  const finalName = {};
+  let added = 0, updated = 0, kept = 0;
+  P.foods.forEach(f => {
+    const key = f.name.toLowerCase();
+    const idx = library.findIndex(l => l.name.toLowerCase() === key);
+    const item = { name: f.name, cal: f.cal, kj: +(f.cal * 4.184).toFixed(1), p: f.p, f: f.f, c: f.c, price: f.price };
+    if (idx < 0) {
+      library.push(item); added++; finalName[key] = item.name;
+    } else if (clash === 'overwrite') {
+      item.name = library[idx].name; library[idx] = item; updated++; finalName[key] = item.name;
+    } else if (clash === 'copy') {
+      let n = f.name + ' [' + planName + ']', k = 2;
+      while (library.some(l => l.name.toLowerCase() === n.toLowerCase())) n = f.name + ' [' + planName + ' ' + (k++) + ']';
+      item.name = n; library.push(item); added++; finalName[key] = n;
+    } else {
+      kept++; finalName[key] = library[idx].name;
+    }
+  });
+  const nameFor = key => finalName[key] || (library.find(l => l.name.toLowerCase() === key) || {}).name;
+
+  // Save each day as a routine tagged with the plan name
+  if (replace) routines = routines.filter(r => r.plan !== planName);
+  P.days.forEach(d => {
+    const items = d.items
+      .map(it => ({ name: nameFor(it.key), qty: it.qty, _meal: it.meal, _snackTime: it.snackTime }))
+      .filter(it => it.name);
+    routines.push({ name: planName + ' · ' + d.name, plan: planName, items });
+  });
+  settings.activePlan = planName;
+  persist();
+
+  pendingPlan = null;
+  document.getElementById('plImportText').value = '';
+  document.getElementById('plPreview').innerHTML =
+    '<div class="plan-msg ok">✓ Imported "' + escapeHtml(planName) + '": ' + added + ' foods added' +
+    (updated ? ', ' + updated + ' updated' : '') + (kept ? ', ' + kept + ' kept as yours' : '') +
+    ', ' + P.days.length + ' days saved.<br>' +
+    '<a onclick="navigate(\'tracker\')" style="cursor:pointer;text-decoration:underline;">Go to the Daily Tracker</a> to load a day.</div>';
+  toast('Plan imported');
+}
+
+// One-tap day buttons on the Daily Tracker for the active plan
+function renderPlanDays() {
+  const sec = document.getElementById('planDaysSection');
+  const row = document.getElementById('planDaysRow');
+  if (!sec || !row) return;
+  const plan = settings.activePlan;
+  const days = plan ? routines.map((r, i) => ({ r, i })).filter(x => x.r.plan === plan) : [];
+  if (!days.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  document.getElementById('planDaysMeta').textContent = plan;
+  const prefix = plan + ' · ';
+  row.innerHTML = days.map(({ r, i }) => {
+    const cal = Math.round(r.items.reduce((s, it) => s + (library.find(f => f.name === it.name) || { cal: 0 }).cal * it.qty, 0));
+    const label = r.name.indexOf(prefix) === 0 ? r.name.slice(prefix.length) : r.name;
+    return '<button class="plan-day-btn" data-ri="' + i + '" title="' + escapeHtml(r.name) + '">' +
+      '<span class="pd-name">' + escapeHtml(label) + '</span>' +
+      '<span class="pd-cal">' + cal + ' cal</span>' +
+    '</button>';
+  }).join('');
+  row.querySelectorAll('[data-ri]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.ri;
+      const r = routines[i];
+      const n = getTodayLog().length;
+      const msg = 'Log "' + r.name + '" (' + r.items.length + ' foods) to today?' +
+        (n ? '\n\nToday already has ' + n + ' entr' + (n === 1 ? 'y' : 'ies') + '. Matching foods will be merged.' : '');
+      if (!confirm(msg)) return;
+      logRoutine(i);
+      renderLog(); renderTotals();
+      toast('Logged: ' + r.name);
+    });
+  });
 }
 
 function persist() {
@@ -2892,6 +3423,7 @@ function downloadReport(text) {
 
 // ── MEAL PICKER ──────────────────────────────────────────
 let mealPickerQueue = []; // { dateKey, foodName, resolve }
+let snackPickerActive = false; // true while the snack-time grid is showing
 
 function promptMealTag(dateKey, foodName) {
   return new Promise(resolve => {
@@ -2912,30 +3444,31 @@ function closeMealModal() {
   document.getElementById('mealModal').classList.remove('open');
 }
 
-function resolveMealPicker(tag) {
+// Single exit point: closes the modal, always restores the B/L/D/S grid,
+// resolves the current item and moves on to the next queued one.
+function finishMealPick(result) {
   closeMealModal();
-  if (!mealPickerQueue.length) return;
-  const item = mealPickerQueue[0];
-  // null means no meal tag (skip was pressed, backdrop tapped, or Escape)
-  if (tag === null || tag === 'skip') {
-    mealPickerQueue.shift();
-    item.resolve({ meal: null, snackTime: null });
-    if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
-  } else if (tag === 'S') {
-    // Prompt for snack time
-    showSnackTimePicker(item, tag);
-  } else {
-    mealPickerQueue.shift();
-    item.resolve({ meal: tag, snackTime: null });
-    if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
-  }
+  snackPickerActive = false;
+  resetMealModal();
+  const item = mealPickerQueue.shift();
+  if (item) item.resolve(result);
+  if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
 }
 
-function showSnackTimePicker(item, tag) {
+function resolveMealPicker(tag) {
+  if (!mealPickerQueue.length) { closeMealModal(); return; }
+  // Skip / Escape / backdrop while choosing a snack time → snack with no time
+  if (snackPickerActive) { finishMealPick({ meal: 'S', snackTime: null }); return; }
+  if (tag === null || tag === 'skip') finishMealPick({ meal: null, snackTime: null });
+  else if (tag === 'S') showSnackTimePicker();
+  else finishMealPick({ meal: tag, snackTime: null });
+}
+
+function showSnackTimePicker() {
+  snackPickerActive = true;
   const times = ['6am','8am','10am','12pm','2pm','4pm','6pm','8pm','10pm'];
   const nameEl = document.getElementById('mealModalName');
   if (nameEl) nameEl.textContent = 'What time was this snack?';
-  // Replace the button grid content using a dedicated container
   const grid = document.getElementById('mealModalGrid');
   if (grid) {
     grid.style.gridTemplateColumns = 'repeat(3,1fr)';
@@ -2943,24 +3476,11 @@ function showSnackTimePicker(item, tag) {
       '<button class="btn ghost" data-snacktime="'+t+'" style="padding:10px;font-size:11px;">'+t+'</button>'
     ).join('');
     grid.querySelectorAll('[data-snacktime]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        closeMealModal();
-        resetMealModal();
-        mealPickerQueue.shift();
-        item.resolve({ meal: tag, snackTime: btn.dataset.snacktime });
-        if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
-      });
+      btn.addEventListener('click', () => finishMealPick({ meal: 'S', snackTime: btn.dataset.snacktime }));
     });
   }
   document.getElementById('mealModal').classList.add('open');
-  const skipBtn = document.getElementById('mealModalSkip');
-  if (skipBtn) skipBtn.onclick = () => {
-    closeMealModal();
-    resetMealModal();
-    mealPickerQueue.shift();
-    item.resolve({ meal: tag, snackTime: null });
-    if (mealPickerQueue.length) setTimeout(showNextMealPicker, 150);
-  };}
+}
 
 function resetMealModal() {
   const nameEl = document.getElementById('mealModalName');
@@ -2977,8 +3497,6 @@ function resetMealModal() {
       btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
     });
   }
-  const skipBtn = document.getElementById('mealModalSkip');
-  if (skipBtn) skipBtn.onclick = () => resolveMealPicker(null);
 }
 
 function safeRender(fn, label) {
@@ -3131,15 +3649,16 @@ function init() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closeFoodModal(); closeRoutineModal();
-      // Escape resolves meal picker with null (no meal) rather than silently closing,
+      // Escape resolves the meal picker rather than silently closing,
       // which would leave the queue stuck
       if (document.getElementById('mealModal').classList.contains('open')) {
         resolveMealPicker(null);
       }
       closeInfoModal(); closeHelpModal();
+      return;
     }
-    // Keyboard shortcuts for meal picker when open
-    if (document.getElementById('mealModal').classList.contains('open')) {
+    // Keyboard shortcuts for meal picker (only on the B/L/D/S step)
+    if (document.getElementById('mealModal').classList.contains('open') && !snackPickerActive) {
       const map = { 'b':'B', 'l':'L', 'd':'D', 's':'S' };
       if (map[e.key.toLowerCase()]) resolveMealPicker(map[e.key.toLowerCase()]);
     }
@@ -3149,7 +3668,8 @@ function init() {
   document.querySelectorAll('[data-meal]').forEach(btn => {
     btn.addEventListener('click', () => resolveMealPicker(btn.dataset.meal));
   });
-  document.getElementById('mealModalSkip').addEventListener('click', () => resolveMealPicker(null));
+  // Single handler for Skip — works for both the meal step and the snack-time step
+  document.getElementById('mealModalSkip').onclick = () => resolveMealPicker(null);
   document.getElementById('mealModal').addEventListener('click', e => {
     if (e.target.id === 'mealModal') resolveMealPicker(null);
   });
